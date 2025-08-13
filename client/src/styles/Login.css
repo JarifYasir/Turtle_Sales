@@ -1,0 +1,134 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(120deg, #f7fafc 0%, #e3f0ff 100%);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 2rem;
+}
+
+.login-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 3rem 2.5rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 4px 24px rgba(53, 120, 214, 0.12);
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.logo {
+  width: 70px;
+  height: 70px;
+  margin-bottom: 1rem;
+}
+
+.brand-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #163d7d;
+}
+
+.brand-subtitle {
+  color: #355d9b;
+  font-size: 0.95rem;
+  margin-top: 0.3rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-top: 1rem;
+}
+
+.input-group {
+  width: 100%;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 12px;
+  background: #f9fafb;
+  color: #1f2937;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.3s ease, background 0.3s ease;
+}
+
+.form-input:focus {
+  border-color: #3578d6;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(53, 120, 214, 0.15);
+}
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper .form-input {
+  width: 100%;
+  padding-right: 2.8rem;
+  box-sizing: border-box;
+}
+.password-toggle {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #3578d6;
+  cursor: pointer;
+}
+
+.submit-btn {
+  padding: 1rem;
+  background: linear-gradient(90deg, #3578d6 30%, #4f9cff 100%);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(90deg, #2c5dab 20%, #3578d6 100%);
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.auth-footer p {
+  font-size: 0.9rem;
+  color: #355d9b;
+}
+
+.auth-link {
+  color: #3578d6;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}

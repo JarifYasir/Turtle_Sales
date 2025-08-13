@@ -1,0 +1,230 @@
+/* Modal Overlay */
+.edit-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Modal Container */
+.edit-modal-container {
+  background: linear-gradient(135deg, #2d1b69 0%, #1e1e3f 100%);
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 20px 25px -5px rgba(139, 92, 246, 0.3);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #e2e8f0;
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Modal Header */
+.edit-modal-header {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #a855f7;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(168, 85, 247, 0.3);
+}
+
+/* Form Styles */
+.edit-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.edit-modal-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-modal-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 8px;
+}
+
+.edit-modal-input {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.edit-modal-input:focus {
+  border-color: #a855f7;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+}
+
+.edit-modal-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.edit-modal-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Error Message */
+.edit-modal-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* Button Container */
+.edit-modal-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* Cancel Button */
+.edit-modal-cancel-btn {
+  flex: 1;
+  padding: 12px 24px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 8px;
+  background-color: transparent;
+  color: #cbd5e1;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.edit-modal-cancel-btn:hover:not(:disabled) {
+  background-color: rgba(139, 92, 246, 0.1);
+  border-color: #a855f7;
+  color: #e2e8f0;
+}
+
+.edit-modal-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Save Button */
+.edit-modal-save-btn {
+  flex: 1;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.edit-modal-save-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.edit-modal-save-btn:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.edit-modal-save-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+}
+
+.edit-modal-save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .edit-modal-container {
+    width: 95%;
+    margin: 20px;
+    padding: 20px;
+  }
+
+  .edit-modal-header {
+    font-size: 1.25rem;
+  }
+
+  .edit-modal-buttons {
+    flex-direction: column;
+  }
+
+  .edit-modal-cancel-btn,
+  .edit-modal-save-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 320px) {
+  .edit-modal-container {
+    padding: 16px;
+  }
+
+  .edit-modal-input {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  .edit-modal-cancel-btn,
+  .edit-modal-save-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+}
