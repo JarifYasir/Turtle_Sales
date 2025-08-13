@@ -5,19 +5,20 @@
 }
 
 .register-container {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(120deg, #f7fafc 0%, #e3f0ff 100%);
+  background: #fff;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  padding: 2rem;
+  padding: 1rem;
+  overflow: hidden;
 }
 
 .register-card {
   background: #fff;
   border-radius: 20px;
-  padding: 3rem 2.5rem;
+  padding: 2rem;
   width: 100%;
   max-width: 450px;
   box-shadow: 0 4px 24px rgba(53, 120, 214, 0.12);
@@ -25,31 +26,32 @@
 
 .logo-section {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .logo {
-  width: 70px;
-  height: 70px;
-  margin-bottom: 1rem;
+  width: clamp(50px, 8vw, 70px);
+  height: clamp(50px, 8vw, 70px);
+  margin-bottom: 0.8rem;
 }
 
 .brand-title {
-  font-size: 1.9rem;
+  font-size: clamp(1.4rem, 4vw, 1.9rem);
   font-weight: 700;
   color: #163d7d;
+  margin: 0;
 }
 
 .brand-subtitle {
   color: #355d9b;
-  font-size: 0.95rem;
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
   margin-top: 0.3rem;
 }
 
 .register-form {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 1rem;
   margin-top: 1rem;
 }
 
@@ -59,12 +61,12 @@
 
 .form-input {
   width: 100%;
-  padding: 0.9rem 1rem;
+  padding: 0.8rem 1rem;
   border: 1px solid #cbd5e0;
   border-radius: 12px;
   background: #f9fafb;
   color: #1f2937;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2vw, 1rem);
   outline: none;
   transition: border 0.3s ease, background 0.3s ease;
 }
@@ -95,18 +97,20 @@
   border: none;
   color: #3578d6;
   cursor: pointer;
+  font-size: 1rem;
 }
 
 .submit-btn {
-  padding: 1rem;
+  padding: 0.9rem;
   background: linear-gradient(90deg, #3578d6 30%, #4f9cff 100%);
   border: none;
   border-radius: 12px;
   color: #fff;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2vw, 1rem);
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease;
+  margin-top: 0.5rem;
 }
 
 .submit-btn:hover {
@@ -116,12 +120,13 @@
 
 .auth-footer {
   text-align: center;
-  margin-top: 1.5rem;
+  margin-top: 1.2rem;
 }
 
 .auth-footer p {
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   color: #355d9b;
+  margin: 0;
 }
 
 .auth-link {

@@ -31,7 +31,7 @@ export default function Header() {
               <Nav.Link href="/">Home</Nav.Link>
 
               {token ? (
-                <Nav.Link href="/dashboard">Dashboard</Nav.Link>
+                <Nav.Link href="/dashboard">Profile</Nav.Link>
               ) : (
                 <Nav.Link href="/register">Register/Login</Nav.Link>
               )}

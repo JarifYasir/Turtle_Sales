@@ -69,30 +69,17 @@ const login = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        msg: "Validation failed",
-        errors: errors.array(),
-      });
+      return res.status(400).json({ success: false, errors: errors.array() });
     }
 
     const { email, password } = req.body;
-
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        msg: "Bad credentials",
-      });
-    }
+    if (!user)
+      return res.status(400).json({ success: false, msg: "Bad credentials" });
 
     const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(400).json({
-        success: false,
-        msg: "Bad password",
-      });
-    }
+    if (!isMatch)
+      return res.status(400).json({ success: false, msg: "Bad password" });
 
     const token = generateToken(user._id);
 
@@ -100,21 +87,14 @@ const login = async (req, res) => {
       success: true,
       msg: "Login successful",
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-      },
+      firstLogin: user.firstLogin,
+      user: { id: user._id, name: user.name, email: user.email },
     });
   } catch (error) {
     console.error("Login error:", error.message);
-    res.status(500).json({
-      success: false,
-      msg: "Server error during login",
-    });
+    res.status(500).json({ success: false, msg: "Server error" });
   }
 };
-
 // @desc    Get user dashboard data
 // @route   GET /api/v1/dashboard
 // @access  Private
@@ -235,12 +215,36 @@ const logout = async (req, res) => {
   }
 };
 
-// IMPORTANT: Make sure all functions are exported
+const completeFirstLogin = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { firstLogin: false },
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, msg: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      msg: "First login completed",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("First login update error:", error.message);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+};
+
 module.exports = {
   register,
   login,
   getDashboard,
-  updateProfile, // Make sure this is included
+  updateProfile,
   deleteAccount,
   logout,
+  completeFirstLogin,
 };

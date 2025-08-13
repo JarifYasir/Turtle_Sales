@@ -1,8 +1,8 @@
 /* Dashboard Container */
 .dashboard-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
-  color: #e2e8f0;
+  background: #fff;
+  color: #1f2937;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   padding: 2rem;
 }
@@ -12,37 +12,37 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #2d1b69 0%, #1e1e3f 100%);
+  background: linear-gradient(90deg, #3578d6 30%, #4f9cff 100%);
   padding: 1.5rem 2rem;
   border-radius: 16px;
   margin-bottom: 2rem;
-  box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 24px rgba(53, 120, 214, 0.12);
+  border: none;
 }
 
 .dashboard-header h1 {
-  color: #a855f7;
+  color: white;
   font-size: 2rem;
   font-weight: 700;
   margin: 0;
-  text-shadow: 0 2px 4px rgba(168, 85, 247, 0.3);
 }
 
 .logout-link {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: rgba(255, 255, 255, 0.2);
   color: white;
   text-decoration: none;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .logout-link:hover {
+  background: rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
   color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Dashboard Content */
@@ -53,12 +53,11 @@
 
 /* User Info Card */
 .user-info {
-  background: linear-gradient(135deg, #2d1b69 0%, #1e1e3f 100%);
+  background: #fff;
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 12px 40px rgba(139, 92, 246, 0.2);
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 24px rgba(53, 120, 214, 0.12);
+  border: 1px solid #e1e9f7;
 }
 
 /* Profile Section */
@@ -74,8 +73,8 @@
   height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid #a855f7;
-  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.4);
+  border: 4px solid #3578d6;
+  box-shadow: 0 4px 16px rgba(53, 120, 214, 0.2);
   transition: transform 0.3s ease;
 }
 
@@ -89,21 +88,20 @@
 }
 
 .user-details h2 {
-  color: #a855f7;
+  color: #163d7d;
   font-size: 1.8rem;
   font-weight: 700;
   margin: 0 0 1.5rem 0;
-  text-shadow: 0 2px 4px rgba(168, 85, 247, 0.3);
 }
 
 .user-details p {
-  color: #cbd5e1;
+  color: #355d9b;
   font-size: 1.1rem;
   margin: 0.75rem 0;
 }
 
 .user-details strong {
-  color: #e2e8f0;
+  color: #163d7d;
   font-weight: 600;
   min-width: 80px;
   display: inline-block;
@@ -124,35 +122,35 @@
 
 /* Edit Name Button */
 .edit-name-btn {
-  background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+  background: linear-gradient(90deg, #3578d6 30%, #4f9cff 100%);
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
+  box-shadow: 0 2px 8px rgba(53, 120, 214, 0.2);
   margin-left: 1rem;
 }
 
 .edit-name-btn:hover {
-  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.4);
+  background: linear-gradient(90deg, #2c5dab 20%, #3578d6 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(53, 120, 214, 0.3);
 }
 
 /* Account Actions */
 .account-actions {
   margin-top: 2rem;
   padding-top: 2rem;
-  border-top: 1px solid rgba(139, 92, 246, 0.3);
+  border-top: 1px solid #e1e9f7;
   text-align: center;
 }
 
 .delete-account-btn {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -161,7 +159,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.2);
   position: relative;
   overflow: hidden;
 }
@@ -187,23 +185,23 @@
 }
 
 .delete-account-btn:hover {
-  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+  background: linear-gradient(90deg, #b91c1c 0%, #991b1b 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
 }
 
 /* Loading State */
 .loading {
   text-align: center;
   padding: 4rem 2rem;
-  background: linear-gradient(135deg, #2d1b69 0%, #1e1e3f 100%);
+  background: #fff;
   border-radius: 20px;
-  box-shadow: 0 12px 40px rgba(139, 92, 246, 0.2);
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 24px rgba(53, 120, 214, 0.12);
+  border: 1px solid #e1e9f7;
 }
 
 .loading p {
-  color: #a855f7;
+  color: #3578d6;
   font-size: 1.2rem;
   font-weight: 600;
   margin: 0;
@@ -311,7 +309,7 @@
 /* Smooth animations */
 * {
   transition: color 0.3s ease, background-color 0.3s ease,
-    border-color 0.3s ease;
+    border-color 0.3s ease, transform 0.3s ease;
 }
 
 /* Custom scrollbar for webkit browsers */
@@ -320,14 +318,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a2e;
+  background: #f9fafb;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #a855f7;
+  background: #3578d6;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9333ea;
+  background: #2c5dab;
 }

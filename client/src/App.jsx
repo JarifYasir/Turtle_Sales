@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from "react";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import Header from "./components/Header";
@@ -13,6 +12,8 @@ import {
   Register,
 } from "./pages";
 import { UserProvider } from "./usercontext/UserContext";
+
+import WelcomePage from "./pages/WelcomePage";
 
 const router = createBrowserRouter([
   {
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
       {
         path: "logout",
         element: <Logout />,
+      },
+      {
+        path: "welcome",
+        element: <WelcomePage />,
       },
     ],
   },

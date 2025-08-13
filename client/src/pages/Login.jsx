@@ -19,24 +19,29 @@ const Login = () => {
     let email = e.target.email.value;
     let password = e.target.password.value;
 
-    if (email.length > 0 && password.length > 0) {
-      const formData = {
-        email,
-        password,
-      };
+    if (email && password) {
+      const formData = { email, password };
+
       try {
         const response = await axios.post(
           "http://localhost:3000/api/v1/login",
           formData
         );
+
         localStorage.setItem("auth", JSON.stringify(response.data.token));
         setToken(JSON.stringify(response.data.token));
+
         toast.success("Login successful");
-        navigate("/dashboard");
+
+        if (response.data.firstLogin) {
+          navigate("/welcome");
+        } else {
+          navigate("/dashboard");
+        }
+
         window.location.reload();
       } catch (err) {
-        console.log(err);
-        if (err.response && err.response.data) {
+        if (err.response?.data) {
           const errorMessage = err.response.data.msg;
           if (errorMessage === "Bad password") {
             toast.error("Incorrect password, Please try again");
@@ -53,7 +58,6 @@ const Login = () => {
       toast.error("Please fill all inputs");
     }
   };
-
   useEffect(() => {
     if (token !== "") {
       toast.success("You are already logged in");

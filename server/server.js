@@ -14,17 +14,15 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173", // Your React app URL
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
 app.use("/api/v1", require("./routes/authRoutes"));
 
-// Health check route
 app.get("/", (req, res) => {
   res.json({ message: "Server is running!" });
 });
@@ -38,7 +36,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler - IMPORTANT: Remove the '*' route that might be causing the issue
 app.use((req, res) => {
   res.status(404).json({
     success: false,
