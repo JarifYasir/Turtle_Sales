@@ -24,19 +24,18 @@ export const UserProvider = ({ children }) => {
           );
           setUser(response.data.user);
         } catch (error) {
-          toast.error("Failed to fetch user data");
+          console.error("Failed to fetch user data:", error);
           // Clear invalid token
           localStorage.removeItem("auth");
           setToken("");
         }
       }
     };
-
     fetchUserData();
   }, [token]);
 
   return (
-    <UserContext.Provider value={{ user, token, setUser, setToken }}>
+    <UserContext.Provider value={{ user, setUser, token, setToken }}>
       {children}
     </UserContext.Provider>
   );

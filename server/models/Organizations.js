@@ -1,5 +1,3 @@
-// models/Organization.js
-
 const mongoose = require("mongoose");
 
 const organizationSchema = new mongoose.Schema(
@@ -31,8 +29,20 @@ const organizationSchema = new mongoose.Schema(
     },
     members: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        role: {
+          type: String,
+          enum: ["owner", "employee"],
+          default: "employee",
+        },
+        joinedAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
   },

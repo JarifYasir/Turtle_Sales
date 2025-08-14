@@ -1,5 +1,3 @@
-// controllers/organizationController.js
-
 const Organization = require("../models/Organizations");
 const User = require("../models/User");
 const { validationResult } = require("express-validator");
@@ -9,13 +7,11 @@ const crypto = require("crypto");
 const generateUniqueCode = async () => {
   let code;
   let exists = true;
-
   while (exists) {
     code = crypto.randomBytes(3).toString("hex").toUpperCase();
     const org = await Organization.findOne({ code });
     if (!org) exists = false;
   }
-
   return code;
 };
 
@@ -24,47 +20,58 @@ exports.createOrganization = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
-        success: false, 
+      return res.status(400).json({
+        success: false,
         msg: "Validation failed",
-        errors: errors.array() 
+        errors: errors.array(),
       });
     }
 
     const { name, description } = req.body;
-
     if (!name || !name.trim()) {
-      return res.status(400).json({ 
-        success: false, 
-        msg: "Organization name is required" 
+      return res.status(400).json({
+        success: false,
+        msg: "Organization name is required",
       });
     }
 
-    // Check if user already owns an organization
-    const existingOrg = await Organization.findOne({ owner: req.user._id });
-    if (existingOrg) {
+    // Check if user already belongs to an organization
+    const existingMembership = await Organization.findOne({
+      $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
+    });
+
+    if (existingMembership) {
       return res.status(400).json({
         success: false,
-        msg: "You already own an organization",
+        msg: "You already belong to an organization",
       });
     }
 
     // Generate unique code
     const code = await generateUniqueCode();
 
-    // Create organization
+    // Create organization with owner as first member
     const organization = new Organization({
       name: name.trim(),
       description: description ? description.trim() : "",
       code,
       owner: req.user._id,
-      members: [req.user._id], // Add owner as first member
+      members: [
+        {
+          user: req.user._id,
+          role: "owner",
+          joinedAt: new Date(),
+        },
+      ],
     });
 
     await organization.save();
 
-    // Populate the owner field for the response
-    await organization.populate("owner", "name email");
+    // Populate the owner and members for the response
+    await organization.populate([
+      { path: "owner", select: "name email" },
+      { path: "members.user", select: "name email createdAt" },
+    ]);
 
     res.status(201).json({
       success: true,
@@ -80,92 +87,32 @@ exports.createOrganization = async (req, res) => {
 // Get organization details
 exports.getOrganization = async (req, res) => {
   try {
-    const organization = await Organization.findOne({ owner: req.user._id })
-      .populate("owner", "name email")
-      .populate("members", "name email createdAt");
+    const organization = await Organization.findOne({
+      $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
+    }).populate([
+      { path: "owner", select: "name email" },
+      { path: "members.user", select: "name email createdAt" },
+    ]);
 
     if (!organization) {
-      return res.status(404).json({ 
-        success: false, 
-        msg: "No organization found for user" 
+      return res.status(404).json({
+        success: false,
+        msg: "No organization found for user",
       });
     }
+
+    // Check if current user is the owner
+    const isOwner =
+      organization.owner._id.toString() === req.user._id.toString();
 
     res.json({
       success: true,
       organization,
       memberCount: organization.members.length,
+      isOwner,
     });
   } catch (error) {
     console.error("Get Organization Error:", error);
-    res.status(500).json({ success: false, msg: "Server error" });
-  }
-};
-
-// Update Organization (only owner allowed)
-exports.updateOrganization = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ 
-        success: false, 
-        msg: "Validation failed",
-        errors: errors.array() 
-      });
-    }
-
-    const { name, description } = req.body;
-    const organization = await Organization.findOne({ owner: req.user._id });
-
-    if (!organization) {
-      return res.status(404).json({ 
-        success: false, 
-        msg: "Organization not found" 
-      });
-    }
-
-    if (name && name.trim()) {
-      organization.name = name.trim();
-    }
-
-    if (description !== undefined) {
-      organization.description = description.trim();
-    }
-
-    await organization.save();
-    await organization.populate("owner", "name email");
-
-    res.json({ 
-      success: true, 
-      msg: "Organization updated successfully", 
-      organization 
-    });
-  } catch (error) {
-    console.error("Update Organization Error:", error);
-    res.status(500).json({ success: false, msg: "Server error" });
-  }
-};
-
-// Delete Organization (only owner allowed)
-exports.deleteOrganization = async (req, res) => {
-  try {
-    const organization = await Organization.findOne({ owner: req.user._id });
-
-    if (!organization) {
-      return res.status(404).json({ 
-        success: false, 
-        msg: "Organization not found" 
-      });
-    }
-
-    await Organization.findByIdAndDelete(organization._id);
-
-    res.json({ 
-      success: true, 
-      msg: "Organization deleted successfully" 
-    });
-  } catch (error) {
-    console.error("Delete Organization Error:", error);
     res.status(500).json({ success: false, msg: "Server error" });
   }
 };
@@ -175,25 +122,24 @@ exports.joinOrganization = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ 
-        success: false, 
+      return res.status(400).json({
+        success: false,
         msg: "Validation failed",
-        errors: errors.array() 
+        errors: errors.array(),
       });
     }
 
     const { code } = req.body;
-
     if (!code || !code.trim()) {
-      return res.status(400).json({ 
-        success: false, 
-        msg: "Organization code is required" 
+      return res.status(400).json({
+        success: false,
+        msg: "Organization code is required",
       });
     }
 
     // Check if user already belongs to an organization
-    const existingMembership = await Organization.findOne({ 
-      members: req.user._id 
+    const existingMembership = await Organization.findOne({
+      $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
     });
 
     if (existingMembership) {
@@ -204,30 +150,100 @@ exports.joinOrganization = async (req, res) => {
     }
 
     // Find organization by code
-    const organization = await Organization.findOne({ 
-      code: code.trim().toUpperCase() 
+    const organization = await Organization.findOne({
+      code: code.trim().toUpperCase(),
     });
 
     if (!organization) {
-      return res.status(404).json({ 
-        success: false, 
-        msg: "Organization not found with this code" 
+      return res.status(404).json({
+        success: false,
+        msg: "Organization not found with this code",
       });
     }
 
-    // Add user to organization members
-    organization.members.push(req.user._id);
+    // Check if user is already a member (additional safety check)
+    const alreadyMember = organization.members.some(
+      (member) => member.user.toString() === req.user._id.toString()
+    );
+
+    if (alreadyMember) {
+      return res.status(400).json({
+        success: false,
+        msg: "You are already a member of this organization",
+      });
+    }
+
+    // Add user to organization members with employee role
+    organization.members.push({
+      user: req.user._id,
+      role: "employee",
+      joinedAt: new Date(),
+    });
+
     await organization.save();
 
-    await organization.populate("owner", "name email");
+    // Populate the response
+    await organization.populate([
+      { path: "owner", select: "name email" },
+      { path: "members.user", select: "name email createdAt" },
+    ]);
 
     res.json({
       success: true,
       msg: "Successfully joined organization",
       organization,
+      userRole: "employee",
     });
   } catch (error) {
     console.error("Join Organization Error:", error);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+};
+
+// Update Organization (only owner allowed)
+exports.updateOrganization = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        msg: "Validation failed",
+        errors: errors.array(),
+      });
+    }
+
+    const { name, description } = req.body;
+    const organization = await Organization.findOne({ owner: req.user._id });
+
+    if (!organization) {
+      return res.status(404).json({
+        success: false,
+        msg: "Organization not found or you don't have permission",
+      });
+    }
+
+    if (name && name.trim()) {
+      organization.name = name.trim();
+    }
+    if (description !== undefined) {
+      organization.description = description.trim();
+    }
+
+    await organization.save();
+
+    // Populate after saving
+    await organization.populate([
+      { path: "owner", select: "name email" },
+      { path: "members.user", select: "name email createdAt" },
+    ]);
+
+    res.json({
+      success: true,
+      msg: "Organization updated successfully",
+      organization,
+    });
+  } catch (error) {
+    console.error("Update Organization Error:", error);
     res.status(500).json({ success: false, msg: "Server error" });
   }
 };
@@ -239,33 +255,105 @@ exports.removeMember = async (req, res) => {
     const organization = await Organization.findOne({ owner: req.user._id });
 
     if (!organization) {
-      return res.status(404).json({ 
-        success: false, 
-        msg: "Organization not found" 
+      return res.status(404).json({
+        success: false,
+        msg: "Organization not found or you don't have permission",
       });
     }
 
     // Don't allow owner to remove themselves
     if (memberId === req.user._id.toString()) {
-      return res.status(400).json({ 
-        success: false, 
-        msg: "Owner cannot remove themselves from organization" 
+      return res.status(400).json({
+        success: false,
+        msg: "Owner cannot remove themselves from organization",
       });
     }
 
-    // Remove member from organization
-    organization.members = organization.members.filter(
-      member => member.toString() !== memberId
+    // Find and remove the member
+    const memberIndex = organization.members.findIndex(
+      (member) => member.user.toString() === memberId
     );
 
+    if (memberIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        msg: "Member not found in organization",
+      });
+    }
+
+    organization.members.splice(memberIndex, 1);
     await organization.save();
 
-    res.json({ 
-      success: true, 
-      msg: "Member removed successfully" 
+    res.json({
+      success: true,
+      msg: "Member removed successfully",
     });
   } catch (error) {
     console.error("Remove Member Error:", error);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+};
+
+// Leave organization (for employees)
+exports.leaveOrganization = async (req, res) => {
+  try {
+    const organization = await Organization.findOne({
+      "members.user": req.user._id,
+    });
+
+    if (!organization) {
+      return res.status(404).json({
+        success: false,
+        msg: "You are not a member of any organization",
+      });
+    }
+
+    // Don't allow owner to leave (they must delete the organization)
+    if (organization.owner.toString() === req.user._id.toString()) {
+      return res.status(400).json({
+        success: false,
+        msg: "Organization owner cannot leave. Please delete the organization instead.",
+      });
+    }
+
+    // Remove user from members
+    const memberIndex = organization.members.findIndex(
+      (member) => member.user.toString() === req.user._id.toString()
+    );
+
+    if (memberIndex !== -1) {
+      organization.members.splice(memberIndex, 1);
+      await organization.save();
+    }
+
+    res.json({
+      success: true,
+      msg: "Successfully left the organization",
+    });
+  } catch (error) {
+    console.error("Leave Organization Error:", error);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+};
+
+// Delete organization (only owner allowed)
+exports.deleteOrganization = async (req, res) => {
+  try {
+    const organization = await Organization.findOne({ owner: req.user._id });
+    if (!organization) {
+      return res.status(404).json({
+        success: false,
+        msg: "Organization not found or you don't have permission",
+      });
+    }
+
+    await Organization.findByIdAndDelete(organization._id);
+    res.json({
+      success: true,
+      msg: "Organization deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete Organization Error:", error);
     res.status(500).json({ success: false, msg: "Server error" });
   }
 };

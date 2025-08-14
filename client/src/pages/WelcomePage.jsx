@@ -7,24 +7,61 @@ import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
 
 const WelcomePage = () => {
-  const { user, token, setUser, setToken } = useContext(UserContext);
+  const { user, token } = useContext(UserContext);
   const navigate = useNavigate();
   const [mode, setMode] = useState(null);
   const [orgName, setOrgName] = useState("");
   const [orgDescription, setOrgDescription] = useState("");
   const [orgCode, setOrgCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkingOrg, setCheckingOrg] = useState(true);
 
   useEffect(() => {
     if (!token) {
       navigate("/login");
-      toast.warn("Please login first to access dashboard");
+      toast.warn("Please login first to access this page");
+      return;
     }
+
+    // Check if user already belongs to an organization
+    checkExistingOrganization();
   }, [token, navigate]);
+
+  const checkExistingOrganization = async () => {
+    try {
+      const authToken = JSON.parse(localStorage.getItem("auth"));
+      const response = await axios.get(
+        "http://localhost:3000/api/v1/organization",
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        // User already has an organization
+        if (response.data.isOwner) {
+          navigate("/manage-org");
+        } else {
+          // Employees go to dashboard, but can still access manage-org to view
+          navigate("/dashboard");
+        }
+      }
+    } catch (err) {
+      // User doesn't have an organization, which is expected for welcome page
+      if (err.response && err.response.status === 404) {
+        setCheckingOrg(false);
+      } else {
+        console.error("Error checking organization:", err);
+        setCheckingOrg(false);
+      }
+    }
+  };
 
   const handleCreateOrganization = async (e) => {
     e.preventDefault();
-    
+
     if (!orgName.trim()) {
       toast.error("Organization name is required");
       return;
@@ -36,8 +73,8 @@ const WelcomePage = () => {
       const response = await axios.post(
         "http://localhost:3000/api/v1/organization/create",
         {
-          name: orgName,
-          description: orgDescription,
+          name: orgName.trim(),
+          description: orgDescription.trim(),
         },
         {
           headers: {
@@ -48,19 +85,26 @@ const WelcomePage = () => {
 
       if (response.data.success) {
         toast.success("Organization created successfully!");
-        
-        // Complete first login
-        await axios.put(
-          "http://localhost:3000/api/v1/first-login",
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
-          }
-        );
 
-        // Navigate to manage org page
+        // Complete first login if it's the user's first time
+        try {
+          await axios.put(
+            "http://localhost:3000/api/v1/first-login",
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
+          );
+        } catch (firstLoginError) {
+          console.log(
+            "First login update not needed or failed:",
+            firstLoginError
+          );
+        }
+
+        // Navigate to manage org page (owner can manage)
         navigate("/manage-org");
       }
     } catch (err) {
@@ -82,9 +126,14 @@ const WelcomePage = () => {
 
   const handleJoinOrganization = async (e) => {
     e.preventDefault();
-    
+
     if (!orgCode.trim()) {
       toast.error("Organization code is required");
+      return;
+    }
+
+    if (orgCode.length !== 6) {
+      toast.error("Organization code must be exactly 6 characters");
       return;
     }
 
@@ -93,9 +142,7 @@ const WelcomePage = () => {
       const authToken = JSON.parse(localStorage.getItem("auth"));
       const response = await axios.post(
         "http://localhost:3000/api/v1/organization/join",
-        {
-          code: orgCode,
-        },
+        { code: orgCode.trim().toUpperCase() },
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -105,19 +152,26 @@ const WelcomePage = () => {
 
       if (response.data.success) {
         toast.success("Successfully joined organization!");
-        
-        // Complete first login
-        await axios.put(
-          "http://localhost:3000/api/v1/first-login",
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-            },
-          }
-        );
 
-        // Navigate to dashboard
+        // Complete first login if it's the user's first time
+        try {
+          await axios.put(
+            "http://localhost:3000/api/v1/first-login",
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
+            }
+          );
+        } catch (firstLoginError) {
+          console.log(
+            "First login update not needed or failed:",
+            firstLoginError
+          );
+        }
+
+        // Navigate to dashboard (employees go to dashboard, not manage-org)
         navigate("/dashboard");
       }
     } catch (err) {
@@ -156,140 +210,246 @@ const WelcomePage = () => {
     }
   };
 
+  const resetForm = () => {
+    setMode(null);
+    setOrgName("");
+    setOrgDescription("");
+    setOrgCode("");
+  };
+
+  if (checkingOrg) {
+    return (
+      <div className="welcome-container">
+        <div className="welcome-content">
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p className="loading-text">Checking organization status...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="welcome-container">
       <motion.div
         className="welcome-content"
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1>Welcome to Our Platform!</h1>
-        <p>Let's get you started by creating a new organization or joining an existing one.</p>
+        <div className="welcome-header">
+          <h1 className="welcome-title">Welcome, {user?.name || "User"}!</h1>
+          <p className="welcome-subtitle">
+            Let's get you started by creating a new organization or joining an
+            existing one.
+          </p>
+        </div>
 
         <AnimatePresence mode="wait">
           {!mode && (
             <motion.div
-              className="mode-selection"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              key="options"
+              className="welcome-options"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
             >
-              <button
-                className="mode-btn create-btn"
-                onClick={() => setMode("create")}
-                disabled={loading}
+              <motion.div
+                className="option-card"
+                whileHover={{
+                  y: -5,
+                  boxShadow: "0 8px 25px rgba(53, 120, 214, 0.15)",
+                }}
+                whileTap={{ scale: 0.98 }}
               >
-                Create Organization
-              </button>
-              <button
-                className="mode-btn join-btn"
-                onClick={() => setMode("join")}
-                disabled={loading}
+                <div className="option-icon create-icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </div>
+                <h3>Create Organization</h3>
+                <p>
+                  Start your own organization and invite team members to join
+                </p>
+                <button
+                  className="option-btn create-btn"
+                  onClick={() => setMode("create")}
+                  disabled={loading}
+                >
+                  Create New Organization
+                </button>
+              </motion.div>
+
+              <motion.div
+                className="option-card"
+                whileHover={{
+                  y: -5,
+                  boxShadow: "0 8px 25px rgba(53, 120, 214, 0.15)",
+                }}
+                whileTap={{ scale: 0.98 }}
               >
-                Join Organization
-              </button>
-              <button
-                className="skip-btn"
-                onClick={handleSkipForNow}
-                disabled={loading}
-              >
-                Skip for now
-              </button>
+                <div className="option-icon join-icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H16c-.8 0-1.54.37-2.01.99L12 11l2.01 2.01c.47.62 1.21.99 2.01.99h2.54l-2.54 7.63V22z"
+                      fill="currentColor"
+                    />
+                    <path
+                      d="M12.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5z"
+                      fill="currentColor"
+                    />
+                    <path
+                      d="M5.5 6c1.11 0 2-.89 2-2s-.89-2-2-2-2 .89-2 2 .89 2 2 2zm1.5 2h-3C2.46 8 1 9.46 1 11.5V16h8v-4.5C9 9.46 7.54 8 6 8z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </div>
+                <h3>Join Organization</h3>
+                <p>Enter an invitation code to join an existing organization</p>
+                <button
+                  className="option-btn join-btn"
+                  onClick={() => setMode("join")}
+                  disabled={loading}
+                >
+                  Join Organization
+                </button>
+              </motion.div>
             </motion.div>
           )}
 
           {mode === "create" && (
-            <motion.form
-              className="org-form"
-              initial={{ opacity: 0, x: 20 }}
+            <motion.div
+              key="create-form"
+              className="form-container"
+              initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              onSubmit={handleCreateOrganization}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.4 }}
             >
-              <h3>Create New Organization</h3>
-              <div className="form-group">
-                <label>Organization Name *</label>
-                <input
-                  type="text"
-                  value={orgName}
-                  onChange={(e) => setOrgName(e.target.value)}
-                  placeholder="Enter organization name"
-                  required
-                  disabled={loading}
-                />
+              <div className="form-header">
+                <h2>Create Your Organization</h2>
+                <p>Set up your organization details</p>
               </div>
-              <div className="form-group">
-                <label>Description (Optional)</label>
-                <textarea
-                  value={orgDescription}
-                  onChange={(e) => setOrgDescription(e.target.value)}
-                  placeholder="Enter organization description"
-                  rows="3"
-                  disabled={loading}
-                />
-              </div>
-              <div className="form-actions">
-                <button
-                  type="button"
-                  className="back-btn"
-                  onClick={() => setMode(null)}
-                  disabled={loading}
-                >
-                  Back
-                </button>
-                <button
-                  type="submit"
-                  className="submit-btn"
-                  disabled={loading}
-                >
-                  {loading ? "Creating..." : "Create Organization"}
-                </button>
-              </div>
-            </motion.form>
+
+              <form onSubmit={handleCreateOrganization} className="org-form">
+                <div className="form-group">
+                  <label htmlFor="orgName">Organization Name *</label>
+                  <input
+                    type="text"
+                    id="orgName"
+                    value={orgName}
+                    onChange={(e) => setOrgName(e.target.value)}
+                    placeholder="Enter organization name"
+                    className="form-input"
+                    maxLength={100}
+                    disabled={loading}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="orgDescription">Description (Optional)</label>
+                  <textarea
+                    id="orgDescription"
+                    value={orgDescription}
+                    onChange={(e) => setOrgDescription(e.target.value)}
+                    placeholder="Describe your organization..."
+                    className="form-textarea"
+                    maxLength={500}
+                    disabled={loading}
+                    rows={4}
+                  />
+                </div>
+
+                <div className="form-buttons">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="cancel-btn"
+                    disabled={loading}
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    className="submit-btn"
+                    disabled={loading || !orgName.trim()}
+                  >
+                    {loading ? "Creating..." : "Create Organization"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
           )}
 
           {mode === "join" && (
-            <motion.form
-              className="org-form"
-              initial={{ opacity: 0, x: 20 }}
+            <motion.div
+              key="join-form"
+              className="form-container"
+              initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              onSubmit={handleJoinOrganization}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.4 }}
             >
-              <h3>Join Organization</h3>
-              <div className="form-group">
-                <label>Organization Code *</label>
-                <input
-                  type="text"
-                  value={orgCode}
-                  onChange={(e) => setOrgCode(e.target.value.toUpperCase())}
-                  placeholder="Enter 6-character code"
-                  maxLength="6"
-                  required
-                  disabled={loading}
-                />
+              <div className="form-header">
+                <h2>Join Organization</h2>
+                <p>Enter the organization code provided by your team leader</p>
               </div>
-              <div className="form-actions">
-                <button
-                  type="button"
-                  className="back-btn"
-                  onClick={() => setMode(null)}
-                  disabled={loading}
-                >
-                  Back
-                </button>
-                <button
-                  type="submit"
-                  className="submit-btn"
-                  disabled={loading}
-                >
-                  {loading ? "Joining..." : "Join Organization"}
-                </button>
-              </div>
-            </motion.form>
+
+              <form onSubmit={handleJoinOrganization} className="org-form">
+                <div className="form-group">
+                  <label htmlFor="orgCode">Organization Code *</label>
+                  <input
+                    type="text"
+                    id="orgCode"
+                    value={orgCode}
+                    onChange={(e) => setOrgCode(e.target.value.toUpperCase())}
+                    placeholder="Enter 6-character code"
+                    maxLength={6}
+                    className="org-code-input"
+                    disabled={loading}
+                    required
+                  />
+                  <p className="form-help">
+                    The organization code is a 6-character code provided by your
+                    organization owner.
+                  </p>
+                </div>
+
+                <div className="form-buttons">
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="cancel-btn"
+                    disabled={loading}
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    className="submit-btn"
+                    disabled={loading || orgCode.length !== 6}
+                  >
+                    {loading ? "Joining..." : "Join Organization"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
           )}
         </AnimatePresence>
+
+        {!mode && (
+          <div className="skip-section">
+            <button onClick={handleSkipForNow} className="skip-btn">
+              Skip for now
+            </button>
+          </div>
+        )}
       </motion.div>
     </div>
   );
