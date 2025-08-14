@@ -225,6 +225,7 @@ exports.updateOrganization = async (req, res) => {
     if (name && name.trim()) {
       organization.name = name.trim();
     }
+
     if (description !== undefined) {
       organization.description = description.trim();
     }
@@ -248,10 +249,15 @@ exports.updateOrganization = async (req, res) => {
   }
 };
 
-// Remove member from organization (only owner allowed)
+// Remove member from organization (only owner allowed) - FIXED VERSION
 exports.removeMember = async (req, res) => {
   try {
     const { memberId } = req.params;
+
+    console.log("Attempting to remove member:", memberId);
+    console.log("Request user:", req.user._id);
+
+    // Find organization where current user is the owner
     const organization = await Organization.findOne({ owner: req.user._id });
 
     if (!organization) {
@@ -261,6 +267,9 @@ exports.removeMember = async (req, res) => {
       });
     }
 
+    console.log("Organization found:", organization._id);
+    console.log("Organization members:", organization.members);
+
     // Don't allow owner to remove themselves
     if (memberId === req.user._id.toString()) {
       return res.status(400).json({
@@ -269,10 +278,12 @@ exports.removeMember = async (req, res) => {
       });
     }
 
-    // Find and remove the member
+    // Find the member index - FIXED: Convert ObjectId to string for comparison
     const memberIndex = organization.members.findIndex(
       (member) => member.user.toString() === memberId
     );
+
+    console.log("Member index found:", memberIndex);
 
     if (memberIndex === -1) {
       return res.status(404).json({
@@ -281,8 +292,11 @@ exports.removeMember = async (req, res) => {
       });
     }
 
+    // Remove the member
     organization.members.splice(memberIndex, 1);
     await organization.save();
+
+    console.log("Member removed successfully");
 
     res.json({
       success: true,
@@ -340,6 +354,7 @@ exports.leaveOrganization = async (req, res) => {
 exports.deleteOrganization = async (req, res) => {
   try {
     const organization = await Organization.findOne({ owner: req.user._id });
+
     if (!organization) {
       return res.status(404).json({
         success: false,
@@ -348,6 +363,7 @@ exports.deleteOrganization = async (req, res) => {
     }
 
     await Organization.findByIdAndDelete(organization._id);
+
     res.json({
       success: true,
       msg: "Organization deleted successfully",
