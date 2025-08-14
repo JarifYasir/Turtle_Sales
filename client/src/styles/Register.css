@@ -123,6 +123,7 @@
 
 .input-group {
   position: relative;
+  margin-bottom: 16px;
 }
 
 .form-input {
@@ -225,6 +226,18 @@
   transform: translateY(0);
 }
 
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  background: #94a3b8;
+}
+
+.submit-btn:disabled:hover {
+  transform: none;
+  box-shadow: 0 4px 15px rgba(148, 163, 184, 0.3);
+}
+
 .auth-footer {
   text-align: center;
   margin-top: 2rem;
@@ -264,6 +277,77 @@
   color: #1e40af;
 }
 
+/* Password Strength Meter Styles */
+.password-strength {
+  margin-top: 8px;
+}
+
+.strength-bar {
+  width: 100%;
+  height: 4px;
+  background-color: #e2e8f0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.strength-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  border-radius: 2px;
+}
+
+.strength-text {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Validation Styles */
+.password-requirements,
+.validation-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 12px;
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.requirement-item,
+.validation-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  padding: 2px 0;
+}
+
+.requirement-item span,
+.validation-item span {
+  color: #475569;
+  font-weight: 500;
+}
+
+.valid {
+  color: #10b981;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.invalid {
+  color: #ef4444;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.half-width {
+  width: 100%;
+}
+
 /* Input validation states */
 .form-input:valid {
   border-color: #10b981;
@@ -271,18 +355,6 @@
 
 .form-input:invalid:not(:placeholder-shown) {
   border-color: #ef4444;
-}
-
-/* Loading state */
-.submit-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.submit-btn:disabled:hover {
-  transform: none;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
 /* Responsive Design */
@@ -303,6 +375,12 @@
   .logo {
     width: 70px;
     height: 70px;
+  }
+
+  .password-requirements,
+  .validation-info {
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
 }
 
@@ -333,6 +411,11 @@
   .logo {
     width: 60px;
     height: 60px;
+  }
+
+  .requirement-item,
+  .validation-item {
+    font-size: 11px;
   }
 }
 
