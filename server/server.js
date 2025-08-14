@@ -21,7 +21,9 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Routes
 app.use("/api/v1", require("./routes/authRoutes"));
+app.use("/api/v1/organization", require("./routes/organizationRoutes"));
 
 app.get("/", (req, res) => {
   res.json({ message: "Server is running!" });
@@ -44,7 +46,6 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
