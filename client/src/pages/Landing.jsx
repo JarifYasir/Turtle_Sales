@@ -7,58 +7,120 @@ const Landing = () => {
   const navigate = useNavigate();
 
   const handleGetStarted = () => {
-    navigate("/login"); // Adjust path if needed
+    navigate("/login");
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
+  };
+
+  const featureVariants = {
+    hidden: { opacity: 0, x: 50 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
   };
 
   return (
     <div className="landing">
-      <div className="content">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <h1 className="title">Streamline Your Door-to-Door Sales Workflow</h1>
-          <p className="subtitle">
+      <motion.div
+        className="content"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div className="hero-section" variants={itemVariants}>
+          <motion.h1 className="title" variants={itemVariants}>
+            Streamline Your Door-to-Door Sales Workflow
+          </motion.h1>
+          <motion.p className="subtitle" variants={itemVariants}>
             Organize schedules, track sales activities, and monitor performance
             — all in one centralized hub designed for modern teams.
-          </p>
+          </motion.p>
           <motion.button
             className="get-started-btn"
+            variants={itemVariants}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
             onClick={handleGetStarted}
           >
             Get Started – Try Turtle Free
           </motion.button>
-          <div className="features">
-            <div className="feature-card">
-              <span className="feature-icon">🗓️</span>
-              <h3>Centralized Scheduling</h3>
+          <motion.p className="trust-indicator" variants={itemVariants}>
+            No credit card required • Free 14-day trial
+          </motion.p>
+        </motion.div>
+
+        <motion.div className="features-section">
+          <motion.h2 className="features-title" variants={itemVariants}>
+            Why Choose Turtle?
+          </motion.h2>
+          <motion.div className="features">
+            <motion.div
+              className="feature-card"
+              variants={featureVariants}
+              whileHover={{ scale: 1.02 }}
+            >
+              <div className="feature-header">
+                <span className="feature-icon">🗓️</span>
+                <h3>Centralized Scheduling</h3>
+              </div>
               <p>
                 Assign and update sales routes instantly and keep your team
-                coordinated.
+                coordinated with real-time updates.
               </p>
-            </div>
-            <div className="feature-card">
-              <span className="feature-icon">📍</span>
-              <h3>Live Activity Tracking</h3>
+            </motion.div>
+
+            <motion.div
+              className="feature-card"
+              variants={featureVariants}
+              whileHover={{ scale: 1.02 }}
+            >
+              <div className="feature-header">
+                <span className="feature-icon">📍</span>
+                <h3>Live Activity Tracking</h3>
+              </div>
               <p>
-                Monitor team progress in real time for accountability and
-                results.
+                Monitor team progress in real time for complete accountability
+                and measurable results.
               </p>
-            </div>
-            <div className="feature-card">
-              <span className="feature-icon">📊</span>
-              <h3>Performance Analytics</h3>
+            </motion.div>
+
+            <motion.div
+              className="feature-card"
+              variants={featureVariants}
+              whileHover={{ scale: 1.02 }}
+            >
+              <div className="feature-header">
+                <span className="feature-icon">📊</span>
+                <h3>Performance Analytics</h3>
+              </div>
               <p>
-                Gain insights into team and personal performance to optimize
-                outcomes.
+                Gain actionable insights into team and personal performance to
+                optimize sales outcomes.
               </p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   );
 };

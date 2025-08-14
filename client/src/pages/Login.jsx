@@ -58,6 +58,7 @@ const Login = () => {
       toast.error("Please fill all inputs");
     }
   };
+
   useEffect(() => {
     if (token !== "") {
       toast.success("You are already logged in");
@@ -67,10 +68,6 @@ const Login = () => {
 
   return (
     <div className="login-container">
-      <div className="login-background">
-        <div className="purple-gradient"></div>
-      </div>
-
       <motion.div
         className="login-card"
         initial={{ opacity: 0, y: 30 }}
@@ -122,6 +119,12 @@ const Login = () => {
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
+          </div>
+
+          <div className="forgot-password">
+            <Link to="/forgot-password" className="forgot-password-link">
+              Forgot Password?
+            </Link>
           </div>
 
           <motion.button
