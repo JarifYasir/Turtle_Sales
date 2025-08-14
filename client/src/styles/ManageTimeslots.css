@@ -1,0 +1,313 @@
+.manage-timeslots-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 2rem 1rem;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.manage-timeslots-container.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.manage-timeslots-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.manage-timeslots-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #163d7d;
+  margin-bottom: 0.5rem;
+}
+
+.manage-timeslots-header p {
+  font-size: 1.1rem;
+  color: #355d9b;
+  opacity: 0.9;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e1e9f7;
+  border-top: 4px solid #3578d6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.week-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(22, 61, 125, 0.1);
+}
+
+.nav-btn {
+  padding: 0.6rem 1.2rem;
+  background: #3578d6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+  background: #2a5bb8;
+  transform: translateY(-1px);
+}
+
+.nav-btn.current-btn {
+  background: #28a745;
+}
+
+.nav-btn.current-btn:hover {
+  background: #218838;
+}
+
+.current-week span {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #163d7d;
+}
+
+.timeslots-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.day-column {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(22, 61, 125, 0.1);
+  overflow: hidden;
+}
+
+.day-header {
+  background: linear-gradient(135deg, #3578d6 0%, #4f9cff 100%);
+  color: #fff;
+  padding: 1rem;
+  text-align: center;
+}
+
+.day-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.timeslots-list {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-height: 400px;
+}
+
+.no-slots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.timeslot-card {
+  background: #f8fafd;
+  border: 2px solid #e1e9f7;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.timeslot-card.assigned {
+  border-color: #28a745;
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+}
+
+.timeslot-card.unassigned {
+  border-color: #ffc107;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+}
+
+.timeslot-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 61, 125, 0.15);
+}
+
+.slot-time {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #163d7d;
+  margin-bottom: 0.5rem;
+}
+
+.assigned-info .assigned-user {
+  font-size: 0.95rem;
+  color: #155724;
+  margin-bottom: 0.3rem;
+}
+
+.slot-notes {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-style: italic;
+  margin-bottom: 0.5rem;
+}
+
+.unassigned-text {
+  font-size: 0.9rem;
+  color: #856404;
+  font-style: italic;
+}
+
+.assign-btn, .reassign-btn {
+  padding: 0.4rem 0.8rem;
+  background: #3578d6;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.assign-btn:hover, .reassign-btn:hover {
+  background: #2a5bb8;
+}
+
+.assign-form {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.user-select, .notes-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.notes-input {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.save-btn, .cancel-btn, .delete-btn {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.save-btn {
+  background: #28a745;
+  color: #fff;
+}
+
+.save-btn:hover {
+  background: #218838;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: #fff;
+}
+
+.cancel-btn:hover {
+  background: #545b62;
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: #fff;
+}
+
+.delete-btn:hover {
+  background: #c82333;
+}
+
+.save-btn:disabled, .assign-btn:disabled, .reassign-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .timeslots-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .timeslots-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .week-navigation {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .nav-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .current-week {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .manage-timeslots-container {
+    padding: 1rem 0.5rem;
+  }
+  
+  .timeslots-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .manage-timeslots-header h1 {
+    font-size: 2rem;
+  }
+  
+  .day-column {
+    margin-bottom: 1rem;
+  }
+}

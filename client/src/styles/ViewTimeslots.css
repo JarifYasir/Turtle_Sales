@@ -1,0 +1,325 @@
+.view-timeslots-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 2rem 1rem;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.view-timeslots-container.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-timeslots-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.view-timeslots-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #163d7d;
+  margin-bottom: 0.5rem;
+}
+
+.view-timeslots-header p {
+  font-size: 1.1rem;
+  color: #355d9b;
+  opacity: 0.9;
+}
+
+.week-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(22, 61, 125, 0.1);
+}
+
+.nav-btn {
+  padding: 0.6rem 1.2rem;
+  background: #3578d6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+  background: #2a5bb8;
+  transform: translateY(-1px);
+}
+
+.nav-btn.current-btn {
+  background: #28a745;
+}
+
+.nav-btn.current-btn:hover {
+  background: #218838;
+}
+
+.current-week span {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #163d7d;
+}
+
+.my-schedule-summary {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(22, 61, 125, 0.1);
+}
+
+.my-schedule-summary h3 {
+  color: #163d7d;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.no-assignments {
+  color: #6b7280;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+
+.my-timeslots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.my-timeslot {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border: 2px solid #28a745;
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 180px;
+}
+
+.my-timeslot .slot-date {
+  font-weight: 600;
+  color: #155724;
+  font-size: 0.9rem;
+}
+
+.my-timeslot .slot-time {
+  color: #155724;
+  font-size: 0.85rem;
+}
+
+.my-timeslot .slot-notes {
+  color: #6c757d;
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.day-column {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(22, 61, 125, 0.1);
+  overflow: hidden;
+}
+
+.day-header {
+  background: linear-gradient(135deg, #3578d6 0%, #4f9cff 100%);
+  color: #fff;
+  padding: 1rem;
+  text-align: center;
+}
+
+.day-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.day-timeslots {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-height: 300px;
+}
+
+.no-slots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.view-timeslot-card {
+  border-radius: 8px;
+  padding: 0.8rem;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.view-timeslot-card.my-assignment {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border-color: #28a745;
+}
+
+.view-timeslot-card.other-assignment {
+  background: linear-gradient(135deg, #e2e3e5 0%, #d6d8db 100%);
+  border-color: #6c757d;
+}
+
+.view-timeslot-card.unassigned {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border-color: #ffc107;
+}
+
+.view-timeslot-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 61, 125, 0.15);
+}
+
+.view-timeslot-card .slot-time {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #163d7d;
+  margin-bottom: 0.4rem;
+}
+
+.view-timeslot-card .assigned-info {
+  font-size: 0.8rem;
+}
+
+.view-timeslot-card .assigned-user strong {
+  color: #155724;
+}
+
+.view-timeslot-card .assigned-user span {
+  color: #495057;
+}
+
+.view-timeslot-card .unassigned-info {
+  color: #856404;
+  font-style: italic;
+  font-size: 0.8rem;
+}
+
+.view-timeslot-card .slot-notes {
+  font-size: 0.75rem;
+  color: #6c757d;
+  font-style: italic;
+  margin-top: 0.3rem;
+}
+
+.manage-link {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.manage-btn {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #3578d6 0%, #4f9cff 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(53, 120, 214, 0.3);
+}
+
+.manage-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(53, 120, 214, 0.4);
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e1e9f7;
+  border-top: 4px solid #3578d6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .schedule-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .schedule-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .week-navigation {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .nav-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .current-week {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .my-timeslots {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .view-timeslots-container {
+    padding: 1rem 0.5rem;
+  }
+  
+  .schedule-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .view-timeslots-header h1 {
+    font-size: 2rem;
+  }
+  
+  .day-column {
+    margin-bottom: 1rem;
+  }
+  
+  .my-schedule-summary {
+    padding: 1rem;
+  }
+}

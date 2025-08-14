@@ -17,6 +17,9 @@ import TurtlePortal from "./pages/TurtlePortal";
 import { UserProvider } from "./usercontext/UserContext";
 import WelcomePage from "./pages/WelcomePage";
 import ManageOrg from "./pages/ManageOrg";
+import ManageTimeslots from "./pages/ManageTimeslots";
+import ViewTimeslots from "./pages/ViewTimeslots";
+
 
 const router = createBrowserRouter([
   {
@@ -54,10 +57,19 @@ const router = createBrowserRouter([
       {
         path: "turtle-portal",
         element: <TurtlePortal />,
+      },
+      {
+        path: "manage-timeslots",
+        element: <ManageTimeslots />,
+      },
+      {
+        path:"view-timeslots",
+        element: <ViewTimeslots />,
       }
     ],
   },
 ]);
+
 
 function App() {
   return (
@@ -79,5 +91,6 @@ function App() {
     </UserProvider>
   );
 }
+
 
 export default App;
