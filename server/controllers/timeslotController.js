@@ -1,4 +1,4 @@
-// controllers/timeslotController.js (Only the getTimeslots function updated)
+// controllers/timeslotController.js
 const Timeslot = require("../models/Timeslot");
 const Organization = require("../models/Organizations");
 const Sale = require("../models/Sale");
@@ -30,7 +30,6 @@ const generateDayTimeslots = (date) => {
 exports.generateTimeslots = async (req, res) => {
   try {
     const organization = await Organization.findOne({ owner: req.user._id });
-
     if (!organization) {
       return res.status(403).json({
         success: false,
@@ -74,7 +73,7 @@ exports.generateTimeslots = async (req, res) => {
   }
 };
 
-// Get timeslots for organization (UPDATED)
+// Get timeslots for organization (UPDATED - ANY EMPLOYEE CAN SEE ASSIGNED SLOTS)
 exports.getTimeslots = async (req, res) => {
   try {
     const organization = await Organization.findOne({
@@ -123,7 +122,8 @@ exports.getTimeslots = async (req, res) => {
 
     const isOwner = organization.owner.toString() === req.user._id.toString();
 
-    // For employees: only show timeslots with assigned users AND maxEmployees > 0
+    // For ANY employee: show assigned timeslots with maxEmployees > 0
+    // For owners: show all timeslots
     const timeslotsToShow = isOwner 
       ? allTimeslots
       : allTimeslots.filter(slot => 
@@ -140,7 +140,13 @@ exports.getTimeslots = async (req, res) => {
         return {
           ...timeslot.toObject(),
           salesCount: sales.length,
-          sales: sales,
+          sales: sales.map(sale => ({
+            id: sale._id,
+            name: sale.name,
+            price: sale.price,
+            salesRepName: sale.salesRepName,
+            createdAt: sale.createdAt
+          })),
         };
       })
     );
@@ -156,7 +162,7 @@ exports.getTimeslots = async (req, res) => {
   }
 };
 
-// Rest of the functions remain the same...
+// Rest of the functions remain the same
 exports.assignTimeslot = async (req, res) => {
   try {
     const errors = validationResult(req);
