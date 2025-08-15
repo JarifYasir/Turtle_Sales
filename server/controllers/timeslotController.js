@@ -1,5 +1,7 @@
+// controllers/timeslotController.js (Only the getTimeslots function updated)
 const Timeslot = require("../models/Timeslot");
 const Organization = require("../models/Organizations");
+const Sale = require("../models/Sale");
 const { validationResult } = require("express-validator");
 
 // Helper function to generate 2-hour timeslots for a day
@@ -27,8 +29,8 @@ const generateDayTimeslots = (date) => {
 // Generate timeslots for the next week
 exports.generateTimeslots = async (req, res) => {
   try {
-    // Check if user is organization owner
     const organization = await Organization.findOne({ owner: req.user._id });
+
     if (!organization) {
       return res.status(403).json({
         success: false,
@@ -38,15 +40,14 @@ exports.generateTimeslots = async (req, res) => {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     const timeslotsToCreate = [];
 
     // Generate timeslots for next 7 days
     for (let i = 0; i < 7; i++) {
       const currentDate = new Date(today);
       currentDate.setDate(today.getDate() + i);
-
       const daySlots = generateDayTimeslots(currentDate);
+
       daySlots.forEach((slot) => {
         timeslotsToCreate.push({
           ...slot,
@@ -55,11 +56,9 @@ exports.generateTimeslots = async (req, res) => {
       });
     }
 
-    // Use insertMany with ordered: false to skip duplicates
     try {
       await Timeslot.insertMany(timeslotsToCreate, { ordered: false });
     } catch (error) {
-      // Ignore duplicate key errors (E11000)
       if (error.code !== 11000) {
         throw error;
       }
@@ -75,10 +74,9 @@ exports.generateTimeslots = async (req, res) => {
   }
 };
 
-// Get timeslots for organization
+// Get timeslots for organization (UPDATED)
 exports.getTimeslots = async (req, res) => {
   try {
-    // Find user's organization
     const organization = await Organization.findOne({
       $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
     });
@@ -91,8 +89,8 @@ exports.getTimeslots = async (req, res) => {
     }
 
     const { startDate, endDate } = req.query;
-
     let dateFilter = {};
+
     if (startDate && endDate) {
       dateFilter = {
         date: {
@@ -115,7 +113,7 @@ exports.getTimeslots = async (req, res) => {
       };
     }
 
-    const timeslots = await Timeslot.find({
+    const allTimeslots = await Timeslot.find({
       organization: organization._id,
       isActive: true,
       ...dateFilter,
@@ -123,12 +121,33 @@ exports.getTimeslots = async (req, res) => {
       .populate("assignedUsers.user", "name email")
       .sort({ date: 1, startTime: 1 });
 
-    // Check if user is owner
     const isOwner = organization.owner.toString() === req.user._id.toString();
+
+    // For employees: only show timeslots with assigned users AND maxEmployees > 0
+    const timeslotsToShow = isOwner 
+      ? allTimeslots
+      : allTimeslots.filter(slot => 
+          slot.assignedUsers && 
+          slot.assignedUsers.length > 0 && 
+          slot.maxEmployees > 0
+        );
+
+    // Add sale information
+    const timeslotsWithSales = await Promise.all(
+      timeslotsToShow.map(async (timeslot) => {
+        const sales = await Sale.find({ timeslot: timeslot._id });
+        
+        return {
+          ...timeslot.toObject(),
+          salesCount: sales.length,
+          sales: sales,
+        };
+      })
+    );
 
     res.json({
       success: true,
-      timeslots,
+      timeslots: timeslotsWithSales,
       isOwner,
     });
   } catch (error) {
@@ -137,7 +156,7 @@ exports.getTimeslots = async (req, res) => {
   }
 };
 
-// Assign user to timeslot
+// Rest of the functions remain the same...
 exports.assignTimeslot = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -149,7 +168,6 @@ exports.assignTimeslot = async (req, res) => {
       });
     }
 
-    // Check if user is organization owner
     const organization = await Organization.findOne({ owner: req.user._id });
     if (!organization) {
       return res.status(403).json({
@@ -159,7 +177,7 @@ exports.assignTimeslot = async (req, res) => {
     }
 
     const { timeslotId } = req.params;
-    const { userId, notes, action } = req.body; // action can be 'assign' or 'remove'
+    const { userId, notes, action } = req.body;
 
     const timeslot = await Timeslot.findOne({
       _id: timeslotId,
@@ -174,12 +192,11 @@ exports.assignTimeslot = async (req, res) => {
     }
 
     if (action === "remove" && userId) {
-      // Remove user from timeslot
       timeslot.assignedUsers = timeslot.assignedUsers.filter(
         (assignment) => assignment.user.toString() !== userId
       );
-      await timeslot.save();
 
+      await timeslot.save();
       await timeslot.populate("assignedUsers.user", "name email");
 
       return res.json({
@@ -189,7 +206,6 @@ exports.assignTimeslot = async (req, res) => {
       });
     }
 
-    // If userId is provided, check if user is a member of the organization
     if (userId) {
       const isMember = organization.members.some(
         (member) => member.user.toString() === userId
@@ -202,7 +218,6 @@ exports.assignTimeslot = async (req, res) => {
         });
       }
 
-      // Check if user is already assigned to this timeslot
       const isAlreadyAssigned = timeslot.assignedUsers.some(
         (assignment) => assignment.user.toString() === userId
       );
@@ -214,15 +229,13 @@ exports.assignTimeslot = async (req, res) => {
         });
       }
 
-      // Check if timeslot is full
-      if (timeslot.assignedUsers.length >= timeslot.maxEmployees) {
+      if (timeslot.assignedUsers.length >= 2) {
         return res.status(400).json({
           success: false,
-          msg: `This timeslot is full (maximum ${timeslot.maxEmployees} employees)`,
+          msg: "This timeslot is full (maximum 2 employees)",
         });
       }
 
-      // Add user to timeslot
       timeslot.assignedUsers.push({
         user: userId,
         notes: notes || "",
@@ -245,10 +258,8 @@ exports.assignTimeslot = async (req, res) => {
   }
 };
 
-// Delete timeslot
 exports.deleteTimeslot = async (req, res) => {
   try {
-    // Check if user is organization owner
     const organization = await Organization.findOne({ owner: req.user._id });
     if (!organization) {
       return res.status(403).json({

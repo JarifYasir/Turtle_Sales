@@ -26,6 +26,7 @@ app.use("/api/v1", require("./routes/authRoutes"));
 app.use("/api/v1/organization", require("./routes/organizationRoutes"));
 const timeslotRoutes = require("./routes/timeslotRoutes");
 app.use("/api/v1/timeslots", timeslotRoutes);
+app.use('/api/v1/sales', require("./routes/saleRoutes"));
 
 app.get("/", (req, res) => {
   res.json({ message: "Server is running!" });
