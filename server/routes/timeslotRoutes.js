@@ -8,7 +8,15 @@ const router = express.Router();
 // Validation for assigning timeslot
 const assignTimeslotValidation = [
   body("userId").optional().isMongoId().withMessage("Invalid user ID"),
-  body("notes").optional().trim().isLength({ max: 200 }).withMessage("Notes cannot exceed 200 characters"),
+  body("notes")
+    .optional()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage("Notes cannot exceed 200 characters"),
+  body("action")
+    .optional()
+    .isIn(["assign", "remove"])
+    .withMessage("Action must be 'assign' or 'remove'"),
 ];
 
 // Generate timeslots for the next week
@@ -18,7 +26,12 @@ router.post("/generate", auth, timeslotController.generateTimeslots);
 router.get("/", auth, timeslotController.getTimeslots);
 
 // Assign/unassign user to timeslot
-router.put("/assign/:timeslotId", auth, assignTimeslotValidation, timeslotController.assignTimeslot);
+router.put(
+  "/assign/:timeslotId",
+  auth,
+  assignTimeslotValidation,
+  timeslotController.assignTimeslot
+);
 
 // Delete timeslot
 router.delete("/:timeslotId", auth, timeslotController.deleteTimeslot);

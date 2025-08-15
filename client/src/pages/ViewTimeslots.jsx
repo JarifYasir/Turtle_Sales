@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 const ViewTimeslots = () => {
   const { user, token } = useContext(UserContext);
   const navigate = useNavigate();
-  
+
   const [timeslots, setTimeslots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
@@ -21,7 +21,7 @@ const ViewTimeslots = () => {
       toast.warn("Please login first to access this page");
       return;
     }
-    
+
     fetchTimeslots();
   }, [token, navigate, selectedWeekStart]);
 
@@ -29,13 +29,13 @@ const ViewTimeslots = () => {
     try {
       setLoading(true);
       const authToken = JSON.parse(localStorage.getItem("auth"));
-      
+
       const startDate = new Date(selectedWeekStart);
       startDate.setHours(0, 0, 0, 0);
-      
+
       const endDate = new Date(startDate);
       endDate.setDate(startDate.getDate() + 7);
-      
+
       const response = await axios.get(
         `http://localhost:3000/api/v1/timeslots?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
         {
@@ -81,7 +81,7 @@ const ViewTimeslots = () => {
     const dates = [];
     const start = new Date(selectedWeekStart);
     start.setHours(0, 0, 0, 0);
-    
+
     for (let i = 0; i < 7; i++) {
       const date = new Date(start);
       date.setDate(start.getDate() + i);
@@ -92,7 +92,7 @@ const ViewTimeslots = () => {
 
   const groupTimeslotsByDate = () => {
     const grouped = {};
-    timeslots.forEach(slot => {
+    timeslots.forEach((slot) => {
       const dateKey = new Date(slot.date).toDateString();
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
@@ -103,9 +103,33 @@ const ViewTimeslots = () => {
   };
 
   const getMyTimeslots = () => {
-    return timeslots.filter(slot => 
-      slot.assignedUser && slot.assignedUser._id === user.id
+    return timeslots.filter(
+      (slot) =>
+        slot.assignedUsers &&
+        slot.assignedUsers.some((assignment) => assignment.user._id === user.id)
     );
+  };
+
+  const getMyAssignmentInSlot = (slot) => {
+    if (!slot.assignedUsers) return null;
+    return slot.assignedUsers.find(
+      (assignment) => assignment.user._id === user.id
+    );
+  };
+
+  const getSlotStatus = (slot) => {
+    if (!slot.assignedUsers || slot.assignedUsers.length === 0) {
+      return "unassigned";
+    }
+
+    const isMySlot = slot.assignedUsers.some(
+      (assignment) => assignment.user._id === user.id
+    );
+    if (isMySlot) {
+      return "my-assignment";
+    }
+
+    return "other-assignment";
   };
 
   const goToPreviousWeek = () => {
@@ -122,7 +146,11 @@ const ViewTimeslots = () => {
 
   const goToCurrentWeek = () => {
     const today = new Date();
-    const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
+    const startOfWeek = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - today.getDay()
+    );
     setSelectedWeekStart(startOfWeek);
   };
 
@@ -143,7 +171,11 @@ const ViewTimeslots = () => {
     <div className="view-timeslots-container">
       <div className="view-timeslots-header">
         <h1>Work Schedule</h1>
-        <p>{isOwner ? "Team schedule overview" : "Your work schedule and team assignments"}</p>
+        <p>
+          {isOwner
+            ? "Team schedule overview"
+            : "Your work schedule and team assignments"}
+        </p>
       </div>
 
       <div className="week-navigation">
@@ -170,27 +202,34 @@ const ViewTimeslots = () => {
             <p className="no-assignments">No assignments this week</p>
           ) : (
             <div className="my-timeslots">
-              {myTimeslots.map(slot => (
-                <div key={slot._id} className="my-timeslot">
-                  <span className="slot-date">{formatDate(slot.date)}</span>
-                  <span className="slot-time">
-                    {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-                  </span>
-                  {slot.notes && (
-                    <span className="slot-notes">{slot.notes}</span>
-                  )}
-                </div>
-              ))}
+              {myTimeslots.map((slot) => {
+                const myAssignment = getMyAssignmentInSlot(slot);
+                return (
+                  <div key={slot._id} className="my-timeslot">
+                    <span className="slot-date">{formatDate(slot.date)}</span>
+                    <span className="slot-time">
+                      {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                    </span>
+                    {myAssignment?.notes && (
+                      <span className="slot-notes">{myAssignment.notes}</span>
+                    )}
+                    <span className="slot-capacity">
+                      {slot.assignedUsers.length}/{slot.maxEmployees || 2}{" "}
+                      employees
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
       )}
 
       <div className="schedule-grid">
-        {weekDates.map(date => {
+        {weekDates.map((date) => {
           const dateKey = date.toDateString();
           const daySlots = groupedSlots[dateKey] || [];
-          
+
           return (
             <motion.div
               key={dateKey}
@@ -200,47 +239,28 @@ const ViewTimeslots = () => {
               transition={{ duration: 0.3 }}
             >
               <div className="day-header">
-                <h3>{date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</h3>
+                <h3>
+                  {date.toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </h3>
               </div>
-              
+
               <div className="day-timeslots">
                 {daySlots.length === 0 ? (
                   <div className="no-slots">No timeslots</div>
                 ) : (
-                  daySlots.map(slot => (
-                    <div
+                  daySlots.map((slot) => (
+                    <ViewTimeslotCard
                       key={slot._id}
-                      className={`view-timeslot-card ${
-                        slot.assignedUser 
-                          ? slot.assignedUser._id === user.id 
-                            ? 'my-assignment' 
-                            : 'other-assignment'
-                          : 'unassigned'
-                      }`}
-                    >
-                      <div className="slot-time">
-                        {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-                      </div>
-                      
-                      {slot.assignedUser ? (
-                        <div className="assigned-info">
-                          <div className="assigned-user">
-                            {slot.assignedUser._id === user.id ? (
-                              <strong>You</strong>
-                            ) : (
-                              <span>{slot.assignedUser.name}</span>
-                            )}
-                          </div>
-                          {slot.notes && (
-                            <div className="slot-notes">{slot.notes}</div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="unassigned-info">
-                          <span>Available</span>
-                        </div>
-                      )}
-                    </div>
+                      slot={slot}
+                      user={user}
+                      formatTime={formatTime}
+                      getSlotStatus={getSlotStatus}
+                      getMyAssignmentInSlot={getMyAssignmentInSlot}
+                    />
                   ))
                 )}
               </div>
@@ -251,12 +271,66 @@ const ViewTimeslots = () => {
 
       {isOwner && (
         <div className="manage-link">
-          <button 
+          <button
             onClick={() => navigate("/manage-timeslots")}
             className="manage-btn"
           >
             Manage Timeslots
           </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ViewTimeslotCard = ({
+  slot,
+  user,
+  formatTime,
+  getSlotStatus,
+  getMyAssignmentInSlot,
+}) => {
+  const status = getSlotStatus(slot);
+  const myAssignment = getMyAssignmentInSlot(slot);
+
+  return (
+    <div className={`view-timeslot-card ${status}`}>
+      <div className="slot-time">
+        {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+      </div>
+
+      <div className="slot-capacity">
+        {slot.assignedUsers?.length || 0}/{slot.maxEmployees || 2} employees
+      </div>
+
+      {slot.assignedUsers && slot.assignedUsers.length > 0 ? (
+        <div className="assigned-info">
+          {slot.assignedUsers.map((assignment, index) => (
+            <div key={assignment.user._id} className="assigned-user-item">
+              <div className="assigned-user">
+                {assignment.user._id === user.id ? (
+                  <strong className="my-name">You</strong>
+                ) : (
+                  <span className="other-name">{assignment.user.name}</span>
+                )}
+              </div>
+              {assignment.notes && (
+                <div className="slot-notes">{assignment.notes}</div>
+              )}
+            </div>
+          ))}
+
+          {/* Show available spots */}
+          {slot.assignedUsers.length < (slot.maxEmployees || 2) && (
+            <div className="available-spots">
+              {(slot.maxEmployees || 2) - slot.assignedUsers.length} spot(s)
+              available
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="unassigned-info">
+          <span>Available ({slot.maxEmployees || 2} spots)</span>
         </div>
       )}
     </div>

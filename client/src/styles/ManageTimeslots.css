@@ -41,8 +41,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .week-navigation {
@@ -163,28 +167,71 @@
   margin-bottom: 0.5rem;
 }
 
-.assigned-info .assigned-user {
-  font-size: 0.95rem;
-  color: #155724;
+.slot-capacity {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.8rem;
+  padding: 0.3rem 0.6rem;
+  background: rgba(53, 120, 214, 0.1);
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.assigned-info {
+  margin-bottom: 0.5rem;
+}
+
+.assigned-user-item {
+  margin-bottom: 0.8rem;
+  padding: 0.5rem;
+  background: rgba(40, 167, 69, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid #28a745;
+}
+
+.assigned-user {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 0.3rem;
+}
+
+.assigned-user strong {
+  font-size: 0.9rem;
+  color: #155724;
+}
+
+.remove-user-btn {
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.remove-user-btn:hover {
+  background: #c82333;
+  transform: scale(1.1);
 }
 
 .slot-notes {
   font-size: 0.8rem;
   color: #6c757d;
   font-style: italic;
-  margin-bottom: 0.5rem;
+  line-height: 1.3;
 }
 
-.unassigned-text {
-  font-size: 0.9rem;
-  color: #856404;
-  font-style: italic;
-}
-
-.assign-btn, .reassign-btn {
+.add-more-btn {
   padding: 0.4rem 0.8rem;
-  background: #3578d6;
+  background: #17a2b8;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -194,7 +241,35 @@
   margin-top: 0.5rem;
 }
 
-.assign-btn:hover, .reassign-btn:hover {
+.add-more-btn:hover {
+  background: #138496;
+}
+
+.unassigned-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.unassigned-text {
+  font-size: 0.9rem;
+  color: #856404;
+  font-style: italic;
+}
+
+.assign-btn {
+  padding: 0.4rem 0.8rem;
+  background: #3578d6;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.assign-btn:hover {
   background: #2a5bb8;
 }
 
@@ -204,18 +279,21 @@
   border-top: 1px solid #dee2e6;
 }
 
-.user-select, .notes-input {
+.user-select,
+.notes-input {
   width: 100%;
   padding: 0.5rem;
   border: 1px solid #ced4da;
   border-radius: 4px;
   margin-bottom: 0.5rem;
   font-size: 0.8rem;
+  box-sizing: border-box;
 }
 
 .notes-input {
   resize: vertical;
   font-family: inherit;
+  min-height: 60px;
 }
 
 .form-actions {
@@ -224,13 +302,17 @@
   flex-wrap: wrap;
 }
 
-.save-btn, .cancel-btn, .delete-btn {
+.save-btn,
+.cancel-btn,
+.delete-btn {
   padding: 0.4rem 0.8rem;
   border: none;
   border-radius: 4px;
   font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex: 1;
+  min-width: 60px;
 }
 
 .save-btn {
@@ -260,9 +342,30 @@
   background: #c82333;
 }
 
-.save-btn:disabled, .assign-btn:disabled, .reassign-btn:disabled {
+.save-btn:disabled,
+.assign-btn:disabled,
+.add-more-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Additional styling for better employee display */
+.assigned-user-item:first-child {
+  border-left-color: #007bff;
+  background: rgba(0, 123, 255, 0.1);
+}
+
+.assigned-user-item:nth-child(2) {
+  border-left-color: #28a745;
+  background: rgba(40, 167, 69, 0.1);
+}
+
+.assigned-user-item:first-child .assigned-user strong {
+  color: #0056b3;
+}
+
+.assigned-user-item:nth-child(2) .assigned-user strong {
+  color: #155724;
 }
 
 /* Responsive Design */
@@ -276,20 +379,31 @@
   .timeslots-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .week-navigation {
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  
+
   .nav-btn {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
   }
-  
+
   .current-week {
     width: 100%;
     text-align: center;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .save-btn,
+  .cancel-btn,
+  .delete-btn {
+    flex: none;
+    width: 100%;
   }
 }
 
@@ -297,17 +411,66 @@
   .manage-timeslots-container {
     padding: 1rem 0.5rem;
   }
-  
+
   .timeslots-grid {
     grid-template-columns: 1fr;
     gap: 0.5rem;
   }
-  
+
   .manage-timeslots-header h1 {
     font-size: 2rem;
   }
-  
+
   .day-column {
     margin-bottom: 1rem;
   }
+
+  .assigned-user-item {
+    padding: 0.4rem;
+  }
+
+  .assigned-user {
+    font-size: 0.8rem;
+  }
+
+  .remove-user-btn {
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+  }
+}
+
+/* Animation for smooth transitions */
+.assigned-user-item {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading states */
+.timeslot-card.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.timeslot-card.loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

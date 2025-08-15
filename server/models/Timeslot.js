@@ -19,30 +19,42 @@ const timeslotSchema = new mongoose.Schema(
       type: String, // Format: "HH:mm" (e.g., "11:00")
       required: true,
     },
-    assignedUser: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      default: null,
-    },
+    assignedUsers: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        notes: {
+          type: String,
+          trim: true,
+          maxlength: [200, "Notes cannot exceed 200 characters"],
+          default: "",
+        },
+      },
+    ],
     isActive: {
       type: Boolean,
       default: true,
     },
-    notes: {
-      type: String,
-      trim: true,
-      maxlength: [200, "Notes cannot exceed 200 characters"],
-      default: "",
+    maxEmployees: {
+      type: Number,
+      default: 2,
+      min: 1,
+      max: 5,
     },
   },
   { timestamps: true }
 );
 
 // Compound index to prevent duplicate timeslots for same organization, date, and time
-timeslotSchema.index({ organization: 1, date: 1, startTime: 1 }, { unique: true });
+timeslotSchema.index(
+  { organization: 1, date: 1, startTime: 1 },
+  { unique: true }
+);
 
 // Index for faster queries
 timeslotSchema.index({ organization: 1, date: 1 });
-timeslotSchema.index({ assignedUser: 1 });
+timeslotSchema.index({ "assignedUsers.user": 1 });
 
 module.exports = mongoose.model("Timeslot", timeslotSchema);

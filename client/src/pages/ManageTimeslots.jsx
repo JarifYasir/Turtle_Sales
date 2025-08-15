@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 const ManageTimeslots = () => {
   const { user, token } = useContext(UserContext);
   const navigate = useNavigate();
-  
+
   const [timeslots, setTimeslots] = useState([]);
   const [orgMembers, setOrgMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +23,7 @@ const ManageTimeslots = () => {
       toast.warn("Please login first to access this page");
       return;
     }
-    
+
     fetchOrgMembers();
     generateTimeslots();
   }, [token, navigate]);
@@ -47,7 +47,7 @@ const ManageTimeslots = () => {
       if (response.data.success) {
         setOrgMembers(response.data.organization.members || []);
         setIsOwner(response.data.isOwner);
-        
+
         if (!response.data.isOwner) {
           toast.error("Only organization owners can manage timeslots");
           navigate("/turtle-portal");
@@ -80,13 +80,13 @@ const ManageTimeslots = () => {
     try {
       setLoading(true);
       const authToken = JSON.parse(localStorage.getItem("auth"));
-      
+
       const startDate = new Date(selectedWeekStart);
       startDate.setHours(0, 0, 0, 0);
-      
+
       const endDate = new Date(startDate);
       endDate.setDate(startDate.getDate() + 7);
-      
+
       const response = await axios.get(
         `http://localhost:3000/api/v1/timeslots?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
         {
@@ -106,14 +106,19 @@ const ManageTimeslots = () => {
     }
   };
 
-  const handleAssignSlot = async (timeslotId, userId, notes) => {
+  const handleAssignSlot = async (
+    timeslotId,
+    userId,
+    notes,
+    action = "assign"
+  ) => {
     try {
       setAssigningSlot(timeslotId);
       const authToken = JSON.parse(localStorage.getItem("auth"));
-      
+
       const response = await axios.put(
         `http://localhost:3000/api/v1/timeslots/assign/${timeslotId}`,
-        { userId, notes },
+        { userId, notes, action },
         {
           headers: { Authorization: `Bearer ${authToken}` },
         }
@@ -142,7 +147,7 @@ const ManageTimeslots = () => {
 
     try {
       const authToken = JSON.parse(localStorage.getItem("auth"));
-      
+
       const response = await axios.delete(
         `http://localhost:3000/api/v1/timeslots/${timeslotId}`,
         {
@@ -180,7 +185,7 @@ const ManageTimeslots = () => {
     const dates = [];
     const start = new Date(selectedWeekStart);
     start.setHours(0, 0, 0, 0);
-    
+
     for (let i = 0; i < 7; i++) {
       const date = new Date(start);
       date.setDate(start.getDate() + i);
@@ -191,7 +196,7 @@ const ManageTimeslots = () => {
 
   const groupTimeslotsByDate = () => {
     const grouped = {};
-    timeslots.forEach(slot => {
+    timeslots.forEach((slot) => {
       const dateKey = new Date(slot.date).toDateString();
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
@@ -215,7 +220,11 @@ const ManageTimeslots = () => {
 
   const goToCurrentWeek = () => {
     const today = new Date();
-    const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
+    const startOfWeek = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - today.getDay()
+    );
     setSelectedWeekStart(startOfWeek);
   };
 
@@ -235,7 +244,7 @@ const ManageTimeslots = () => {
     <div className="manage-timeslots-container">
       <div className="manage-timeslots-header">
         <h1>Manage Work Timeslots</h1>
-        <p>Assign 2-hour work timeslots to your team members</p>
+        <p>Assign up to 2 employees per 2-hour work timeslot</p>
       </div>
 
       <div className="week-navigation">
@@ -256,10 +265,10 @@ const ManageTimeslots = () => {
       </div>
 
       <div className="timeslots-grid">
-        {weekDates.map(date => {
+        {weekDates.map((date) => {
           const dateKey = date.toDateString();
           const daySlots = groupedSlots[dateKey] || [];
-          
+
           return (
             <motion.div
               key={dateKey}
@@ -271,12 +280,12 @@ const ManageTimeslots = () => {
               <div className="day-header">
                 <h3>{formatDate(date)}</h3>
               </div>
-              
+
               <div className="timeslots-list">
                 {daySlots.length === 0 ? (
                   <div className="no-slots">No timeslots available</div>
                 ) : (
-                  daySlots.map(slot => (
+                  daySlots.map((slot) => (
                     <TimeslotCard
                       key={slot._id}
                       slot={slot}
@@ -297,20 +306,48 @@ const ManageTimeslots = () => {
   );
 };
 
-const TimeslotCard = ({ slot, members, onAssign, onDelete, isAssigning, formatTime }) => {
-  const [selectedUser, setSelectedUser] = useState(slot.assignedUser?._id || "");
-  const [notes, setNotes] = useState(slot.notes || "");
+const TimeslotCard = ({
+  slot,
+  members,
+  onAssign,
+  onDelete,
+  isAssigning,
+  formatTime,
+}) => {
+  const [selectedUser, setSelectedUser] = useState("");
+  const [notes, setNotes] = useState("");
   const [showAssignForm, setShowAssignForm] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAssign(slot._id, selectedUser || null, notes);
-    setShowAssignForm(false);
+    if (selectedUser) {
+      onAssign(slot._id, selectedUser, notes, "assign");
+      setSelectedUser("");
+      setNotes("");
+      setShowAssignForm(false);
+    }
   };
+
+  const handleRemoveUser = (userId) => {
+    onAssign(slot._id, userId, "", "remove");
+  };
+
+  const getAvailableMembers = () => {
+    const assignedUserIds =
+      slot.assignedUsers?.map((assignment) => assignment.user._id) || [];
+    return members.filter(
+      (member) => !assignedUserIds.includes(member.user._id)
+    );
+  };
+
+  const canAddMore =
+    (slot.assignedUsers?.length || 0) < (slot.maxEmployees || 2);
 
   return (
     <motion.div
-      className={`timeslot-card ${slot.assignedUser ? 'assigned' : 'unassigned'}`}
+      className={`timeslot-card ${
+        slot.assignedUsers?.length > 0 ? "assigned" : "unassigned"
+      }`}
       layout
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -319,32 +356,51 @@ const TimeslotCard = ({ slot, members, onAssign, onDelete, isAssigning, formatTi
       <div className="slot-time">
         {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
       </div>
-      
-      {slot.assignedUser ? (
+
+      <div className="slot-capacity">
+        {slot.assignedUsers?.length || 0} / {slot.maxEmployees || 2} employees
+      </div>
+
+      {slot.assignedUsers && slot.assignedUsers.length > 0 ? (
         <div className="assigned-info">
-          <div className="assigned-user">
-            <strong>{slot.assignedUser.name}</strong>
-          </div>
-          {slot.notes && (
-            <div className="slot-notes">{slot.notes}</div>
+          {slot.assignedUsers.map((assignment, index) => (
+            <div key={assignment.user._id} className="assigned-user-item">
+              <div className="assigned-user">
+                <strong>{assignment.user.name}</strong>
+                <button
+                  onClick={() => handleRemoveUser(assignment.user._id)}
+                  className="remove-user-btn"
+                  disabled={isAssigning}
+                  title="Remove user"
+                >
+                  ×
+                </button>
+              </div>
+              {assignment.notes && (
+                <div className="slot-notes">{assignment.notes}</div>
+              )}
+            </div>
+          ))}
+
+          {canAddMore && (
+            <button
+              onClick={() => setShowAssignForm(!showAssignForm)}
+              className="add-more-btn"
+              disabled={isAssigning}
+            >
+              {showAssignForm ? "Cancel" : "Add Employee"}
+            </button>
           )}
-          <button
-            onClick={() => setShowAssignForm(!showAssignForm)}
-            className="reassign-btn"
-            disabled={isAssigning}
-          >
-            {showAssignForm ? "Cancel" : "Reassign"}
-          </button>
         </div>
       ) : (
         <div className="unassigned-info">
-          <span className="unassigned-text">Unassigned</span>
+          <span className="unassigned-text">No employees assigned</span>
           <button
             onClick={() => setShowAssignForm(true)}
             className="assign-btn"
             disabled={isAssigning}
           >
-            Assign
+            Assign Employee
           </button>
         </div>
       )}
@@ -363,15 +419,16 @@ const TimeslotCard = ({ slot, members, onAssign, onDelete, isAssigning, formatTi
               value={selectedUser}
               onChange={(e) => setSelectedUser(e.target.value)}
               className="user-select"
+              required
             >
-              <option value="">Unassigned</option>
-              {members.map(member => (
+              <option value="">Select an employee</option>
+              {getAvailableMembers().map((member) => (
                 <option key={member.user._id} value={member.user._id}>
                   {member.user.name}
                 </option>
               ))}
             </select>
-            
+
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -379,14 +436,14 @@ const TimeslotCard = ({ slot, members, onAssign, onDelete, isAssigning, formatTi
               className="notes-input"
               rows="2"
             />
-            
+
             <div className="form-actions">
               <button
                 type="submit"
                 className="save-btn"
-                disabled={isAssigning}
+                disabled={isAssigning || !selectedUser}
               >
-                {isAssigning ? "Saving..." : "Save"}
+                {isAssigning ? "Assigning..." : "Assign"}
               </button>
               <button
                 type="button"
@@ -395,15 +452,13 @@ const TimeslotCard = ({ slot, members, onAssign, onDelete, isAssigning, formatTi
               >
                 Cancel
               </button>
-              {slot.assignedUser || selectedUser ? (
-                <button
-                  type="button"
-                  onClick={() => onDelete(slot._id)}
-                  className="delete-btn"
-                >
-                  Delete
-                </button>
-              ) : null}
+              <button
+                type="button"
+                onClick={() => onDelete(slot._id)}
+                className="delete-btn"
+              >
+                Delete Slot
+              </button>
             </div>
           </motion.form>
         )}
