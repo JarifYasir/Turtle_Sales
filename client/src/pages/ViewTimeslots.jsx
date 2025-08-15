@@ -9,11 +9,19 @@ import { toast } from "react-toastify";
 const ViewTimeslots = () => {
   const { user, token } = useContext(UserContext);
   const navigate = useNavigate();
-
   const [timeslots, setTimeslots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
   const [selectedWeekStart, setSelectedWeekStart] = useState(new Date());
+  const [showSaleForm, setShowSaleForm] = useState(false);
+  const [selectedTimeslot, setSelectedTimeslot] = useState(null);
+  const [saleForm, setSaleForm] = useState({
+    name: "",
+    number: "",
+    address: "",
+    price: "",
+    details: "",
+  });
 
   useEffect(() => {
     if (!token) {
@@ -21,7 +29,6 @@ const ViewTimeslots = () => {
       toast.warn("Please login first to access this page");
       return;
     }
-
     fetchTimeslots();
   }, [token, navigate, selectedWeekStart]);
 
@@ -29,10 +36,8 @@ const ViewTimeslots = () => {
     try {
       setLoading(true);
       const authToken = JSON.parse(localStorage.getItem("auth"));
-
       const startDate = new Date(selectedWeekStart);
       startDate.setHours(0, 0, 0, 0);
-
       const endDate = new Date(startDate);
       endDate.setDate(startDate.getDate() + 7);
 
@@ -121,15 +126,68 @@ const ViewTimeslots = () => {
     if (!slot.assignedUsers || slot.assignedUsers.length === 0) {
       return "unassigned";
     }
-
     const isMySlot = slot.assignedUsers.some(
       (assignment) => assignment.user._id === user.id
     );
     if (isMySlot) {
       return "my-assignment";
     }
-
     return "other-assignment";
+  };
+
+  const handleTimeslotClick = (timeslot) => {
+    if (isOwner) return; // Owners can't record sales
+    
+    if (timeslot.maxEmployees <= 0) {
+      toast.info("No more spots available for this timeslot");
+      return;
+    }
+    
+    setSelectedTimeslot(timeslot);
+    setShowSaleForm(true);
+  };
+
+  const handleSaleFormChange = (e) => {
+    setSaleForm({
+      ...saleForm,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSaleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!saleForm.name || !saleForm.number || !saleForm.address || !saleForm.details || !saleForm.price) {
+      toast.error("All fields are required");
+      return;
+    }
+
+    try {
+      const authToken = JSON.parse(localStorage.getItem("auth"));
+      
+      const response = await axios.post(
+        "http://localhost:3000/api/v1/sales",
+        {
+          timeslotId: selectedTimeslot._id,
+          ...saleForm,
+          price: parseFloat(saleForm.price),
+        },
+        {
+          headers: { Authorization: `Bearer ${authToken}` },
+        }
+      );
+
+      if (response.data.success) {
+        toast.success("Sale recorded successfully!");
+        setShowSaleForm(false);
+        setSaleForm({ name: "", number: "", address: "", price: "", details: "" });
+        setSelectedTimeslot(null);
+        fetchTimeslots();
+      }
+    } catch (error) {
+      console.error("Error creating sale:", error);
+      toast.error(error.response?.data?.msg || "Failed to record sale");
+    }
   };
 
   const goToPreviousWeek = () => {
@@ -156,181 +214,355 @@ const ViewTimeslots = () => {
 
   if (loading) {
     return (
-      <div className="view-timeslots-container loading">
-        <div className="loading-spinner"></div>
-        <p>Loading timeslots...</p>
+      <div className="timeslots-container">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading timeslots...</p>
+        </div>
       </div>
     );
   }
 
-  const groupedSlots = groupTimeslotsByDate();
   const weekDates = getWeekDates();
+  const groupedTimeslots = groupTimeslotsByDate();
   const myTimeslots = getMyTimeslots();
 
   return (
-    <div className="view-timeslots-container">
-      <div className="view-timeslots-header">
-        <h1>Work Schedule</h1>
-        <p>
-          {isOwner
-            ? "Team schedule overview"
-            : "Your work schedule and team assignments"}
+    <div className="timeslots-container">
+      <motion.div
+        className="timeslots-header"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1>Weekly Schedule</h1>
+        <p className="header-subtitle">
+          {isOwner ? "Team schedule overview" : "Sales dashboard - Click timeslots to record sales"}
         </p>
-      </div>
 
-      <div className="week-navigation">
-        <button onClick={goToPreviousWeek} className="nav-btn">
-          ← Previous Week
-        </button>
-        <div className="current-week">
-          <span>
-            {formatDate(weekDates[0])} - {formatDate(weekDates[6])}
-          </span>
-        </div>
-        <button onClick={goToCurrentWeek} className="nav-btn current-btn">
-          Current Week
-        </button>
-        <button onClick={goToNextWeek} className="nav-btn">
-          Next Week →
-        </button>
-      </div>
-
-      {!isOwner && (
-        <div className="my-schedule-summary">
-          <h3>Your Assignments This Week</h3>
-          {myTimeslots.length === 0 ? (
-            <p className="no-assignments">No assignments this week</p>
-          ) : (
-            <div className="my-timeslots">
-              {myTimeslots.map((slot) => {
-                const myAssignment = getMyAssignmentInSlot(slot);
-                return (
-                  <div key={slot._id} className="my-timeslot">
-                    <span className="slot-date">{formatDate(slot.date)}</span>
-                    <span className="slot-time">
-                      {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-                    </span>
-                    {myAssignment?.notes && (
-                      <span className="slot-notes">{myAssignment.notes}</span>
-                    )}
-                    <span className="slot-capacity">
-                      {slot.assignedUsers.length}/{slot.maxEmployees || 2}{" "}
-                      employees
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="schedule-grid">
-        {weekDates.map((date) => {
-          const dateKey = date.toDateString();
-          const daySlots = groupedSlots[dateKey] || [];
-
-          return (
-            <motion.div
-              key={dateKey}
-              className="day-column"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="day-header">
-                <h3>
-                  {date.toLocaleDateString("en-US", {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </h3>
-              </div>
-
-              <div className="day-timeslots">
-                {daySlots.length === 0 ? (
-                  <div className="no-slots">No timeslots</div>
-                ) : (
-                  daySlots.map((slot) => (
-                    <ViewTimeslotCard
-                      key={slot._id}
-                      slot={slot}
-                      user={user}
-                      formatTime={formatTime}
-                      getSlotStatus={getSlotStatus}
-                      getMyAssignmentInSlot={getMyAssignmentInSlot}
-                    />
-                  ))
-                )}
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {isOwner && (
-        <div className="manage-link">
-          <button
-            onClick={() => navigate("/manage-timeslots")}
-            className="manage-btn"
-          >
-            Manage Timeslots
+        <div className="week-navigation">
+          <button onClick={goToPreviousWeek} className="nav-btn">
+            ← Previous Week
+          </button>
+          <button onClick={goToCurrentWeek} className="current-week-btn">
+            Current Week
+          </button>
+          <button onClick={goToNextWeek} className="nav-btn">
+            Next Week →
           </button>
         </div>
+
+        <div className="week-display">
+          <h3>
+            {formatDate(weekDates[0])} - {formatDate(weekDates[6])}
+          </h3>
+        </div>
+      </motion.div>
+
+      {!isOwner && (
+        <motion.div
+          className="my-assignments-summary"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <h3>Sales Dashboard</h3>
+          <p>
+            <strong>{timeslots.length}</strong> available timeslots for sales
+          </p>
+          <p style={{ fontSize: '0.9rem', marginTop: '8px', color: '#fff', opacity: 0.9 }}>
+            💰 Click any timeslot with assigned cleaners to record a sale
+          </p>
+        </motion.div>
       )}
-    </div>
-  );
-};
 
-const ViewTimeslotCard = ({
-  slot,
-  user,
-  formatTime,
-  getSlotStatus,
-  getMyAssignmentInSlot,
-}) => {
-  const status = getSlotStatus(slot);
-  const myAssignment = getMyAssignmentInSlot(slot);
+      <motion.div
+        className="calendar-grid"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        {weekDates.map((date) => (
+          <div key={date.toDateString()} className="day-column">
+            <div className="day-header">
+              <h3>{formatDate(date)}</h3>
+            </div>
+            <div className="day-timeslots">
+              {groupedTimeslots[date.toDateString()]?.length > 0 ? (
+                groupedTimeslots[date.toDateString()].map((timeslot) => {
+                  const status = getSlotStatus(timeslot);
+                  const canClick = !isOwner && timeslot.maxEmployees > 0;
 
-  return (
-    <div className={`view-timeslot-card ${status}`}>
-      <div className="slot-time">
-        {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-      </div>
+                  return (
+                    <motion.div
+                      key={timeslot._id}
+                      className={`timeslot-card ${status} ${canClick ? 'clickable' : ''}`}
+                      whileHover={canClick ? { scale: 1.02 } : {}}
+                      whileTap={canClick ? { scale: 0.98 } : {}}
+                      onClick={() => canClick && handleTimeslotClick(timeslot)}
+                      style={{ cursor: canClick ? 'pointer' : 'default' }}
+                    >
+                      <div className="timeslot-time">
+                        {formatTime(timeslot.startTime)} - {formatTime(timeslot.endTime)}
+                      </div>
 
-      <div className="slot-capacity">
-        {slot.assignedUsers?.length || 0}/{slot.maxEmployees || 2} employees
-      </div>
+                      <div className="timeslot-assignments">
+                        <div style={{ fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '4px' }}>
+                          👨‍💼 Assigned Cleaners:
+                        </div>
+                        {timeslot.assignedUsers?.length > 0 ? (
+                          timeslot.assignedUsers.map((assignment, idx) => (
+                            <div
+                              key={idx}
+                              className={`assignment ${
+                                assignment.user._id === user.id
+                                  ? "my-assignment-user"
+                                  : "other-assignment-user"
+                              }`}
+                            >
+                              <span className="user-name">
+                                {assignment.user.name}
+                                {assignment.user._id === user.id && " (You)"}
+                              </span>
+                              {assignment.notes && (
+                                <span className="assignment-notes">
+                                  {assignment.notes}
+                                </span>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="no-assignment">No cleaners assigned</div>
+                        )}
+                      </div>
 
-      {slot.assignedUsers && slot.assignedUsers.length > 0 ? (
-        <div className="assigned-info">
-          {slot.assignedUsers.map((assignment, index) => (
-            <div key={assignment.user._id} className="assigned-user-item">
-              <div className="assigned-user">
-                {assignment.user._id === user.id ? (
-                  <strong className="my-name">You</strong>
-                ) : (
-                  <span className="other-name">{assignment.user.name}</span>
-                )}
-              </div>
-              {assignment.notes && (
-                <div className="slot-notes">{assignment.notes}</div>
+                      <div style={{ fontSize: '0.8rem', color: '#666', marginTop: '8px' }}>
+                        🏠 {timeslot.maxEmployees} cleaning spots available
+                      </div>
+
+                      {timeslot.sales && timeslot.sales.length > 0 && (
+                        <div style={{ 
+                          marginTop: '8px', 
+                          padding: '6px', 
+                          backgroundColor: '#e8f5e8', 
+                          borderRadius: '4px',
+                          border: '1px solid #c3e6cb'
+                        }}>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#155724' }}>
+                            💰 {timeslot.sales.length} Sale{timeslot.sales.length !== 1 ? 's' : ''}:
+                          </div>
+                          {timeslot.sales.map((sale, idx) => (
+                            <div key={idx} style={{ fontSize: '0.7rem', color: '#155724' }}>
+                              ${sale.price} - {sale.name} by {sale.salesRepName}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {canClick && (
+                        <div style={{ 
+                          marginTop: '8px', 
+                          textAlign: 'center', 
+                          color: '#007bff', 
+                          fontSize: '0.8rem',
+                          fontWeight: '500'
+                        }}>
+                          ➕ Click to record sale
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })
+              ) : (
+                <div className="no-timeslots">No available timeslots</div>
               )}
             </div>
-          ))}
+          </div>
+        ))}
+      </motion.div>
 
-          {/* Show available spots */}
-          {slot.assignedUsers.length < (slot.maxEmployees || 2) && (
-            <div className="available-spots">
-              {(slot.maxEmployees || 2) - slot.assignedUsers.length} spot(s)
-              available
-            </div>
-          )}
+      <div className="legend">
+        <div className="legend-item">
+          <div className="legend-color my-assignment"></div>
+          <span>You are assigned as cleaner</span>
         </div>
-      ) : (
-        <div className="unassigned-info">
-          <span>Available ({slot.maxEmployees || 2} spots)</span>
+        <div className="legend-item">
+          <div className="legend-color other-assignment"></div>
+          <span>Others assigned as cleaners</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-color unassigned"></div>
+          <span>No cleaners assigned</span>
+        </div>
+      </div>
+
+      {/* SALE FORM MODAL */}
+      {showSaleForm && selectedTimeslot && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '24px',
+            borderRadius: '8px',
+            width: '90%',
+            maxWidth: '500px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+          }}>
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ margin: '0 0 8px', color: '#333' }}>Record Sale</h3>
+              <p style={{ margin: '0 0 8px', color: '#666', fontSize: '0.9rem' }}>
+                {formatDate(selectedTimeslot.date)} • {formatTime(selectedTimeslot.startTime)} - {formatTime(selectedTimeslot.endTime)}
+              </p>
+              <p style={{ margin: '0', color: '#666', fontSize: '0.9rem' }}>
+                Sales Rep: <strong>{user.name}</strong>
+              </p>
+            </div>
+
+            <form onSubmit={handleSaleSubmit}>
+              <input
+                type="text"
+                name="name"
+                placeholder="Customer Name *"
+                value={saleForm.name}
+                onChange={handleSaleFormChange}
+                style={{ 
+                  width: '100%', 
+                  padding: '12px', 
+                  margin: '8px 0', 
+                  border: '1px solid #ddd', 
+                  borderRadius: '4px',
+                  fontSize: '16px'
+                }}
+                required
+              />
+              
+              <input
+                type="tel"
+                name="number"
+                placeholder="Phone Number *"
+                value={saleForm.number}
+                onChange={handleSaleFormChange}
+                style={{ 
+                  width: '100%', 
+                  padding: '12px', 
+                  margin: '8px 0', 
+                  border: '1px solid #ddd', 
+                  borderRadius: '4px',
+                  fontSize: '16px'
+                }}
+                required
+              />
+              
+              <textarea
+                name="address"
+                placeholder="Customer Address *"
+                value={saleForm.address}
+                onChange={handleSaleFormChange}
+                rows="2"
+                style={{ 
+                  width: '100%', 
+                  padding: '12px', 
+                  margin: '8px 0', 
+                  border: '1px solid #ddd', 
+                  borderRadius: '4px', 
+                  resize: 'vertical',
+                  fontSize: '16px',
+                  fontFamily: 'inherit'
+                }}
+                required
+              />
+              
+              <input
+                type="number"
+                name="price"
+                placeholder="Price ($) *"
+                value={saleForm.price}
+                onChange={handleSaleFormChange}
+                min="0"
+                step="0.01"
+                style={{ 
+                  width: '100%', 
+                  padding: '12px', 
+                  margin: '8px 0', 
+                  border: '1px solid #ddd', 
+                  borderRadius: '4px',
+                  fontSize: '16px'
+                }}
+                required
+              />
+              
+              <textarea
+                name="details"
+                placeholder="Sale Details *"
+                value={saleForm.details}
+                onChange={handleSaleFormChange}
+                rows="3"
+                style={{ 
+                  width: '100%', 
+                  padding: '12px', 
+                  margin: '8px 0', 
+                  border: '1px solid #ddd', 
+                  borderRadius: '4px', 
+                  resize: 'vertical',
+                  fontSize: '16px',
+                  fontFamily: 'inherit'
+                }}
+                required
+              />
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSaleForm(false);
+                    setSaleForm({ name: "", number: "", address: "", price: "", details: "" });
+                    setSelectedTimeslot(null);
+                  }}
+                  style={{ 
+                    flex: 1, 
+                    padding: '12px', 
+                    backgroundColor: '#6c757d', 
+                    color: 'white', 
+                    border: 'none', 
+                    borderRadius: '4px', 
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: '500'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{ 
+                    flex: 1, 
+                    padding: '12px', 
+                    backgroundColor: '#007bff', 
+                    color: 'white', 
+                    border: 'none', 
+                    borderRadius: '4px', 
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: '500'
+                  }}
+                >
+                  Record Sale
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
