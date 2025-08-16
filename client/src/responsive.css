@@ -1,97 +1,161 @@
-@media (max-width: 900px) {
-  .login-left {
-    display: none;
+/* Global Responsive Styles */
+@media (max-width: 1024px) {
+  .dashboard-container,
+  .turtle-portal-container,
+  .manage-org-container,
+  .login-container,
+  .register-container,
+  .welcome-container,
+  .logout-main {
+    padding: 1.5rem;
   }
 
-  .register-left {
-    display: none;
-  }
-}
-
-@media (max-width: 600px) {
-  .dashboard-main {
-    font-size: 20px !important;
-  }
-
-  .landing-main {
-    font-size: 20px !important;
-  }
-
-  .logout-button {
-    width: 300px;
-  }
-
-  .landing-register-button {
-    width: 300px !important;
-  }
-
-  .landing-login-button {
-    width: 300px !important;
-  }
-
-  .dashboard-main p{
-    font-size: 15px;
+  .portal-actions,
+  .welcome-options {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 }
 
-@media (max-width: 400px) {
-  .dashboard-main {
-    font-size: 15px !important;
+@media (max-width: 768px) {
+  .dashboard-container,
+  .turtle-portal-container,
+  .manage-org-container,
+  .login-container,
+  .register-container,
+  .welcome-container,
+  .logout-main {
+    padding: 1rem;
   }
 
-  .landing-main {
-    font-size: 15px !important;
+  .dashboard-header h1,
+  .portal-header h1,
+  .manage-org-header h1,
+  .welcome-title {
+    font-size: 2rem;
   }
 
-  .logout-button {
-    padding: 12px;
+  .user-info,
+  .login-card,
+  .register-card,
+  .welcome-content {
+    padding: 2rem;
   }
 
-  .landing-register-button {
-    padding: 8px !important;
-    width: 250px !important;
-  }
-
-  .landing-login-button {
-    padding: 8px !important;
-    width: 250px !important;
-  }
-}
-
-@media (max-width: 370px) {
-  .login-center-options {
+  .profile-section {
     flex-direction: column;
     align-items: center;
-    row-gap: 10px;
+    text-align: center;
   }
 
-  .login-center-buttons {
-    margin-top: 20px;
-  }
-
-  .login-center h2 {
-    font-size: 30px;
-  }
-
-  .login-center p {
-    font-size: 15px;
-  }
-
-  .register-center-options {
+  .form-buttons {
     flex-direction: column;
-    align-items: center;
-    row-gap: 10px;
   }
 
-  .register-center-buttons {
-    margin-top: 20px;
+  .cancel-btn,
+  .submit-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container,
+  .turtle-portal-container,
+  .manage-org-container,
+  .login-container,
+  .register-container,
+  .welcome-container,
+  .logout-main {
+    padding: 0.5rem;
   }
 
-  .register-center h2 {
-    font-size: 30px;
+  .dashboard-header h1,
+  .portal-header h1,
+  .manage-org-header h1,
+  .welcome-title {
+    font-size: 1.5rem;
   }
 
-  .register-center p {
-    font-size: 15px;
+  .user-info,
+  .login-card,
+  .register-card,
+  .welcome-content {
+    padding: 1.5rem;
+  }
+
+  .profile-pic {
+    width: 80px;
+    height: 80px;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .modal-content,
+  .edit-modal-container {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
+  .option-btn,
+  .logout-button,
+  .get-started-btn {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.8rem 1.5rem;
+  }
+
+  .action-card {
+    padding: 1.5rem;
+  }
+
+  .action-icon {
+    font-size: 2rem;
+  }
+
+  .option-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 320px) {
+  .dashboard-header h1,
+  .portal-header h1,
+  .manage-org-header h1,
+  .welcome-title {
+    font-size: 1.25rem;
+  }
+
+  .user-info,
+  .login-card,
+  .register-card,
+  .welcome-content {
+    padding: 1rem;
+  }
+
+  .profile-pic {
+    width: 60px;
+    height: 60px;
+  }
+
+  .action-card h3,
+  .option-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .form-buttons {
+    gap: 0.5rem;
+  }
+
+  .cancel-btn,
+  .submit-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
   }
 }

@@ -5,9 +5,56 @@
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #f8fbff 0%, #e8f4fd 100%);
   padding: 2rem 1rem;
   box-sizing: border-box;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.manage-org-container::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(
+    circle,
+    rgba(59, 130, 246, 0.08) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite;
+}
+
+.manage-org-container::after {
+  content: "";
+  position: absolute;
+  bottom: -20%;
+  left: -5%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(
+    circle,
+    rgba(147, 197, 253, 0.08) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  animation: float 10s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  33% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  66% {
+    transform: translateY(10px) translateX(-5px);
+  }
 }
 
 .manage-org-container.loading {
@@ -19,18 +66,24 @@
   text-align: center;
   margin-bottom: 3rem;
   max-width: 800px;
+  position: relative;
+  z-index: 1;
 }
 
 .manage-org-header h1 {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #163d7d;
+  color: #1e40af;
   margin-bottom: 1rem;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .manage-org-header p {
   font-size: 1.2rem;
-  color: #355d9b;
+  color: #64748b;
   margin: 0;
   opacity: 0.9;
   line-height: 1.6;
@@ -40,8 +93,8 @@
 .loading-spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid #e1e9f7;
-  border-top: 4px solid #3578d6;
+  border: 4px solid rgba(59, 130, 246, 0.1);
+  border-top: 4px solid #3b82f6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1.5rem;
@@ -58,7 +111,7 @@
 
 .manage-org-container.loading p {
   font-size: 1.2rem;
-  color: #355d9b;
+  color: #64748b;
   margin: 0;
   font-weight: 500;
 }
@@ -70,6 +123,8 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  position: relative;
+  z-index: 1;
 }
 
 /* Card Base Styling */
@@ -77,17 +132,53 @@
 .invitation-card,
 .members-card,
 .danger-zone {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(22, 61, 125, 0.12);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.org-details-card::before,
+.invitation-card::before,
+.members-card::before,
+.danger-zone::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.05),
+    transparent
+  );
+  transition: left 0.8s ease;
+}
+
+.org-details-card:hover::before,
+.invitation-card:hover::before,
+.members-card:hover::before,
+.danger-zone:hover::before {
+  left: 100%;
+}
+
+.org-details-card:hover,
+.invitation-card:hover,
+.members-card:hover,
+.danger-zone:hover {
+  box-shadow: 0 12px 40px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
 }
 
 /* Card Headers */
 .card-header {
-  background: linear-gradient(135deg, #3578d6 0%, #4f9cff 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
   padding: 1.5rem 2rem;
   color: #fff;
   display: flex;

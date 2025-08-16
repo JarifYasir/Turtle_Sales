@@ -1,8 +1,58 @@
 .turtle-portal-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  height: 100vh;
+  background: linear-gradient(135deg, #f8fbff 0%, #e8f4fd 100%);
   padding: 2rem;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.turtle-portal-container::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(
+    circle,
+    rgba(59, 130, 246, 0.08) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite;
+}
+
+.turtle-portal-container::after {
+  content: "";
+  position: absolute;
+  bottom: -20%;
+  left: -5%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(
+    circle,
+    rgba(147, 197, 253, 0.08) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  animation: float 10s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  33% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  66% {
+    transform: translateY(10px) translateX(-5px);
+  }
 }
 
 .turtle-portal-container.loading {
@@ -14,60 +64,78 @@
 
 .portal-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
 }
 
 .portal-header h1 {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  color: #163d7d;
+  color: #1e40af;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #163d7d 0%, #3578d6 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .portal-header p {
-  font-size: 1.2rem;
-  color: #355d9b;
+  font-size: 1.1rem;
+  color: #64748b;
   opacity: 0.9;
+  margin: 0;
 }
 
 .loading-spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid #e1e9f7;
-  border-top: 4px solid #3578d6;
+  border: 4px solid rgba(59, 130, 246, 0.1);
+  border-top: 4px solid #3b82f6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .portal-actions {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  max-width: 1200px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 1000px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  align-content: center;
+  max-height: calc(100vh - 8rem);
 }
 
 .action-card {
-  background: #fff;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
   padding: 2rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 32px rgba(22, 61, 125, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.1);
   position: relative;
   overflow: hidden;
+  max-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .action-card::before {
@@ -80,7 +148,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(53, 120, 214, 0.1),
+    rgba(59, 130, 246, 0.1),
     transparent
   );
   transition: left 0.5s ease;
@@ -92,7 +160,8 @@
 
 .action-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(22, 61, 125, 0.2);
+  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 .action-icon {
@@ -104,13 +173,17 @@
 .action-card h3 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #163d7d;
+  color: #1e40af;
   margin-bottom: 0.8rem;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .action-card p {
   font-size: 1rem;
-  color: #6b7280;
+  color: #64748b;
   line-height: 1.5;
   margin: 0;
 }
@@ -119,40 +192,71 @@
 @media (max-width: 768px) {
   .turtle-portal-container {
     padding: 1rem;
+    height: 100vh;
+    overflow: hidden;
   }
-  
+
+  .portal-header {
+    margin-bottom: 1.5rem;
+  }
+
   .portal-header h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
-  
+
   .portal-actions {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
+    max-height: calc(100vh - 6rem);
   }
-  
+
   .action-card {
     padding: 1.5rem;
+    max-height: 250px;
   }
 }
 
 @media (max-width: 480px) {
+  .turtle-portal-container {
+    padding: 0.5rem;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .portal-header {
+    margin-bottom: 1rem;
+  }
+
   .portal-header h1 {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
-  
+
   .portal-header p {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
-  
+
+  .portal-actions {
+    gap: 0.75rem;
+    max-height: calc(100vh - 4.5rem);
+  }
+
   .action-card {
     padding: 1rem;
+    max-height: 200px;
   }
-  
+
   .action-icon {
-    font-size: 2.5rem;
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
   }
-  
+
   .action-card h3 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .action-card p {
+    font-size: 0.9rem;
+    line-height: 1.4;
   }
 }
