@@ -122,22 +122,11 @@ exports.getTimeslots = async (req, res) => {
 
     const isOwner = organization.owner.toString() === req.user._id.toString();
 
-    // For ANY employee: show assigned timeslots with maxEmployees > 0
-    // For owners: show all timeslots
-    const timeslotsToShow = isOwner 
-      ? allTimeslots
-      : allTimeslots.filter(slot => 
-          slot.assignedUsers && 
-          slot.assignedUsers.length > 0 && 
-          slot.maxEmployees > 0
-        );
-
-    // Add sale information
+    // Get all timeslots with sales information
     const timeslotsWithSales = await Promise.all(
-      timeslotsToShow.map(async (timeslot) => {
+      allTimeslots.map(async (timeslot) => {
         const sales = await Sale.find({ timeslot: timeslot._id });
-        
-        return {
+        const timeslotObj = {
           ...timeslot.toObject(),
           salesCount: sales.length,
           sales: sales.map(sale => ({
@@ -148,12 +137,25 @@ exports.getTimeslots = async (req, res) => {
             createdAt: sale.createdAt
           })),
         };
+
+        // For non-management views, only include timeslots with available slots
+        if (!req.query.management) {
+          const availableSlots = timeslot.assignedUsers ? timeslot.assignedUsers.length - sales.length : 0;
+          if (availableSlots <= 0) {
+            return null;
+          }
+        }
+        
+        return timeslotObj;
       })
     );
 
+    // Filter out null values (if any)
+    const validTimeslots = timeslotsWithSales.filter(slot => slot !== null);
+
     res.json({
       success: true,
-      timeslots: timeslotsWithSales,
+      timeslots: validTimeslots,
       isOwner,
     });
   } catch (error) {

@@ -87,7 +87,7 @@ const ManageTimeslots = () => {
       endDate.setDate(startDate.getDate() + 7);
 
       const response = await axios.get(
-        `http://localhost:3000/api/v1/timeslots?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
+        `http://localhost:3000/api/v1/timeslots?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}&management=true`,
         {
           headers: { Authorization: `Bearer ${authToken}` },
         }

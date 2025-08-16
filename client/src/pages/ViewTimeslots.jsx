@@ -135,18 +135,17 @@ const ViewTimeslots = () => {
   };
 
   const handleTimeslotClick = (timeslot) => {
-    if (isOwner) return; // Owners can't record sales
-
-    if (timeslot.maxEmployees <= 0) {
-      toast.info("No more spots available for this timeslot");
-      return;
-    }
-
     // Get number of assigned cleaners and current sales
     const assignedCleanersCount = timeslot.assignedUsers
       ? timeslot.assignedUsers.length
       : 0;
     const currentSalesCount = timeslot.sales ? timeslot.sales.length : 0;
+
+    // Check if there are available slots for sales
+    if (currentSalesCount >= assignedCleanersCount) {
+      toast.info("No more sales slots available for this timeslot");
+      return;
+    }
 
     if (assignedCleanersCount === 0) {
       toast.info(
@@ -270,11 +269,9 @@ const ViewTimeslots = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1>Weekly Schedule</h1>
+        <h1>Sales Dashboard</h1>
         <p className="header-subtitle">
-          {isOwner
-            ? "Team schedule overview"
-            : "Sales dashboard - Click timeslots to record sales"}
+          Click timeslots to record sales
         </p>
 
         <div className="week-navigation">
@@ -296,12 +293,10 @@ const ViewTimeslots = () => {
         </div>
       </motion.div>
 
-      {!isOwner && (
-        <motion.div
+      <motion.div
           className="my-assignments-summary"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
         >
           <h3>Sales Dashboard</h3>
           <p>
@@ -315,10 +310,9 @@ const ViewTimeslots = () => {
               opacity: 0.9,
             }}
           >
-            💰 Click any timeslot with assigned cleaners to record a sale
+            Tap to log sale
           </p>
         </motion.div>
-      )}
 
       <motion.div
         className="calendar-grid"
@@ -340,7 +334,6 @@ const ViewTimeslots = () => {
                     ? timeslot.assignedUsers.length
                     : 0;
                   const canClick =
-                    !isOwner &&
                     timeslot.maxEmployees > 0 &&
                     salesCount < assignedCleanersCount &&
                     assignedCleanersCount > 0;
@@ -369,7 +362,7 @@ const ViewTimeslots = () => {
                             marginBottom: "4px",
                           }}
                         >
-                          👨‍💼 Assigned Cleaners:
+                          Assigned Workers:
                         </div>
                         {timeslot.assignedUsers?.length > 0 ? (
                           timeslot.assignedUsers.map((assignment, idx) => (
@@ -394,19 +387,9 @@ const ViewTimeslots = () => {
                           ))
                         ) : (
                           <div className="no-assignment">
-                            No cleaners assigned
+                            No workers assigned
                           </div>
                         )}
-                      </div>
-
-                      <div
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "#666",
-                          marginTop: "8px",
-                        }}
-                      >
-                        🏠 {timeslot.maxEmployees} cleaning spots available
                       </div>
 
                       {timeslot.sales && timeslot.sales.length > 0 && (
