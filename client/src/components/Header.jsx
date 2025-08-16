@@ -21,22 +21,46 @@ export default function Header() {
   }, []);
 
   return (
-    <div style={{ paddingBottom: "30px" }}>
-      <Navbar expand="lg" className="bg-body-tertiary" fixed="top">
-        <Container>
-          <Navbar.Brand href="/">Turtle Sales</Navbar.Brand>
+    <div style={{ paddingBottom: "70px" }}>
+      <Navbar
+        expand="lg"
+        className="bg-body-tertiary"
+        fixed="top"
+        style={{ zIndex: 1050 }}
+      >
+        <Container fluid className="px-3">
+          <Navbar.Brand
+            href="/"
+            style={{ fontSize: "1.5rem", fontWeight: "bold" }}
+          >
+            Turtle Sales
+          </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              <Nav.Link href="/">Home</Nav.Link>
+              <Nav.Link href="/" style={{ padding: "0.5rem 1rem" }}>
+                Home
+              </Nav.Link>
 
               {token ? (
                 <>
-                  <Nav.Link href="/dashboard">Profile</Nav.Link>
-                  <Nav.Link href="/turtle-portal">Turtle Portal</Nav.Link>
+                  <Nav.Link
+                    href="/dashboard"
+                    style={{ padding: "0.5rem 1rem" }}
+                  >
+                    Profile
+                  </Nav.Link>
+                  <Nav.Link
+                    href="/turtle-portal"
+                    style={{ padding: "0.5rem 1rem" }}
+                  >
+                    Turtle Portal
+                  </Nav.Link>
                 </>
               ) : (
-                <Nav.Link href="/register">Register/Login</Nav.Link>
+                <Nav.Link href="/register" style={{ padding: "0.5rem 1rem" }}>
+                  Register/Login
+                </Nav.Link>
               )}
             </Nav>
           </Navbar.Collapse>

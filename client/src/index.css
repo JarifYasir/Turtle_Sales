@@ -15,10 +15,12 @@ body {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   min-height: 100vh;
   overflow-x: hidden;
+  overflow-y: auto;
   line-height: 1.5;
   color: #111827;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-overflow-scrolling: touch;
 }
 
 #root {

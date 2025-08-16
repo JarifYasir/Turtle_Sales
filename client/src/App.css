@@ -1,8 +1,10 @@
 .App {
   min-height: 100vh;
+  height: auto;
   width: 100%;
   position: relative;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Global card styling */

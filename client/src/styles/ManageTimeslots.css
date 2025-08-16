@@ -1,8 +1,11 @@
 .manage-timeslots-container {
   min-height: 100vh;
+  height: auto;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   padding: 2rem 1rem;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .manage-timeslots-container.loading {
