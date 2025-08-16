@@ -188,6 +188,14 @@ const ViewSales = () => {
   if (loading) {
     return (
       <div className="view-sales-container">
+        <motion.div
+          className="sales-header"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1>Sales Overview</h1>
+        </motion.div>
         <div className="loading-spinner"></div>
         <p style={{ textAlign: "center", color: "var(--gray)" }}>
           Loading sales data...
@@ -239,7 +247,7 @@ const ViewSales = () => {
         <div className="calendar-view">
           <div className="calendar-header">
             <button onClick={navigateToPreviousWeek} className="toggle-btn">
-              &laquo; Previous Week
+              &laquo; Previous
             </button>
             <h2>Week of {weekStartDate.toLocaleDateString()}</h2>
             <div>
@@ -248,10 +256,10 @@ const ViewSales = () => {
                 className="toggle-btn"
                 style={{ marginRight: "0.5rem" }}
               >
-                Current Week
+                Current
               </button>
               <button onClick={navigateToNextWeek} className="toggle-btn">
-                Next Week &raquo;
+                Next &raquo;
               </button>
             </div>
           </div>

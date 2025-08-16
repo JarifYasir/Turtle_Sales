@@ -73,6 +73,8 @@
   gap: 1rem;
   margin-top: 1rem;
   flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
 }
 
 .employee-select,
@@ -161,6 +163,10 @@
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: var(--light-green) var(--off-white);
+  scroll-behavior: smooth;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  padding-bottom: 1rem;
+  touch-action: pan-x;
 }
 
 /* For WebKit browsers */
@@ -253,6 +259,8 @@
   border-left: 3px solid var(--primary-green);
   transition: var(--transition-fast);
   position: relative;
+  overflow: hidden;
+  word-break: break-word;
 }
 
 .sale-card:hover {
@@ -286,11 +294,23 @@
   opacity: 0.7;
   transition: var(--transition-fast);
   margin-top: -5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
 }
 
 .delete-btn:hover {
   opacity: 1;
-  transform: scale(1.2);
+  transform: scale(1.1);
+}
+
+@media (hover: hover) {
+  .delete-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 }
 
 .sale-time {
@@ -349,6 +369,7 @@
   margin: 1rem auto;
   width: 100%;
   max-width: 400px;
+  box-sizing: border-box;
 }
 
 .no-sales-message p {
@@ -422,6 +443,19 @@
   .week-slider {
     grid-auto-columns: minmax(160px, 1fr);
   }
+
+  .calendar-header {
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .calendar-header h2 {
+    order: -1;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -443,10 +477,25 @@
 
   .week-slider {
     grid-auto-columns: minmax(140px, 1fr);
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
   }
 
   .day-header h3 {
     font-size: 0.9rem;
+  }
+
+  .day-sales {
+    min-height: 150px;
+    max-height: 400px;
+  }
+
+  .sale-card {
+    padding: 0.85rem;
+  }
+
+  .sale-header h3 {
+    font-size: 1rem;
   }
 }
 
@@ -463,31 +512,134 @@
     font-size: 1.5rem;
   }
 
+  .filter-controls {
+    width: 100%;
+  }
+
   .week-slider {
     grid-auto-columns: 85%;
     padding: 0.25rem 0;
+    scroll-padding: 0.5rem;
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
   }
 
   .day-column {
     min-width: 100%;
+    max-width: 100%;
   }
 
   .employee-select,
   .toggle-btn {
     width: 100%;
     padding: 0.75rem 1rem;
+    min-width: 0;
   }
 
   .sale-info {
     grid-template-columns: 1fr;
   }
 
+  .calendar-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
   .calendar-header h2 {
     font-size: 1.25rem;
+    margin: 0.5rem 0;
+  }
+
+  .calendar-header div {
+    display: flex;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .calendar-header div button {
+    flex: 1;
+    margin-right: 0 !important;
+    font-size: 0.85rem;
   }
 
   .back-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  /* Touch optimization for mobile */
+  .day-sales {
+    -webkit-overflow-scrolling: touch;
+    padding: 0.5rem;
+  }
+
+  .sale-card {
+    padding: 0.75rem;
+    border-left-width: 2px;
+  }
+
+  .sale-header h3 {
+    font-size: 0.95rem;
+  }
+
+  .sale-time {
+    font-size: 0.8rem;
+  }
+
+  .sale-info p {
+    font-size: 0.85rem;
+  }
+
+  .delete-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 1rem;
+    padding: 0;
+    margin: 0 0 0 5px;
+  }
+
+  .no-sales-message {
+    max-width: 100%;
+    padding: 2rem 1rem;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 375px) {
+  .sales-header h1 {
+    font-size: 1.35rem;
+  }
+  
+  .calendar-header h2 {
+    font-size: 1.1rem;
+  }
+  
+  .calendar-header div button {
+    padding: 0.6rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .employee-select,
+  .toggle-btn {
+    font-size: 0.85rem;
+  }
+  
+  .week-slider {
+    grid-auto-columns: 90%;
+  }
+  
+  .day-header h3 {
+    font-size: 0.85rem;
+  }
+  
+  .delete-btn {
+    width: 18px;
+    height: 18px;
+    font-size: 0.9rem;
+  }
+  
+  .sale-header h3 {
+    font-size: 0.9rem;
   }
 }
