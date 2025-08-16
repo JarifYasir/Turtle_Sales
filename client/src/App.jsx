@@ -20,6 +20,7 @@ import ManageOrg from "./pages/ManageOrg";
 import ManageTimeslots from "./pages/ManageTimeslots";
 import ViewTimeslots from "./pages/ViewTimeslots";
 import ViewSales from "./pages/viewsales";
+import EmployeePaystub from "./pages/EmployeePaystub";
 
 const router = createBrowserRouter([
   {
@@ -69,6 +70,10 @@ const router = createBrowserRouter([
       {
         path: "view-sales",
         element: <ViewSales />,
+      },
+      {
+        path: "employee-paystub",
+        element: <EmployeePaystub />,
       },
     ],
   },

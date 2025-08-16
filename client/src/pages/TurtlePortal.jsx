@@ -73,7 +73,7 @@ const TurtlePortal = () => {
           onClick={() => navigate("/view-timeslots")}
         >
           <div className="action-icon">📅</div>
-          <h3>View Schedule</h3>
+          <h3>View Timeslots</h3>
           <p>Check your work schedule and team assignments</p>
         </div>
 
@@ -101,6 +101,15 @@ const TurtlePortal = () => {
               <div className="action-icon">⏰</div>
               <h3>Manage Timeslots</h3>
               <p>Assign work schedules and manage team availability</p>
+            </div>
+
+            <div
+              className="action-card"
+              onClick={() => navigate("/employee-paystub")}
+            >
+              <div className="action-icon">💰</div>
+              <h3>Employee Paystub</h3>
+              <p>Manage and view employee payroll information</p>
             </div>
           </>
         )}
