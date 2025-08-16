@@ -1,703 +1,498 @@
-.view-timeslots-container {
+/* ========== ViewTimeslots.css ========== */
+/* Modern, fully responsive design with turtle theme */
+
+.timeslots-container {
+  width: 100%;
   min-height: 100vh;
-  height: auto;
-  background: linear-gradient(135deg, #f8fbff 0%, #e8f4fd 100%);
   padding: 1.5rem;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  position: relative;
+  background-color: var(--pale-green);
+  background-image: linear-gradient(
+    135deg,
+    var(--pale-green) 0%,
+    var(--off-white) 100%
+  );
   overflow-x: hidden;
-  overflow-y: auto;
 }
 
-.view-timeslots-container::before {
-  content: "";
-  position: absolute;
-  top: -20%;
-  right: -10%;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(
-    circle,
-    rgba(59, 130, 246, 0.08) 0%,
-    transparent 70%
+/* Header Section */
+.timeslots-header {
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--secondary-green)
   );
-  border-radius: 50%;
-  animation: float 8s ease-in-out infinite;
-}
-
-.view-timeslots-container::after {
-  content: "";
-  position: absolute;
-  bottom: -20%;
-  left: -5%;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(
-    circle,
-    rgba(147, 197, 253, 0.08) 0%,
-    transparent 70%
-  );
-  border-radius: 50%;
-  animation: float 10s ease-in-out infinite reverse;
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px) translateX(0px);
-  }
-  33% {
-    transform: translateY(-20px) translateX(10px);
-  }
-  66% {
-    transform: translateY(10px) translateX(-5px);
-  }
-}
-
-.view-timeslots-container.loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.view-timeslots-header {
-  text-align: center;
+  border-radius: var(--border-radius);
+  color: var(--white);
+  padding: 1.5rem;
   margin-bottom: 1.5rem;
-  position: relative;
-  z-index: 1;
+  box-shadow: var(--shadow-medium);
+  text-align: center;
 }
 
-.view-timeslots-header h1 {
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: #1e40af;
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.timeslots-header h1 {
+  color: var(--white);
   margin-bottom: 0.5rem;
+  font-size: 2rem;
 }
 
-.view-timeslots-header p {
+.header-subtitle {
+  color: rgba(255, 255, 255, 0.9);
   font-size: 1rem;
-  color: #64748b;
-  opacity: 0.9;
-  margin: 0;
+  margin-bottom: 1.25rem;
 }
 
+/* Week Navigation */
 .week-navigation {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(59, 130, 246, 0.1);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
-  position: relative;
-  z-index: 1;
-  transition: all 0.3s ease;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
 }
 
-.week-navigation:hover {
-  box-shadow: 0 12px 40px rgba(59, 130, 246, 0.15);
-  transform: translateY(-1px);
+.nav-btn,
+.current-week-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--border-radius-small);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
 }
 
 .nav-btn {
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-  position: relative;
-  overflow: hidden;
-}
-
-.nav-btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
-.nav-btn:hover::before {
-  left: 100%;
+  background-color: rgba(255, 255, 255, 0.25);
+  color: var(--dark-green);
+  font-weight: bold;
 }
 
 .nav-btn:hover {
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+  background-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-2px);
 }
 
-.nav-btn.current-btn {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+.current-week-btn {
+  background-color: var(--white);
+  color: var(--primary-green);
 }
 
-.nav-btn.current-btn:hover {
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+.current-week-btn:hover {
+  background-color: var(--light-gray);
+  transform: translateY(-2px);
 }
 
-.current-week span {
+.week-display {
+  margin-top: 1rem;
+}
+
+.week-display h3 {
+  color: var(--white);
   font-size: 1.1rem;
-  font-weight: 600;
-  color: #1e40af;
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
-.my-schedule-summary {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(59, 130, 246, 0.1);
-  border-radius: 16px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
-  position: relative;
-  z-index: 1;
-  transition: all 0.3s ease;
-  overflow: hidden;
-}
-
-.my-schedule-summary::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
+/* My Assignments Summary */
+.my-assignments-summary {
   background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(59, 130, 246, 0.05),
-    transparent
+    135deg,
+    var(--turtle-shell),
+    var(--turtle-shell-dark)
   );
-  transition: left 0.8s ease;
+  color: var(--white);
+  border-radius: var(--border-radius);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-light);
 }
 
-.my-schedule-summary:hover::before {
-  left: 100%;
+.my-assignments-summary h3 {
+  color: var(--white);
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
 }
 
-.my-schedule-summary:hover {
-  box-shadow: 0 12px 40px rgba(59, 130, 246, 0.15);
-  transform: translateY(-2px);
+.my-assignments-summary p {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.25rem;
 }
 
-.my-schedule-summary h3 {
-  color: #1e40af;
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 1rem;
-  font-size: 1.3rem;
-  font-weight: 600;
-  position: relative;
-  z-index: 1;
-}
-
-.no-assignments {
-  color: #64748b;
-  font-style: italic;
-  text-align: center;
-  padding: 1rem;
-  position: relative;
-  z-index: 1;
-}
-
-.my-timeslots {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.my-timeslot {
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-  border: 2px solid #10b981;
-  border-radius: 12px;
-  padding: 1rem;
+/* Mobile View - Calendar Layout */
+.calendar-grid {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  min-width: 200px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.my-timeslot::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(16, 185, 129, 0.1),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
-.my-timeslot:hover::before {
-  left: 100%;
-}
-
-.my-timeslot:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
-}
-
-.my-timeslot .slot-date {
-  font-weight: 600;
-  color: #047857;
-  font-size: 0.9rem;
-  position: relative;
-  z-index: 1;
-}
-
-.my-timeslot .slot-time {
-  color: #047857;
-  font-size: 0.85rem;
-  position: relative;
-  z-index: 1;
-}
-
-.my-timeslot .slot-notes {
-  color: #64748b;
-  font-size: 0.75rem;
-  font-style: italic;
-  position: relative;
-  z-index: 1;
-}
-
-.my-timeslot .slot-capacity {
-  font-size: 0.75rem;
-  color: #1e40af;
-  background: rgba(59, 130, 246, 0.1);
-  padding: 0.3rem 0.6rem;
-  border-radius: 6px;
-  align-self: flex-start;
-  font-weight: 500;
-  position: relative;
-  z-index: 1;
-}
-
-.schedule-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 1rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
 }
 
 .day-column {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(59, 130, 246, 0.1);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
+  background-color: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
   overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.day-column:hover {
-  box-shadow: 0 12px 40px rgba(59, 130, 246, 0.15);
-  transform: translateY(-2px);
+  border: 1px solid rgba(76, 175, 80, 0.1);
 }
 
 .day-header {
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-  color: #fff;
-  padding: 1rem;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.day-header::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
-.day-column:hover .day-header::before {
-  left: 100%;
+  background: var(--accent-green);
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(76, 175, 80, 0.1);
 }
 
 .day-header h3 {
+  color: var(--dark-green);
   margin: 0;
   font-size: 1rem;
-  font-weight: 600;
-  position: relative;
-  z-index: 1;
+  text-align: center;
 }
 
 .day-timeslots {
-  padding: 1rem;
+  padding: 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  min-height: 280px;
+  gap: 0.75rem;
 }
 
-.no-slots {
+/* Timeslot Cards */
+.timeslot-card {
+  background-color: var(--white);
+  border-radius: var(--border-radius-small);
+  padding: 1rem;
+  box-shadow: var(--shadow-light);
+  border: 1px solid rgba(76, 175, 80, 0.1);
+  transition: var(--transition-fast);
+}
+
+.timeslot-card.my-assignment {
+  border-left: 4px solid var(--primary-green);
+}
+
+.timeslot-card.other-assignment {
+  border-left: 4px solid var(--secondary-green);
+}
+
+.timeslot-card.unassigned {
+  border-left: 4px solid var(--gray);
+  opacity: 0.8;
+}
+
+.timeslot-card.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.timeslot-time {
+  font-weight: 600;
+  color: var(--dark-green);
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 100px;
-  color: #64748b;
+}
+
+.timeslot-time::before {
+  content: "🕒";
+  margin-right: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.timeslot-assignments {
+  background-color: var(--pale-green);
+  padding: 0.75rem;
+  border-radius: var(--border-radius-small);
+  margin-bottom: 0.75rem;
+}
+
+.assignment {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border-radius: var(--border-radius-small);
+  font-size: 0.9rem;
+}
+
+.my-assignment-user {
+  background-color: rgba(76, 175, 80, 0.15);
+  border-left: 3px solid var(--primary-green);
+}
+
+.other-assignment-user {
+  background-color: rgba(139, 195, 74, 0.1);
+  border-left: 3px solid var(--secondary-green);
+}
+
+.user-name {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.assignment-notes {
+  font-size: 0.8rem;
+  color: var(--gray);
+  display: block;
+}
+
+.no-assignment {
+  color: var(--gray);
   font-style: italic;
   font-size: 0.9rem;
 }
 
-.view-timeslot-card {
-  border-radius: 12px;
-  padding: 1rem;
-  transition: all 0.3s ease;
-  border: 1px solid transparent;
-  position: relative;
-  overflow: hidden;
+.no-timeslots {
+  text-align: center;
+  color: var(--gray);
+  padding: 1.5rem;
+  font-style: italic;
 }
 
-.view-timeslot-card::before {
-  content: "";
-  position: absolute;
+/* Legend */
+.legend {
+  background-color: var(--white);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-light);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.legend-color {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+}
+
+.legend-color.my-assignment {
+  background-color: var(--primary-green);
+}
+
+.legend-color.other-assignment {
+  background-color: var(--secondary-green);
+}
+
+.legend-color.unassigned {
+  background-color: var(--gray);
+}
+
+/* Sales Form Modal */
+.sale-form-modal {
+  position: fixed;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
-.view-timeslot-card:hover::before {
-  left: 100%;
-}
-
-.view-timeslot-card.my-assignment {
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-  border-color: #10b981;
-}
-
-.view-timeslot-card.other-assignment {
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-  border-color: #64748b;
-}
-
-.view-timeslot-card.unassigned {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border-color: #f59e0b;
-}
-
-.view-timeslot-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
-}
-
-.view-timeslot-card .slot-time {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #1e40af;
-  margin-bottom: 0.4rem;
-  position: relative;
-  z-index: 1;
-}
-
-.view-timeslot-card .slot-capacity {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #1e40af;
-  margin-bottom: 0.6rem;
-  padding: 0.3rem 0.6rem;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 6px;
-  display: inline-block;
-  position: relative;
-  z-index: 1;
-}
-
-.view-timeslot-card .assigned-info {
-  font-size: 0.8rem;
-}
-
-.view-timeslot-card .assigned-user-item {
-  margin-bottom: 0.6rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
   padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 8px;
-  border-left: 3px solid #10b981;
-  position: relative;
-  z-index: 1;
 }
 
-.view-timeslot-card .assigned-user-item:first-child {
-  border-left-color: #3b82f6;
+.sale-form-content {
+  background-color: var(--white);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
 }
 
-.view-timeslot-card .assigned-user-item:nth-child(2) {
-  border-left-color: #10b981;
+.sale-form-header {
+  margin-bottom: 0.75rem;
 }
 
-.view-timeslot-card .assigned-user .my-name {
-  color: #1e40af;
-  font-weight: 600;
+.sale-form-header h3 {
+  margin: 0 0 0.25rem;
+  color: var(--dark-green);
+  font-size: 1.2rem;
 }
 
-.view-timeslot-card .assigned-user .other-name {
-  color: #475569;
-  font-weight: 500;
-}
-
-.view-timeslot-card .unassigned-info {
-  color: #d97706;
-  font-style: italic;
+.sale-form-date {
+  margin: 0 0 0.25rem;
+  color: var(--gray);
   font-size: 0.8rem;
-  position: relative;
-  z-index: 1;
 }
 
-.view-timeslot-card .slot-notes {
-  font-size: 0.75rem;
-  color: #64748b;
-  font-style: italic;
-  margin-top: 0.3rem;
-  line-height: 1.3;
-  position: relative;
-  z-index: 1;
+.sale-form-rep {
+  margin: 0;
+  color: var(--gray);
+  font-size: 0.8rem;
 }
 
-.view-timeslot-card .available-spots {
-  font-size: 0.75rem;
-  color: #0891b2;
-  font-style: italic;
-  margin-top: 0.5rem;
-  padding: 0.4rem;
-  background: rgba(8, 145, 178, 0.1);
-  border-radius: 6px;
-  text-align: center;
-  position: relative;
-  z-index: 1;
+.sale-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
 }
 
-.manage-link {
-  text-align: center;
-  margin-top: 1.5rem;
-  position: relative;
-  z-index: 1;
+.sale-form .full-width {
+  grid-column: 1 / -1;
 }
 
-.manage-btn {
-  padding: 1rem 2.5rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-  color: #fff;
+.sale-form input,
+.sale-form textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--accent-green);
+  border-radius: var(--border-radius-small);
+  font-size: 0.9rem;
+  transition: var(--transition-fast);
+}
+
+.sale-form input:focus,
+.sale-form textarea:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.sale-form textarea {
+  resize: none;
+  font-family: inherit;
+  height: 60px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  grid-column: 1 / -1;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 0.6rem;
   border: none;
-  border-radius: 50px;
-  font-size: 1.1rem;
+  border-radius: var(--border-radius-small);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-  position: relative;
-  overflow: hidden;
+  transition: var(--transition-fast);
+  font-size: 0.9rem;
 }
 
-.manage-btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
+.cancel-btn {
+  background-color: var(--gray);
+  color: var(--white);
+}
+
+.cancel-btn:hover {
+  background-color: #5a6268;
+}
+
+.submit-btn {
   background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
+    135deg,
+    var(--primary-green),
+    var(--secondary-green)
   );
-  transition: left 0.5s ease;
+  color: var(--white);
 }
 
-.manage-btn:hover::before {
-  left: 100%;
+.submit-btn:hover {
+  background: linear-gradient(
+    135deg,
+    var(--secondary-green),
+    var(--primary-green)
+  );
 }
 
-.manage-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
 }
 
 .loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid rgba(59, 130, 246, 0.1);
-  border-top: 4px solid #3b82f6;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  border: 3px solid rgba(76, 175, 80, 0.3);
+  border-top-color: var(--primary-green);
+  animation: spin 1s infinite linear;
   margin-bottom: 1rem;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .schedule-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.75rem;
+/* Responsive Styles */
+@media (min-width: 768px) {
+  .timeslots-container {
+    padding: 2rem;
   }
 
-  .day-timeslots {
-    min-height: 250px;
-  }
-}
-
-@media (max-width: 768px) {
-  .view-timeslots-container {
-    padding: 1rem;
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
   }
 
-  .view-timeslots-header h1 {
-    font-size: 2rem;
-  }
-
-  .schedule-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
+  .legend {
+    flex-direction: row;
+    justify-content: center;
   }
 
   .week-navigation {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 0.75rem;
+    gap: 1rem;
   }
 
-  .nav-btn {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.9rem;
-  }
-
-  .current-week {
-    width: 100%;
-    text-align: center;
-    margin-top: 0.5rem;
-  }
-
-  .my-timeslots {
-    flex-direction: column;
-  }
-
-  .my-timeslot {
-    min-width: auto;
-  }
-
-  .day-timeslots {
-    min-height: 220px;
-    padding: 0.75rem;
-  }
-
-  .view-timeslot-card {
-    padding: 0.75rem;
+  .nav-btn,
+  .current-week-btn {
+    padding: 0.75rem 1.25rem;
   }
 }
 
-@media (max-width: 480px) {
-  .view-timeslots-container {
-    padding: 0.75rem;
+@media (min-width: 992px) {
+  .timeslots-header h1 {
+    font-size: 2.5rem;
   }
 
-  .view-timeslots-header {
-    margin-bottom: 1rem;
+  .calendar-grid {
+    grid-template-columns: repeat(7, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .timeslots-container {
+    padding: 1rem;
   }
 
-  .view-timeslots-header h1 {
+  .timeslots-header {
+    padding: 1.25rem;
+  }
+
+  .timeslots-header h1 {
     font-size: 1.75rem;
   }
 
-  .schedule-grid {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
+  .nav-btn,
+  .current-week-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
   }
 
-  .week-navigation {
-    padding: 0.5rem;
-    gap: 0.25rem;
+  .day-header h3 {
+    font-size: 0.9rem;
   }
 
-  .nav-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-  }
-
-  .my-schedule-summary {
-    padding: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .day-timeslots {
-    min-height: 180px;
-    padding: 0.5rem;
-    gap: 0.5rem;
-  }
-
-  .view-timeslot-card {
-    padding: 0.75rem;
-  }
-
-  .view-timeslot-card .assigned-user-item {
-    padding: 0.4rem;
-    margin-bottom: 0.4rem;
-  }
-
-  .manage-btn {
-    padding: 0.8rem 2rem;
-    font-size: 1rem;
+  .timeslot-time {
+    font-size: 0.9rem;
   }
 }

@@ -23,6 +23,7 @@ const ManageOrg = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [removingMember, setRemovingMember] = useState(null);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -200,7 +201,13 @@ const ManageOrg = () => {
   const copyOrgCode = async () => {
     try {
       await navigator.clipboard.writeText(orgDetails.code);
+      setCopySuccess(true);
       toast.success("Organization code copied to clipboard!");
+
+      // Reset the copy success state after 2 seconds
+      setTimeout(() => {
+        setCopySuccess(false);
+      }, 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
       toast.error("Failed to copy organization code");
@@ -248,8 +255,8 @@ const ManageOrg = () => {
         {/* Organization Details Card */}
         <motion.div
           className="org-details-card"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <div className="card-header">
@@ -299,7 +306,14 @@ const ManageOrg = () => {
                     onClick={handleUpdateOrg}
                     disabled={updateLoading}
                   >
-                    {updateLoading ? "Saving..." : "Save Changes"}
+                    {updateLoading ? (
+                      <>
+                        <span className="loading-spinner-small"></span>
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
                   </button>
                 </div>
               </div>
@@ -323,37 +337,26 @@ const ManageOrg = () => {
                   <label>Total Members:</label>
                   <span>{members.length}</span>
                 </div>
-                <div className="info-item">
-                  <label>Organization Code:</label>
-                  <div className="code-display">
-                    <span className="org-code">{orgDetails.code}</span>
-                    <button className="copy-btn" onClick={copyOrgCode}>
-                      Copy
+                <div className="info-item invitation-section">
+                  <label>Invitation Code:</label>
+                  <div className="invitation-code">
+                    <span>{orgDetails.code}</span>
+                    <button
+                      className={copySuccess ? "copied" : ""}
+                      onClick={copyOrgCode}
+                    >
+                      {copySuccess ? "Copied!" : "Copy Code"}
                     </button>
                   </div>
+                  <p className="invitation-hint">
+                    {isOwner
+                      ? "Share this code with others to invite them to your organization"
+                      : "Invite people to join your organization using this invitation code"}
+                  </p>
                 </div>
               </div>
             )}
           </div>
-        </motion.div>
-
-        {/* Invitation Code Card */}
-        <motion.div
-          className="invitation-card"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <h3>Invitation Code</h3>
-          <div className="invitation-code">
-            <span>{orgDetails.code}</span>
-            <button onClick={copyOrgCode}>Copy Code</button>
-          </div>
-          <p>
-            {isOwner
-              ? "Share the invitation code above with others to invite them to your organization"
-              : "Invite people to join your organization using the invitation code above"}
-          </p>
         </motion.div>
 
         {/* Members List */}
@@ -361,9 +364,12 @@ const ManageOrg = () => {
           className="members-card"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <h3>Members ({members.length})</h3>
+          <h3>
+            Organization Members{" "}
+            <span className="member-count">{members.length}</span>
+          </h3>
           <div className="members-list">
             <AnimatePresence>
               {members.map((member) => (
@@ -379,7 +385,13 @@ const ManageOrg = () => {
                     <div className="member-details">
                       <h4>{member.user.name}</h4>
                       <p>{member.user.email}</p>
-                      <span className="member-role">{member.role}</span>
+                      <span
+                        className={`member-role ${
+                          member.role === "owner" ? "role-owner" : "role-member"
+                        }`}
+                      >
+                        {member.role === "owner" ? "Owner" : "Member"}
+                      </span>
                     </div>
                     <div className="member-meta">
                       <span>Joined: {formatJoinDate(member.joinedAt)}</span>
@@ -393,14 +405,24 @@ const ManageOrg = () => {
                       }
                       disabled={removingMember === member.user._id}
                     >
-                      {removingMember === member.user._id
-                        ? "Removing..."
-                        : "Remove"}
+                      {removingMember === member.user._id ? (
+                        <>
+                          <span className="loading-spinner-small"></span>
+                          Removing...
+                        </>
+                      ) : (
+                        <>Remove</>
+                      )}
                     </button>
                   )}
                 </motion.div>
               ))}
             </AnimatePresence>
+            {members.length === 0 && (
+              <div className="no-members">
+                <p>No members in this organization yet.</p>
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -427,7 +449,14 @@ const ManageOrg = () => {
                 onClick={handleDeleteOrg}
                 disabled={deleteLoading}
               >
-                {deleteLoading ? "Deleting..." : "Delete Organization"}
+                {deleteLoading ? (
+                  <>
+                    <span className="loading-spinner-small"></span>
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete Organization"
+                )}
               </button>
             </div>
           </motion.div>

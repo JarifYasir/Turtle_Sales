@@ -1,109 +1,265 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* Logout Page Styles */
+.logout-container {
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    var(--pale-green) 0%,
+    var(--off-white) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+}
+
+.logout-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M30 30 Q50 10 70 30 Q50 50 30 30" fill="%23a0c4a0" opacity="0.1"/><path d="M30 70 Q50 90 70 70 Q50 50 30 70" fill="%234a7c59" opacity="0.1"/></svg>')
+    repeat;
+  background-size: 150px 150px;
+  pointer-events: none;
 }
 
 .logout-main {
-  font-size: 2rem;
-  min-height: 100vh;
-  height: auto;
+  text-align: center;
+}
+
+.logout-content {
+  max-width: 500px;
   width: 100%;
-  background: linear-gradient(135deg, #f8fbff 0%, #e8f4fd 100%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding: 2rem;
-}
-
-.logout-main::before {
-  content: "";
-  position: absolute;
-  top: -20%;
-  right: -10%;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(
-    circle,
-    rgba(59, 130, 246, 0.08) 0%,
-    transparent 70%
-  );
-  border-radius: 50%;
-  animation: float 8s ease-in-out infinite;
-}
-
-.logout-main::after {
-  content: "";
-  position: absolute;
-  bottom: -20%;
-  left: -5%;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(
-    circle,
-    rgba(147, 197, 253, 0.08) 0%,
-    transparent 70%
-  );
-  border-radius: 50%;
-  animation: float 10s ease-in-out infinite reverse;
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px) translateX(0px);
-  }
-  33% {
-    transform: translateY(-20px) translateX(10px);
-  }
-  66% {
-    transform: translateY(10px) translateX(-5px);
-  }
-}
-
-.logout-main h1 {
-  color: #1e40af;
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  position: relative;
-  z-index: 1;
+  background: var(--white);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow-strong);
+  padding: 3rem;
   text-align: center;
-}
-
-.logout-main p {
-  color: #64748b;
-  font-size: 1.2rem;
-  font-weight: 500;
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  opacity: 0.9;
-}
-
-.logout-button {
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-  color: white;
-  border: none;
-  padding: 1rem 2.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-  margin-top: 2rem;
+  border: 1px solid rgba(160, 196, 160, 0.2);
   position: relative;
   z-index: 1;
   overflow: hidden;
+}
+
+.logout-content::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--secondary-green)
+  );
+}
+
+.logout-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(
+    135deg,
+    var(--light-green),
+    var(--secondary-green)
+  );
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: var(--white);
+  margin: 0 auto 2rem;
+  box-shadow: var(--shadow-medium);
+  animation: fadeInScale 0.8s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.logout-main h1,
+.logout-title {
+  color: var(--primary-green);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--secondary-green)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.logout-main p,
+.logout-message {
+  color: var(--gray);
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+.logout-status {
+  background: var(--pale-green);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(160, 196, 160, 0.3);
+  animation: fadeInUp 0.8s ease-out 0.6s both;
+}
+
+.status-icon {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(
+    135deg,
+    var(--light-green),
+    var(--secondary-green)
+  );
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--white);
+  margin: 0 auto 1rem;
+  box-shadow: var(--shadow-light);
+  animation: checkmark 0.6s ease-out 1s both;
+}
+
+@keyframes checkmark {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.status-text {
+  color: var(--primary-green);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.logout-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: fadeInUp 0.8s ease-out 0.8s both;
+}
+
+.btn-home {
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--secondary-green)
+  );
+  color: var(--white);
+  border: none;
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-home::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.btn-home:hover::before {
+  left: 100%;
+}
+
+.btn-home:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+  color: var(--white);
+  text-decoration: none;
+}
+
+.btn-login {
+  background: var(--white);
+  border: 2px solid var(--accent-green);
+  color: var(--primary-green);
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-login:hover {
+  background: var(--accent-green);
+  color: var(--white);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.logout-button {
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--secondary-green)
+  );
+  color: var(--white);
+  border: none;
+  padding: 16px 32px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-medium);
+  position: relative;
+  overflow: hidden;
+  margin-top: 1rem;
 }
 
 .logout-button::before {
@@ -119,7 +275,7 @@
     rgba(255, 255, 255, 0.2),
     transparent
   );
-  transition: left 0.5s ease;
+  transition: left 0.5s;
 }
 
 .logout-button:hover::before {
@@ -127,41 +283,107 @@
 }
 
 .logout-button:hover {
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-strong);
+}
+
+/* Animation Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .logout-main {
-    font-size: 1.5rem;
+  .logout-container {
+    padding: 1rem;
+  }
+
+  .logout-content {
     padding: 2rem;
   }
 
-  .logout-main h1 {
+  .logout-icon {
+    width: 70px;
+    height: 70px;
     font-size: 2rem;
   }
 
-  .logout-main p {
+  .logout-main h1,
+  .logout-title {
+    font-size: 1.75rem;
+  }
+
+  .logout-main p,
+  .logout-message {
     font-size: 1rem;
   }
 
+  .logout-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-home,
+  .btn-login {
+    justify-content: center;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+  }
+
   .logout-button {
-    padding: 0.8rem 2rem;
+    padding: 12px 24px;
     font-size: 1rem;
   }
 }
 
 @media (max-width: 480px) {
-  .logout-main {
+  .logout-content {
+    padding: 1.5rem;
+  }
+
+  .logout-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .logout-main h1,
+  .logout-title {
+    font-size: 1.5rem;
+  }
+
+  .logout-main p,
+  .logout-message {
+    font-size: 0.95rem;
+  }
+
+  .logout-status {
+    padding: 1rem;
+  }
+
+  .status-icon {
+    width: 40px;
+    height: 40px;
     font-size: 1.25rem;
   }
 
-  .logout-main h1 {
-    font-size: 1.75rem;
+  .btn-home,
+  .btn-login {
+    padding: 10px 20px;
+    font-size: 0.9rem;
   }
 
   .logout-button {
+    padding: 10px 20px;
+    font-size: 0.95rem;
     width: 100%;
     max-width: 300px;
   }

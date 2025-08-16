@@ -5,7 +5,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(30, 64, 175, 0.2);
+  background: rgba(45, 90, 45, 0.8);
   backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
@@ -16,15 +16,14 @@
 
 /* Modal Container */
 .edit-modal-container {
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(59, 130, 246, 0.1);
-  border-radius: 20px;
+  background: var(--white);
+  border: 1px solid rgba(160, 196, 160, 0.2);
+  border-radius: var(--border-radius-large);
   padding: 2rem;
   width: 90%;
   max-width: 450px;
-  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
-  color: #1e293b;
+  box-shadow: var(--shadow-strong);
+  color: var(--dark-gray);
   animation: slideIn 0.3s ease-out;
   position: relative;
   overflow: hidden;
@@ -34,20 +33,14 @@
   content: "";
   position: absolute;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: 4px;
   background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(59, 130, 246, 0.05),
-    transparent
+    135deg,
+    var(--primary-green),
+    var(--accent-green)
   );
-  transition: left 0.8s ease;
-}
-
-.edit-modal-container:hover::before {
-  left: 100%;
 }
 
 /* Modal Header */
@@ -55,8 +48,12 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
-  color: #1e40af;
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: var(--primary-green);
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--accent-green)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -69,7 +66,7 @@
 .edit-modal-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .edit-modal-field {
@@ -80,26 +77,25 @@
 .edit-modal-label {
   font-size: 1rem;
   font-weight: 600;
-  color: #334155;
-  margin-bottom: 8px;
+  color: var(--dark-gray);
+  margin-bottom: 0.5rem;
 }
 
 .edit-modal-input {
   padding: 1rem 1.25rem;
-  border-radius: 12px;
-  border: 2px solid #e2e8f0;
-  background: rgba(255, 255, 255, 0.8);
-  color: #1e293b;
+  border-radius: var(--border-radius);
+  border: 2px solid var(--accent-green);
+  background: var(--white);
+  color: var(--dark-gray);
   font-size: 1rem;
   outline: none;
-  transition: all 0.3s ease;
+  transition: var(--transition);
   font-family: inherit;
 }
 
 .edit-modal-input:focus {
-  border-color: #3b82f6;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
   transform: translateY(-1px);
 }
 
@@ -128,72 +124,60 @@
 /* Button Container */
 .edit-modal-buttons {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  justify-content: center;
 }
 
 /* Cancel Button */
 .edit-modal-cancel-btn {
-  flex: 1;
   padding: 12px 24px;
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-  color: #475569;
+  border: 2px solid var(--accent-green);
+  border-radius: var(--border-radius);
+  background: var(--white);
+  color: var(--primary-green);
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(71, 85, 105, 0.1);
-  position: relative;
-  overflow: hidden;
-}
-
-.edit-modal-cancel-btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
-  transition: left 0.5s ease;
-}
-
-.edit-modal-cancel-btn:hover::before {
-  left: 100%;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .edit-modal-cancel-btn:hover:not(:disabled) {
-  box-shadow: 0 4px 15px rgba(71, 85, 105, 0.2);
-  transform: translateY(-1px);
+  background: var(--accent-green);
+  color: var(--white);
+  transform: translateY(-2px);
 }
 
 .edit-modal-cancel-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 /* Save Button */
 .edit-modal-save-btn {
-  flex: 1;
   padding: 12px 24px;
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-  color: white;
+  border-radius: var(--border-radius);
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--accent-green)
+  );
+  color: var(--white);
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  transition: var(--transition);
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .edit-modal-save-btn::before {

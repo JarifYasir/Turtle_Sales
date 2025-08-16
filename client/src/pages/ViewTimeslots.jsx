@@ -270,9 +270,7 @@ const ViewTimeslots = () => {
         transition={{ duration: 0.5 }}
       >
         <h1>Sales Dashboard</h1>
-        <p className="header-subtitle">
-          Click timeslots to record sales
-        </p>
+        <p className="header-subtitle">Click timeslots to record sales</p>
 
         <div className="week-navigation">
           <button onClick={goToPreviousWeek} className="nav-btn">
@@ -294,25 +292,16 @@ const ViewTimeslots = () => {
       </motion.div>
 
       <motion.div
-          className="my-assignments-summary"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h3>Sales Dashboard</h3>
-          <p>
-            <strong>{timeslots.length}</strong> available timeslots for sales
-          </p>
-          <p
-            style={{
-              fontSize: "0.9rem",
-              marginTop: "8px",
-              color: "#fff",
-              opacity: 0.9,
-            }}
-          >
-            Tap to log sale
-          </p>
-        </motion.div>
+        className="my-assignments-summary"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <h3>Sales Dashboard</h3>
+        <p>
+          <strong>{timeslots.length}</strong> available timeslots for sales
+        </p>
+        <p>Tap to log sale</p>
+      </motion.div>
 
       <motion.div
         className="calendar-grid"
@@ -347,7 +336,6 @@ const ViewTimeslots = () => {
                       whileHover={canClick ? { scale: 1.02 } : {}}
                       whileTap={canClick ? { scale: 0.98 } : {}}
                       onClick={() => canClick && handleTimeslotClick(timeslot)}
-                      style={{ cursor: canClick ? "pointer" : "default" }}
                     >
                       <div className="timeslot-time">
                         {formatTime(timeslot.startTime)} -{" "}
@@ -535,61 +523,27 @@ const ViewTimeslots = () => {
 
       {/* SALE FORM MODAL */}
       {showSaleForm && selectedTimeslot && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              padding: "24px",
-              borderRadius: "8px",
-              width: "90%",
-              maxWidth: "500px",
-              maxHeight: "90vh",
-              overflowY: "auto",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-            }}
-          >
-            <div style={{ marginBottom: "20px" }}>
-              <h3 style={{ margin: "0 0 8px", color: "#333" }}>Record Sale</h3>
-              <p
-                style={{ margin: "0 0 8px", color: "#666", fontSize: "0.9rem" }}
-              >
+        <div className="sale-form-modal">
+          <div className="sale-form-content">
+            <div className="sale-form-header">
+              <h3>Record Sale</h3>
+              <p className="sale-form-date">
                 {formatDate(selectedTimeslot.date)} •{" "}
                 {formatTime(selectedTimeslot.startTime)} -{" "}
                 {formatTime(selectedTimeslot.endTime)}
               </p>
-              <p style={{ margin: "0", color: "#666", fontSize: "0.9rem" }}>
+              <p className="sale-form-rep">
                 Sales Rep: <strong>{user.name}</strong>
               </p>
             </div>
 
-            <form onSubmit={handleSaleSubmit}>
+            <form className="sale-form" onSubmit={handleSaleSubmit}>
               <input
                 type="text"
                 name="name"
                 placeholder="Customer Name *"
                 value={saleForm.name}
                 onChange={handleSaleFormChange}
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  margin: "8px 0",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  fontSize: "16px",
-                }}
                 required
               />
 
@@ -599,33 +553,6 @@ const ViewTimeslots = () => {
                 placeholder="Phone Number *"
                 value={saleForm.number}
                 onChange={handleSaleFormChange}
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  margin: "8px 0",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  fontSize: "16px",
-                }}
-                required
-              />
-
-              <textarea
-                name="address"
-                placeholder="Customer Address *"
-                value={saleForm.address}
-                onChange={handleSaleFormChange}
-                rows="2"
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  margin: "8px 0",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  resize: "vertical",
-                  fontSize: "16px",
-                  fontFamily: "inherit",
-                }}
                 required
               />
 
@@ -637,39 +564,35 @@ const ViewTimeslots = () => {
                 onChange={handleSaleFormChange}
                 min="0"
                 step="0.01"
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  margin: "8px 0",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  fontSize: "16px",
-                }}
                 required
               />
 
-              <textarea
-                name="details"
-                placeholder="Sale Details *"
-                value={saleForm.details}
-                onChange={handleSaleFormChange}
-                rows="3"
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  margin: "8px 0",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  resize: "vertical",
-                  fontSize: "16px",
-                  fontFamily: "inherit",
-                }}
-                required
-              />
+              <div className="full-width">
+                <textarea
+                  name="address"
+                  placeholder="Customer Address *"
+                  value={saleForm.address}
+                  onChange={handleSaleFormChange}
+                  rows="2"
+                  required
+                />
+              </div>
 
-              <div style={{ display: "flex", gap: "12px", marginTop: "20px" }}>
+              <div className="full-width">
+                <textarea
+                  name="details"
+                  placeholder="Sale Details *"
+                  value={saleForm.details}
+                  onChange={handleSaleFormChange}
+                  rows="2"
+                  required
+                />
+              </div>
+
+              <div className="form-actions">
                 <button
                   type="button"
+                  className="cancel-btn"
                   onClick={() => {
                     setShowSaleForm(false);
                     setSaleForm({
@@ -681,34 +604,10 @@ const ViewTimeslots = () => {
                     });
                     setSelectedTimeslot(null);
                   }}
-                  style={{
-                    flex: 1,
-                    padding: "12px",
-                    backgroundColor: "#6c757d",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontSize: "16px",
-                    fontWeight: "500",
-                  }}
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  style={{
-                    flex: 1,
-                    padding: "12px",
-                    backgroundColor: "#007bff",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontSize: "16px",
-                    fontWeight: "500",
-                  }}
-                >
+                <button type="submit" className="submit-btn">
                   Record Sale
                 </button>
               </div>

@@ -1,76 +1,622 @@
+/* Employee Paystub Page Styles */
 .employee-paystub-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   min-height: 100vh;
-  height: auto;
-  overflow-x: hidden;
-  overflow-y: auto;
+  background: linear-gradient(
+    135deg,
+    var(--pale-green) 0%,
+    var(--off-white) 100%
+  );
+  padding: 2rem;
+  position: relative;
+}
+
+.employee-paystub-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="60" rx="5" stroke="%23a0c4a0" stroke-width="2" fill="none" opacity="0.1"/><rect x="20" y="20" width="60" height="8" fill="%234a7c59" opacity="0.1"/><rect x="20" y="35" width="40" height="8" fill="%237fb069" opacity="0.1"/></svg>')
+    repeat;
+  background-size: 120px 120px;
+  pointer-events: none;
+}
+
+.paystub-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 .paystub-header {
   text-align: center;
   margin-bottom: 3rem;
-  color: white;
+  background: var(--white);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow-medium);
+  padding: 2.5rem;
+  border: 1px solid rgba(160, 196, 160, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.paystub-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--secondary-green)
+  );
 }
 
 .paystub-header h1 {
-  font-size: 3rem;
+  color: var(--primary-green);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--secondary-green)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.paystub-subtitle {
+  color: var(--gray);
+  font-size: 1.125rem;
+  margin: 0;
+}
+
+/* Period Selector */
+.period-selector {
+  background: var(--white);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow-light);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(160, 196, 160, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.period-selector::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(
+    135deg,
+    var(--light-green),
+    var(--secondary-green)
+  );
+}
+
+.period-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.period-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--accent-green), var(--light-green));
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: var(--white);
+  box-shadow: var(--shadow-light);
+}
+
+.period-title {
+  color: var(--primary-green);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.period-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.period-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+}
+
+.period-label {
+  font-weight: 600;
+  color: var(--primary-green);
   margin-bottom: 0.5rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  font-size: 0.9rem;
 }
 
-.paystub-header p {
-  font-size: 1.2rem;
-  opacity: 0.9;
+.period-input,
+.period-select {
+  padding: 10px 14px;
+  border: 2px solid var(--accent-green);
+  border-radius: var(--border-radius);
+  font-size: 0.95rem;
+  transition: var(--transition);
+  background: var(--white);
 }
 
-.paystub-content {
-  background: white;
-  border-radius: 15px;
-  padding: 3rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+.period-input:focus,
+.period-select:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(45, 90, 45, 0.1);
+}
+
+.btn-generate {
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--secondary-green)
+  );
+  color: var(--white);
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: fit-content;
+}
+
+.btn-generate:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Paystub Document */
+.paystub-document {
+  background: var(--white);
+  border-radius: var(--border-radius-large);
+  box-shadow: var(--shadow-strong);
+  border: 1px solid rgba(160, 196, 160, 0.2);
+  overflow: hidden;
+  position: relative;
+}
+
+.paystub-document::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--secondary-green)
+  );
+}
+
+.document-header {
+  background: var(--pale-green);
+  padding: 2rem;
+  border-bottom: 2px solid var(--accent-green);
+}
+
+.company-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.company-details {
+  flex: 1;
+}
+
+.company-name {
+  color: var(--primary-green);
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.company-address {
+  color: var(--gray);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.document-title {
   text-align: center;
+  color: var(--primary-green);
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--secondary-green)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.temp-message {
+.employee-period-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.info-section {
+  background: var(--white);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  border: 1px solid rgba(160, 196, 160, 0.3);
+}
+
+.info-title {
+  color: var(--primary-green);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(160, 196, 160, 0.2);
+}
+
+.info-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.info-label {
+  color: var(--gray);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.info-value {
+  color: var(--dark-gray);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Earnings and Deductions */
+.document-body {
+  padding: 2rem;
+}
+
+.earnings-deductions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
   margin-bottom: 2rem;
 }
 
-.temp-message h3 {
-  color: #4facfe;
+.earnings-section,
+.deductions-section {
+  background: var(--pale-green);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  border: 1px solid rgba(160, 196, 160, 0.3);
+}
+
+.section-title {
+  color: var(--primary-green);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.earnings-table,
+.deductions-table {
+  width: 100%;
+  background: var(--white);
+  border-radius: var(--border-radius-small);
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+}
+
+.earnings-table th,
+.deductions-table th {
+  background: var(--accent-green);
+  color: var(--primary-green);
+  font-weight: 600;
+  padding: 0.75rem;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.earnings-table td,
+.deductions-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(160, 196, 160, 0.2);
+  font-size: 0.9rem;
+}
+
+.earnings-table tr:last-child td,
+.deductions-table tr:last-child td {
+  border-bottom: none;
+}
+
+.earnings-table tr:hover,
+.deductions-table tr:hover {
+  background: var(--pale-green);
+}
+
+.amount {
+  font-weight: 600;
+  text-align: right;
+}
+
+.amount.positive {
+  color: var(--light-green);
+}
+
+.amount.negative {
+  color: #dc3545;
+}
+
+/* Totals Section */
+.totals-section {
+  background: var(--white);
+  border: 2px solid var(--primary-green);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.totals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.total-item {
+  text-align: center;
+  padding: 1rem;
+  background: var(--pale-green);
+  border-radius: var(--border-radius-small);
+}
+
+.total-label {
+  color: var(--gray);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.total-value {
+  color: var(--primary-green);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.net-pay {
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--secondary-green)
+  );
+  color: var(--white);
+  border: none;
+}
+
+.net-pay .total-label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.net-pay .total-value {
+  color: var(--white);
   font-size: 2rem;
+}
+
+/* Document Footer */
+.document-footer {
+  background: var(--pale-green);
+  padding: 1.5rem 2rem;
+  border-top: 2px solid var(--accent-green);
+  text-align: center;
+}
+
+.footer-note {
+  color: var(--gray);
+  font-size: 0.85rem;
+  line-height: 1.5;
   margin-bottom: 1rem;
 }
 
-.temp-message p {
-  color: #666;
-  font-size: 1.1rem;
-  line-height: 1.6;
+.document-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
-.back-btn {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  color: white;
+.btn-print {
+  background: linear-gradient(
+    135deg,
+    var(--secondary-green),
+    var(--light-green)
+  );
+  color: var(--white);
   border: none;
   padding: 12px 24px;
-  border-radius: 25px;
-  font-size: 1rem;
+  border-radius: var(--border-radius);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  display: inline-block;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.back-btn:hover {
+.btn-print:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+  box-shadow: var(--shadow-medium);
 }
 
-.back-btn:active {
-  transform: translateY(0);
+.btn-download {
+  background: var(--white);
+  border: 2px solid var(--primary-green);
+  color: var(--primary-green);
+  padding: 12px 24px;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-download:hover {
+  background: var(--pale-green);
+  transform: translateY(-2px);
+}
+
+.btn-email {
+  background: linear-gradient(135deg, var(--accent-green), var(--light-green));
+  color: var(--white);
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-email:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--gray);
+}
+
+.empty-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--pale-green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--accent-green);
+  margin: 0 auto 1.5rem;
+}
+
+.empty-title {
+  color: var(--primary-green);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.empty-description {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Print Styles */
+@media print {
+  .employee-paystub-container {
+    background: white;
+    padding: 0;
+  }
+
+  .employee-paystub-container::before {
+    display: none;
+  }
+
+  .paystub-header,
+  .period-selector {
+    display: none;
+  }
+
+  .paystub-document {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+
+  .document-actions {
+    display: none;
+  }
+
+  .earnings-table,
+  .deductions-table {
+    break-inside: avoid;
+  }
+
+  .totals-section {
+    break-inside: avoid;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .employee-paystub-container {
+    padding: 1.5rem;
+  }
+
+  .earnings-deductions {
+    grid-template-columns: 1fr;
+  }
+
+  .company-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .employee-period-info {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -78,11 +624,96 @@
     padding: 1rem;
   }
 
+  .paystub-header {
+    padding: 2rem;
+  }
+
   .paystub-header h1 {
     font-size: 2rem;
   }
 
-  .paystub-content {
-    padding: 2rem;
+  .period-selector {
+    padding: 1.5rem;
+  }
+
+  .period-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .period-group {
+    min-width: auto;
+  }
+
+  .document-header {
+    padding: 1.5rem;
+  }
+
+  .document-body {
+    padding: 1.5rem;
+  }
+
+  .company-name {
+    font-size: 1.5rem;
+  }
+
+  .document-title {
+    font-size: 1.75rem;
+  }
+
+  .totals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .document-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .paystub-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .paystub-header {
+    padding: 1.5rem;
+  }
+
+  .document-header {
+    padding: 1rem;
+  }
+
+  .document-body {
+    padding: 1rem;
+  }
+
+  .info-section {
+    padding: 1rem;
+  }
+
+  .earnings-section,
+  .deductions-section {
+    padding: 1rem;
+  }
+
+  .totals-section {
+    padding: 1rem;
+  }
+
+  .earnings-table th,
+  .deductions-table th,
+  .earnings-table td,
+  .deductions-table td {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .total-value {
+    font-size: 1.25rem;
+  }
+
+  .net-pay .total-value {
+    font-size: 1.5rem;
   }
 }

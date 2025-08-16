@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
+import AssignEmployeeModal from "../components/AssignEmployeeModal";
 
 const ManageTimeslots = () => {
   const { user, token } = useContext(UserContext);
@@ -14,8 +15,9 @@ const ManageTimeslots = () => {
   const [orgMembers, setOrgMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
-  const [assigningSlot, setAssigningSlot] = useState(null);
   const [selectedWeekStart, setSelectedWeekStart] = useState(new Date());
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState(null);
 
   useEffect(() => {
     if (!token) {
@@ -112,7 +114,6 @@ const ManageTimeslots = () => {
     action = "assign"
   ) => {
     try {
-      setAssigningSlot(timeslotId);
       const authToken = JSON.parse(localStorage.getItem("auth"));
 
       const response = await axios.put(
@@ -134,16 +135,10 @@ const ManageTimeslots = () => {
       } else {
         toast.error("Failed to assign timeslot");
       }
-    } finally {
-      setAssigningSlot(null);
     }
   };
 
   const handleDeleteSlot = async (timeslotId) => {
-    if (!window.confirm("Are you sure you want to delete this timeslot?")) {
-      return;
-    }
-
     try {
       const authToken = JSON.parse(localStorage.getItem("auth"));
 
@@ -227,6 +222,16 @@ const ManageTimeslots = () => {
     setSelectedWeekStart(startOfWeek);
   };
 
+  const handleOpenAssignModal = (slot) => {
+    setSelectedSlot(slot);
+    setShowAssignModal(true);
+  };
+
+  const handleCloseAssignModal = () => {
+    setSelectedSlot(null);
+    setShowAssignModal(false);
+  };
+
   if (loading) {
     return (
       <div className="manage-timeslots-container loading">
@@ -241,12 +246,22 @@ const ManageTimeslots = () => {
 
   return (
     <div className="manage-timeslots-container">
-      <div className="manage-timeslots-header">
+      <motion.div
+        className="manage-timeslots-header"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <h1>Manage Work Timeslots</h1>
-        <p>Assign up to 2 employees per 2-hour work timeslot</p>
-      </div>
+        <p>Assign employees to work timeslots for your organization</p>
+      </motion.div>
 
-      <div className="week-navigation">
+      <motion.div
+        className="week-navigation"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
         <button onClick={goToPreviousWeek} className="nav-btn">
           ← Previous Week
         </button>
@@ -261,9 +276,14 @@ const ManageTimeslots = () => {
         <button onClick={goToNextWeek} className="nav-btn">
           Next Week →
         </button>
-      </div>
+      </motion.div>
 
-      <div className="timeslots-grid">
+      <motion.div
+        className="timeslots-grid"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
         {weekDates.map((date) => {
           const dateKey = date.toDateString();
           const daySlots = groupedSlots[dateKey] || [];
@@ -288,10 +308,9 @@ const ManageTimeslots = () => {
                     <TimeslotCard
                       key={slot._id}
                       slot={slot}
-                      members={orgMembers}
                       onAssign={handleAssignSlot}
                       onDelete={handleDeleteSlot}
-                      isAssigning={assigningSlot === slot._id}
+                      onOpenAssignModal={() => handleOpenAssignModal(slot)}
                       formatTime={formatTime}
                     />
                   ))
@@ -300,43 +319,24 @@ const ManageTimeslots = () => {
             </motion.div>
           );
         })}
-      </div>
+      </motion.div>
+
+      {/* Assignment Modal */}
+      <AssignEmployeeModal
+        show={showAssignModal}
+        onClose={handleCloseAssignModal}
+        timeslot={selectedSlot}
+        fetchTimeslots={fetchTimeslots}
+        employees={orgMembers.map((member) => member.user)}
+        onDeleteTimeslot={handleDeleteSlot}
+      />
     </div>
   );
 };
 
-const TimeslotCard = ({
-  slot,
-  members,
-  onAssign,
-  onDelete,
-  isAssigning,
-  formatTime,
-}) => {
-  const [selectedUser, setSelectedUser] = useState("");
-  const [notes, setNotes] = useState("");
-  const [showAssignForm, setShowAssignForm] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (selectedUser) {
-      onAssign(slot._id, selectedUser, notes, "assign");
-      setSelectedUser("");
-      setNotes("");
-      setShowAssignForm(false);
-    }
-  };
-
+const TimeslotCard = ({ slot, onAssign, onOpenAssignModal, formatTime }) => {
   const handleRemoveUser = (userId) => {
     onAssign(slot._id, userId, "", "remove");
-  };
-
-  const getAvailableMembers = () => {
-    const assignedUserIds =
-      slot.assignedUsers?.map((assignment) => assignment.user._id) || [];
-    return members.filter(
-      (member) => !assignedUserIds.includes(member.user._id)
-    );
   };
 
   const canAddMore =
@@ -362,15 +362,14 @@ const TimeslotCard = ({
 
       {slot.assignedUsers && slot.assignedUsers.length > 0 ? (
         <div className="assigned-info">
-          {slot.assignedUsers.map((assignment, index) => (
+          {slot.assignedUsers.map((assignment) => (
             <div key={assignment.user._id} className="assigned-user-item">
               <div className="assigned-user">
                 <strong>{assignment.user.name}</strong>
                 <button
                   onClick={() => handleRemoveUser(assignment.user._id)}
                   className="remove-user-btn"
-                  disabled={isAssigning}
-                  title="Remove user"
+                  aria-label="Remove user"
                 >
                   ×
                 </button>
@@ -382,86 +381,19 @@ const TimeslotCard = ({
           ))}
 
           {canAddMore && (
-            <button
-              onClick={() => setShowAssignForm(!showAssignForm)}
-              className="add-more-btn"
-              disabled={isAssigning}
-            >
-              {showAssignForm ? "Cancel" : "Add Employee"}
+            <button onClick={onOpenAssignModal} className="add-more-btn">
+              Add Employee
             </button>
           )}
         </div>
       ) : (
         <div className="unassigned-info">
           <span className="unassigned-text">No employees assigned</span>
-          <button
-            onClick={() => setShowAssignForm(true)}
-            className="assign-btn"
-            disabled={isAssigning}
-          >
+          <button onClick={onOpenAssignModal} className="assign-btn">
             Assign Employee
           </button>
         </div>
       )}
-
-      <AnimatePresence>
-        {showAssignForm && (
-          <motion.form
-            className="assign-form"
-            onSubmit={handleSubmit}
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <select
-              value={selectedUser}
-              onChange={(e) => setSelectedUser(e.target.value)}
-              className="user-select"
-              required
-            >
-              <option value="">Select an employee</option>
-              {getAvailableMembers().map((member) => (
-                <option key={member.user._id} value={member.user._id}>
-                  {member.user.name}
-                </option>
-              ))}
-            </select>
-
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Notes (optional)"
-              className="notes-input"
-              rows="2"
-            />
-
-            <div className="form-actions">
-              <button
-                type="submit"
-                className="save-btn"
-                disabled={isAssigning || !selectedUser}
-              >
-                {isAssigning ? "Assigning..." : "Assign"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAssignForm(false)}
-                className="cancel-btn"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => onDelete(slot._id)}
-                className="delete-btn"
-              >
-                Delete Slot
-              </button>
-            </div>
-          </motion.form>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 };

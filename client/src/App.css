@@ -1,66 +1,59 @@
+/* App-specific styles */
 .App {
   min-height: 100vh;
-  height: auto;
-  width: 100%;
-  position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Global card styling */
-.card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(59, 130, 246, 0.1);
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+/* Toast Container Styling */
+.Toastify__toast-container {
+  z-index: 9999;
 }
 
-.card:hover {
-  box-shadow: 0 12px 40px rgba(59, 130, 246, 0.15);
-  transform: translateY(-2px);
-}
-
-.card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
+.Toastify__toast--success {
   background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(59, 130, 246, 0.05),
-    transparent
+    135deg,
+    var(--light-green),
+    var(--secondary-green)
   );
-  transition: left 0.8s ease;
+  color: var(--white);
 }
 
-.card:hover::before {
-  left: 100%;
+.Toastify__toast--error {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: var(--white);
 }
 
-/* Loading animations */
-@keyframes fadeIn {
+.Toastify__toast--info {
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--secondary-green)
+  );
+  color: var(--white);
+}
+
+.Toastify__toast--warning {
+  background: linear-gradient(135deg, #ffc107, #e0a800);
+  color: var(--dark-green);
+}
+
+/* Main Content Area */
+.main-content {
+  flex: 1;
+  padding-top: 70px; /* Account for fixed header */
+  min-height: calc(100vh - 70px);
+}
+
+/* Page Transitions */
+.page-transition {
+  animation: pageSlideIn 0.4s ease-out;
+}
+
+@keyframes pageSlideIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInFromLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
+    transform: translateX(20px);
   }
   to {
     opacity: 1;
@@ -68,70 +61,60 @@
   }
 }
 
-@keyframes slideInFromRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--pale-green);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-green);
+  border-radius: var(--border-radius-small);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-green);
+}
+
+/* Focus Styles for Accessibility */
+*:focus {
+  outline: 2px solid var(--primary-green);
+  outline-offset: 2px;
+}
+
+/* Remove focus outline from navbar links */
+.navbar a:focus,
+.navbar .nav-link:focus {
+  outline: none;
+}
+
+button:focus,
+.btn-primary:focus,
+.btn-secondary:focus,
+.btn-danger:focus {
+  outline: 2px solid var(--primary-green);
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .navbar,
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger {
+    display: none !important;
   }
-  to {
-    opacity: 1;
-    transform: translateX(0);
+
+  body {
+    background: white !important;
+    color: black !important;
   }
-}
 
-.fade-in {
-  animation: fadeIn 0.6s ease-out;
-}
-
-.slide-in-left {
-  animation: slideInFromLeft 0.6s ease-out;
-}
-
-.slide-in-right {
-  animation: slideInFromRight 0.6s ease-out;
-}
-
-/* Utility classes */
-.text-center {
-  text-align: center;
-}
-
-.text-left {
-  text-align: left;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.mb-0 {
-  margin-bottom: 0;
-}
-.mb-1 {
-  margin-bottom: 0.5rem;
-}
-.mb-2 {
-  margin-bottom: 1rem;
-}
-.mb-3 {
-  margin-bottom: 1.5rem;
-}
-.mb-4 {
-  margin-bottom: 2rem;
-}
-
-.mt-0 {
-  margin-top: 0;
-}
-.mt-1 {
-  margin-top: 0.5rem;
-}
-.mt-2 {
-  margin-top: 1rem;
-}
-.mt-3 {
-  margin-top: 1.5rem;
-}
-.mt-4 {
-  margin-top: 2rem;
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
 }
