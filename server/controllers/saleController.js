@@ -9,20 +9,49 @@ exports.createSale = async (req, res) => {
 
     const timeslot = await Timeslot.findById(timeslotId);
     if (!timeslot) {
-      return res.status(404).json({ success: false, msg: "Timeslot not found" });
+      return res
+        .status(404)
+        .json({ success: false, msg: "Timeslot not found" });
+    }
+
+    // Check existing sales count for this timeslot
+    const existingSalesCount = await Sale.countDocuments({
+      timeslot: timeslotId,
+    });
+
+    // Get number of assigned cleaners (max sales allowed = number of cleaners)
+    const assignedCleanersCount = timeslot.assignedUsers
+      ? timeslot.assignedUsers.length
+      : 0;
+
+    if (assignedCleanersCount === 0) {
+      return res.status(400).json({
+        success: false,
+        msg: "No cleaners assigned to this timeslot. Sales cannot be recorded.",
+      });
+    }
+
+    if (existingSalesCount >= assignedCleanersCount) {
+      return res.status(400).json({
+        success: false,
+        msg: `Maximum of ${assignedCleanersCount} sale${
+          assignedCleanersCount !== 1 ? "s" : ""
+        } allowed for this timeslot (${assignedCleanersCount} cleaner${
+          assignedCleanersCount !== 1 ? "s" : ""
+        } assigned). This timeslot is full.`,
+      });
     }
 
     if (timeslot.maxEmployees <= 0) {
-      return res.status(400).json({ success: false, msg: "No spots available" });
+      return res
+        .status(400)
+        .json({ success: false, msg: "No spots available" });
     }
 
     // Verify user is member of the organization
     const organization = await Organization.findOne({
       _id: timeslot.organization,
-      $or: [
-        { owner: req.user._id },
-        { "members.user": req.user._id }
-      ],
+      $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
     });
 
     if (!organization) {
@@ -34,9 +63,9 @@ exports.createSale = async (req, res) => {
 
     const sale = new Sale({
       name: name.trim(),
-      number: number.trim(), 
+      number: number.trim(),
       address: address.trim(),
-      price: parseFloat(price), 
+      price: parseFloat(price),
       details: details.trim(),
       salesRepName: req.user.name,
       user: req.user._id,

@@ -19,7 +19,7 @@ import WelcomePage from "./pages/WelcomePage";
 import ManageOrg from "./pages/ManageOrg";
 import ManageTimeslots from "./pages/ManageTimeslots";
 import ViewTimeslots from "./pages/ViewTimeslots";
-
+import ViewSales from "./pages/viewsales";
 
 const router = createBrowserRouter([
   {
@@ -63,13 +63,16 @@ const router = createBrowserRouter([
         element: <ManageTimeslots />,
       },
       {
-        path:"view-timeslots",
+        path: "view-timeslots",
         element: <ViewTimeslots />,
-      }
+      },
+      {
+        path: "view-sales",
+        element: <ViewSales />,
+      },
     ],
   },
 ]);
-
 
 function App() {
   return (
@@ -91,6 +94,5 @@ function App() {
     </UserProvider>
   );
 }
-
 
 export default App;

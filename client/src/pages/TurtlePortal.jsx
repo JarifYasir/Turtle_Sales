@@ -17,7 +17,7 @@ const TurtlePortal = () => {
       toast.warn("Please login first to access dashboard");
       return;
     }
-    
+
     checkUserRole();
   }, [token, navigate]);
 
@@ -68,21 +68,36 @@ const TurtlePortal = () => {
           <p>View and manage your profile settings</p>
         </div>
 
-        <div className="action-card" onClick={() => navigate("/view-timeslots")}>
+        <div
+          className="action-card"
+          onClick={() => navigate("/view-timeslots")}
+        >
           <div className="action-icon">📅</div>
           <h3>View Schedule</h3>
           <p>Check your work schedule and team assignments</p>
         </div>
 
+        <div className="action-card" onClick={() => navigate("/view-sales")}>
+          <div className="action-icon">📊</div>
+          <h3>View Sales</h3>
+          <p>View sales data and performance analytics</p>
+        </div>
+
         {isOwner && (
           <>
-            <div className="action-card" onClick={() => navigate("/manage-org")}>
+            <div
+              className="action-card"
+              onClick={() => navigate("/manage-org")}
+            >
               <div className="action-icon">🏢</div>
               <h3>Manage Organization</h3>
               <p>Configure organization settings and manage team</p>
             </div>
 
-            <div className="action-card" onClick={() => navigate("/manage-timeslots")}>
+            <div
+              className="action-card"
+              onClick={() => navigate("/manage-timeslots")}
+            >
               <div className="action-icon">⏰</div>
               <h3>Manage Timeslots</h3>
               <p>Assign work schedules and manage team availability</p>
