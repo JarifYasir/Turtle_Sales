@@ -31,11 +31,13 @@ export default function Header() {
               <Nav.Link href="/">Home</Nav.Link>
 
               {token ? (
-                <Nav.Link href="/dashboard">Profile</Nav.Link>
+                <>
+                  <Nav.Link href="/dashboard">Profile</Nav.Link>
+                  <Nav.Link href="/turtle-portal">Turtle Portal</Nav.Link>
+                </>
               ) : (
                 <Nav.Link href="/register">Register/Login</Nav.Link>
               )}
-              <Nav.Link href="/turtle-portal">Turtle Portal</Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>

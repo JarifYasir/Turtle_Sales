@@ -19,7 +19,6 @@ const WelcomePage = () => {
   useEffect(() => {
     if (!token) {
       navigate("/login");
-      toast.warn("Please login first to access this page");
       return;
     }
 
@@ -63,7 +62,6 @@ const WelcomePage = () => {
     e.preventDefault();
 
     if (!orgName.trim()) {
-      toast.error("Organization name is required");
       return;
     }
 
@@ -128,12 +126,10 @@ const WelcomePage = () => {
     e.preventDefault();
 
     if (!orgCode.trim()) {
-      toast.error("Organization code is required");
       return;
     }
 
     if (orgCode.length !== 6) {
-      toast.error("Organization code must be exactly 6 characters");
       return;
     }
 

@@ -27,7 +27,6 @@ const ManageOrg = () => {
   useEffect(() => {
     if (!token) {
       navigate("/login");
-      toast.warn("Please login first to access this page");
     } else {
       fetchOrgDetails();
     }
@@ -70,7 +69,6 @@ const ManageOrg = () => {
 
   const handleUpdateOrg = async () => {
     if (!orgDetails.name.trim()) {
-      toast.error("Organization name is required");
       return;
     }
 

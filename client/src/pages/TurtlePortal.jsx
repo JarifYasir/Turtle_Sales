@@ -14,7 +14,6 @@ const TurtlePortal = () => {
   useEffect(() => {
     if (!token) {
       navigate("/login");
-      toast.warn("Please login first to access dashboard");
       return;
     }
 

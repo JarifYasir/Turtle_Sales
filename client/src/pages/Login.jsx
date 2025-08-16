@@ -54,14 +54,11 @@ const Login = () => {
           toast.error("An error occurred. Please try again.");
         }
       }
-    } else {
-      toast.error("Please fill all inputs");
     }
   };
 
   useEffect(() => {
     if (token !== "") {
-      toast.success("You are already logged in");
       navigate("/dashboard");
     }
   }, [token]);

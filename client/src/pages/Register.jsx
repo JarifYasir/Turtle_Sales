@@ -71,25 +71,21 @@ const Register = () => {
     // Validate username
     const usernameChecks = validateUsername(username);
     if (!Object.values(usernameChecks).every(Boolean)) {
-      toast.error("Please meet all username requirements");
       return;
     }
 
     // Validate email
     if (!validateEmail(email)) {
-      toast.error("Please enter a valid email address");
       return;
     }
 
     // Validate password strength
     if (passwordStrength.score < 3) {
-      toast.error("Password must be at least medium strength");
       return;
     }
 
     // Check if passwords match
     if (password !== confirmPassword) {
-      toast.error("Passwords don't match");
       return;
     }
 
@@ -124,14 +120,11 @@ const Register = () => {
           toast.error("An error occurred. Please try again.");
         }
       }
-    } else {
-      toast.error("Please fill all inputs");
     }
   };
 
   useEffect(() => {
     if (token !== "") {
-      toast.success("You are already logged in");
       navigate("/dashboard");
     }
   }, [token]);

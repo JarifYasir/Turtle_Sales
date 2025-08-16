@@ -26,7 +26,6 @@ const ViewTimeslots = () => {
   useEffect(() => {
     if (!token) {
       navigate("/login");
-      toast.warn("Please login first to access this page");
       return;
     }
     fetchTimeslots();
@@ -189,7 +188,6 @@ const ViewTimeslots = () => {
       !saleForm.details ||
       !saleForm.price
     ) {
-      toast.error("All fields are required");
       return;
     }
 
