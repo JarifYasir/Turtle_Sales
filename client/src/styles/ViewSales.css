@@ -1,53 +1,201 @@
 .view-sales-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   height: auto;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 2rem 1rem;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
 .sales-header {
   text-align: center;
-  margin-bottom: 3rem;
-  color: white;
+  margin-bottom: 2rem;
+  color: #163d7d;
 }
 
 .sales-header h1 {
-  font-size: 3rem;
+  font-size: 2.5rem;
+  font-weight: 700;
   margin-bottom: 0.5rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .sales-header p {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+  color: #355d9b;
   opacity: 0.9;
 }
 
 .sales-content {
   background: white;
   border-radius: 15px;
-  padding: 3rem;
+  padding: 1.5rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.sales-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1rem;
+  margin: 0 auto 2rem;
+  padding: 0 1rem;
+}
+
+.day-column {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(22, 61, 125, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 300px);
+}
+
+.day-header {
+  background: linear-gradient(135deg, #3578d6 0%, #4f9cff 100%);
+  color: white;
+  padding: 0.8rem;
   text-align: center;
 }
 
-.temp-message {
-  margin-bottom: 2rem;
+.day-header h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
-.temp-message h3 {
-  color: #667eea;
-  font-size: 2rem;
-  margin-bottom: 1rem;
+.day-sales {
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  flex-grow: 1;
 }
 
-.temp-message p {
-  color: #666;
-  font-size: 1.1rem;
-  line-height: 1.6;
+.no-sales, .no-sales-message {
+  text-align: center;
+  color: #6b7280;
+  padding: 1rem;
+  font-size: 0.875rem;
+  font-style: italic;
+  grid-column: 1 / -1;
+}
+
+.sale-card {
+  background: #f8fafd;
+  border: 1px solid #e1e9f7;
+  border-radius: 8px;
+  padding: 0.8rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.sale-time {
+  color: #3578d6;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin: 0.2rem 0 0.6rem;
+}
+
+.sale-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sale-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e9ecef;
+  padding-right: 24px;
+}
+
+.sale-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #2d3748;
+  font-weight: 600;
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+  opacity: 0.7;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.delete-btn:hover {
+  background: #c82333;
+  opacity: 1;
+}
+
+.sale-info {
+  display: grid;
+  gap: 0.25rem;
+  text-align: left;
+}
+
+.sale-info p {
+  margin: 0;
+  line-height: 1.4;
+  color: #4a5568;
+}
+
+.sale-info strong {
+  color: #2d3748;
+  margin-right: 0.25rem;
+}
+
+.filter-controls {
+  margin: 1rem 0 2rem;
+  text-align: center;
+}
+
+.employee-select,
+.toggle-btn {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #163d7d;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.employee-select {
+  min-width: 200px;
+  margin: 0 0.5rem;
+}
+
+.employee-select option {
+  background: #fff;
+  color: #2d3748;
+}
+
+.toggle-btn:hover,
+.employee-select:hover {
+  border-color: #3578d6;
+  box-shadow: 0 1px 4px rgba(53, 120, 214, 0.2);
 }
 
 .back-btn {
@@ -79,10 +227,22 @@
   }
 
   .sales-header h1 {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
   .sales-content {
-    padding: 2rem;
+    padding: 1rem;
+  }
+
+  .sales-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sale-card {
+    padding: 0.5rem;
+  }
+
+  .sale-info {
+    font-size: 0.8125rem;
   }
 }

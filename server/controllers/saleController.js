@@ -1,7 +1,84 @@
-// controllers/saleController.js (UPDATED - ANY EMPLOYEE CAN RECORD SALES)
+// controllers/saleController.js
 const Sale = require("../models/Sale");
 const Timeslot = require("../models/Timeslot");
 const Organization = require("../models/Organizations");
+
+// Get all sales for organization
+exports.getSales = async (req, res) => {
+  try {
+    // Find the organization the user belongs to
+    const organization = await Organization.findOne({
+      $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
+    });
+
+    if (!organization) {
+      return res.status(404).json({
+        success: false,
+        msg: "User not associated with any organization",
+      });
+    }
+
+    // Get all sales for the organization
+    const sales = await Sale.find({ organization: organization._id })
+      .sort({ createdAt: -1 })
+      .populate("user", "name")
+      .populate({
+        path: "timeslot",
+        select: "date startTime endTime",
+      });
+
+    res.json({ success: true, sales });
+  } catch (error) {
+    console.error("Get Sales Error:", error);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+};
+
+// Delete a sale (manager only)
+exports.deleteSale = async (req, res) => {
+  try {
+    const { saleId } = req.params;
+
+    // Find the organization where user is owner
+    const organization = await Organization.findOne({
+      owner: req.user._id,
+    });
+
+    if (!organization) {
+      return res.status(403).json({
+        success: false,
+        msg: "Only organization owners can delete sales",
+      });
+    }
+
+    // Find and delete the sale
+    const sale = await Sale.findOne({
+      _id: saleId,
+      organization: organization._id,
+    });
+
+    if (!sale) {
+      return res.status(404).json({
+        success: false,
+        msg: "Sale not found",
+      });
+    }
+
+    // Find the associated timeslot and increase available spots
+    const timeslot = await Timeslot.findById(sale.timeslot);
+    if (timeslot) {
+      timeslot.maxEmployees = timeslot.maxEmployees + 1;
+      await timeslot.save();
+    }
+
+    await sale.deleteOne();
+
+    res.json({ success: true, msg: "Sale deleted successfully" });
+  } catch (error) {
+    console.error("Delete Sale Error:", error);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+};
 
 exports.createSale = async (req, res) => {
   try {
