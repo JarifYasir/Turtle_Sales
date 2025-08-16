@@ -1,15 +1,12 @@
 /* ManageOrg.css - Complete Stylesheet */
 
 .manage-org-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fbff 0%, #e8f4fd 100%);
   padding: 2rem 1rem;
   box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   position: relative;
-  overflow-x: hidden;
 }
 
 .manage-org-container::before {
@@ -26,6 +23,7 @@
   );
   border-radius: 50%;
   animation: float 8s ease-in-out infinite;
+  z-index: 0;
 }
 
 .manage-org-container::after {
@@ -42,6 +40,7 @@
   );
   border-radius: 50%;
   animation: float 10s ease-in-out infinite reverse;
+  z-index: 0;
 }
 
 @keyframes float {
@@ -58,6 +57,9 @@
 }
 
 .manage-org-container.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
 }
 
@@ -68,24 +70,21 @@
   max-width: 800px;
   position: relative;
   z-index: 1;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .manage-org-header h1 {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #1e40af;
+  color: #1f2937;
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .manage-org-header p {
   font-size: 1.2rem;
-  color: #64748b;
+  color: #4b5563;
   margin: 0;
-  opacity: 0.9;
   line-height: 1.6;
 }
 
@@ -93,8 +92,8 @@
 .loading-spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid rgba(59, 130, 246, 0.1);
-  border-top: 4px solid #3b82f6;
+  border: 4px solid #e1e9f7;
+  border-top: 4px solid #3578d6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1.5rem;
@@ -111,7 +110,7 @@
 
 .manage-org-container.loading p {
   font-size: 1.2rem;
-  color: #64748b;
+  color: #4b5563;
   margin: 0;
   font-weight: 500;
 }
@@ -125,6 +124,7 @@
   gap: 2rem;
   position: relative;
   z-index: 1;
+  margin: 0 auto;
 }
 
 /* Card Base Styling */
@@ -132,55 +132,29 @@
 .invitation-card,
 .members-card,
 .danger-zone {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  border: 1px solid rgba(59, 130, 246, 0.1);
+  border: 1px solid #e5e7eb;
   transition: all 0.3s ease;
   position: relative;
-}
-
-.org-details-card::before,
-.invitation-card::before,
-.members-card::before,
-.danger-zone::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(59, 130, 246, 0.05),
-    transparent
-  );
-  transition: left 0.8s ease;
-}
-
-.org-details-card:hover::before,
-.invitation-card:hover::before,
-.members-card:hover::before,
-.danger-zone:hover::before {
-  left: 100%;
 }
 
 .org-details-card:hover,
 .invitation-card:hover,
 .members-card:hover,
 .danger-zone:hover {
-  box-shadow: 0 12px 40px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
 }
 
 /* Card Headers */
 .card-header {
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
   padding: 1.5rem 2rem;
-  color: #fff;
+  color: #1f2937;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -196,9 +170,9 @@
 /* Edit Button in Header */
 .edit-btn {
   padding: 0.6rem 1.2rem;
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
   border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 500;
@@ -207,7 +181,7 @@
 }
 
 .edit-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #2563eb;
   transform: translateY(-1px);
 }
 
@@ -237,12 +211,12 @@
 .info-item label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #163d7d;
+  color: #6b7280;
 }
 
 .info-item span {
   font-size: 1.1rem;
-  color: #2c3e50;
+  color: #1f2937;
   font-weight: 500;
 }
 
@@ -251,25 +225,25 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: #f8fafd;
+  background: #f1f5f9;
   padding: 0.8rem;
   border-radius: 8px;
-  border: 1px solid #e1e9f7;
+  border: 1px solid #e2e8f0;
 }
 
 .org-code {
   font-family: "Courier New", monospace;
   font-weight: 600;
-  color: #163d7d;
+  color: #1e293b;
   flex: 1;
   font-size: 1.1rem;
 }
 
 .copy-btn {
   padding: 0.5rem 1rem;
-  background: #3578d6;
-  color: #fff;
-  border: none;
+  background: #e2e8f0;
+  color: #475569;
+  border: 1px solid #cbd5e1;
   border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 500;
@@ -278,7 +252,7 @@
 }
 
 .copy-btn:hover {
-  background: #2a5bb8;
+  background: #cbd5e1;
   transform: scale(1.05);
 }
 
@@ -297,26 +271,32 @@
 
 .form-group label {
   font-weight: 600;
-  color: #163d7d;
+  color: #374151;
   font-size: 1rem;
 }
 
 .form-group input,
 .form-group textarea {
   padding: 1rem;
-  border: 2px solid #e1e9f7;
+  border: 2px solid #d1d5db;
   border-radius: 10px;
   font-size: 1rem;
   transition: all 0.3s ease;
-  background: #fff;
+  background: #ffffff;
+  color: #1f2937;
   font-family: inherit;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #9ca3af;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #3578d6;
-  box-shadow: 0 0 0 4px rgba(53, 120, 214, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .form-group textarea {
@@ -334,8 +314,8 @@
 
 .save-btn {
   padding: 0.8rem 2rem;
-  background: linear-gradient(135deg, #3578d6 0%, #4f9cff 100%);
-  color: #fff;
+  background: #10b981;
+  color: #ffffff;
   border: none;
   border-radius: 10px;
   font-size: 1rem;
@@ -346,7 +326,8 @@
 
 .save-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(53, 120, 214, 0.3);
+  background: #059669;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
 }
 
 .save-btn:disabled {
@@ -361,7 +342,7 @@
 }
 
 .invitation-card h3 {
-  color: #163d7d;
+  color: #1f2937;
   font-size: 1.3rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
@@ -371,26 +352,26 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: #f8fafd;
+  background: #f1f5f9;
   padding: 1rem;
   border-radius: 10px;
-  border: 1px solid #e1e9f7;
+  border: 1px solid #e2e8f0;
   margin-bottom: 1rem;
 }
 
 .invitation-code span {
   font-family: "Courier New", monospace;
   font-weight: 600;
-  color: #163d7d;
+  color: #1e293b;
   flex: 1;
   font-size: 1.2rem;
 }
 
 .invitation-code button {
   padding: 0.6rem 1.2rem;
-  background: #3578d6;
-  color: #fff;
-  border: none;
+  background: #e2e8f0;
+  color: #475569;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 500;
@@ -399,7 +380,7 @@
 }
 
 .invitation-code button:hover {
-  background: #2a5bb8;
+  background: #cbd5e1;
   transform: scale(1.05);
 }
 
@@ -416,8 +397,9 @@
 }
 
 .members-card h3 {
-  background: linear-gradient(135deg, #3578d6 0%, #4f9cff 100%);
-  color: #fff;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+  color: #1f2937;
   padding: 1.5rem 2rem;
   margin: 0;
   font-size: 1.4rem;
@@ -429,35 +411,27 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 /* Member Item */
 .member-item {
-  background: linear-gradient(135deg, #fff 0%, #f8fafd 100%);
+  background: #f9fafb;
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid #e1e9f7;
+  border: 1px solid #f3f4f6;
   transition: all 0.3s ease;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
-  overflow: hidden;
-}
-
-.member-item::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #3578d6, #4f9cff);
 }
 
 .member-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(22, 61, 125, 0.15);
+  background: #f3f4f6;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
 .member-info {
@@ -470,7 +444,7 @@
 .member-details h4 {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #163d7d;
+  color: #1f2937;
   margin: 0 0 0.3rem 0;
 }
 
@@ -492,8 +466,9 @@
 }
 
 .member-role {
-  background: linear-gradient(135deg, #e8f2ff, #d1e7ff);
-  color: #3578d6;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
 }
 
 .member-meta span {
@@ -504,8 +479,8 @@
 /* Remove Button */
 .remove-btn {
   padding: 0.6rem 1.2rem;
-  background: linear-gradient(135deg, #3578d6, #4f9cff);
-  color: #fff;
+  background: #ef4444;
+  color: #ffffff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -516,9 +491,9 @@
 }
 
 .remove-btn:hover {
-  background: linear-gradient(135deg, #2a5bb8, #3578d6);
+  background: #dc2626;
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(53, 120, 214, 0.3);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 .remove-btn:disabled {
@@ -529,12 +504,13 @@
 
 /* Danger Zone */
 .danger-zone {
-  border: 2px solid #dc3545;
+  border: 2px solid #fecaca;
+  background: #fef2f2;
 }
 
 .danger-zone h3 {
-  background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
-  color: #fff;
+  background: #fecaca;
+  color: #dc2626;
   padding: 1.5rem 2rem;
   margin: 0;
   font-size: 1.4rem;
@@ -550,7 +526,7 @@
 }
 
 .danger-info h4 {
-  color: #dc3545;
+  color: #dc2626;
   font-size: 1.2rem;
   font-weight: 600;
   margin: 0 0 0.8rem 0;
@@ -565,8 +541,8 @@
 
 .delete-org-btn {
   padding: 0.8rem 1.8rem;
-  background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
-  color: #fff;
+  background: #dc2626;
+  color: #ffffff;
   border: none;
   border-radius: 10px;
   font-size: 1rem;
@@ -578,7 +554,8 @@
 
 .delete-org-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+  background: #b91c1c;
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
 }
 
 .delete-org-btn:disabled {
@@ -693,9 +670,4 @@
 /* Global styles for smooth scrolling */
 html {
   scroll-behavior: smooth;
-}
-
-body {
-  overflow-x: hidden;
-  overflow-y: auto;
 }
