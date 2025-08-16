@@ -258,43 +258,44 @@ const WelcomePage = () => {
             >
               <motion.div
                 className="option-card"
-                whileHover={{
-                  y: -5,
-                  boxShadow: "0 8px 25px rgba(53, 120, 214, 0.15)",
-                }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.99 }}
+                onClick={() => !loading && setMode("create")}
               >
                 <div className="option-icon create-icon">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path
                       d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"
                       fill="currentColor"
                     />
                   </svg>
                 </div>
-                <h3>Create Organization</h3>
-                <p>
-                  Start your own organization and invite team members to join
-                </p>
+                <div className="option-content">
+                  <h3>Create Organization</h3>
+                  <p>
+                    Start your own organization and invite team members to join
+                  </p>
+                </div>
                 <button
                   className="option-btn create-btn"
-                  onClick={() => setMode("create")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMode("create");
+                  }}
                   disabled={loading}
                 >
-                  Create New Organization
+                  Create
                 </button>
               </motion.div>
 
               <motion.div
                 className="option-card"
-                whileHover={{
-                  y: -5,
-                  boxShadow: "0 8px 25px rgba(53, 120, 214, 0.15)",
-                }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.99 }}
+                onClick={() => !loading && setMode("join")}
               >
                 <div className="option-icon join-icon">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path
                       d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H16c-.8 0-1.54.37-2.01.99L12 11l2.01 2.01c.47.62 1.21.99 2.01.99h2.54l-2.54 7.63V22z"
                       fill="currentColor"
@@ -309,14 +310,21 @@ const WelcomePage = () => {
                     />
                   </svg>
                 </div>
-                <h3>Join Organization</h3>
-                <p>Enter an invitation code to join an existing organization</p>
+                <div className="option-content">
+                  <h3>Join Organization</h3>
+                  <p>
+                    Enter an invitation code to join an existing organization
+                  </p>
+                </div>
                 <button
                   className="option-btn join-btn"
-                  onClick={() => setMode("join")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setMode("join");
+                  }}
                   disabled={loading}
                 >
-                  Join Organization
+                  Join
                 </button>
               </motion.div>
             </motion.div>
