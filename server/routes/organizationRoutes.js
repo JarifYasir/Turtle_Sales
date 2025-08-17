@@ -57,4 +57,7 @@ router.delete("/member/:memberId", auth, organizationController.removeMember);
 // Leave organization (employees only)
 router.post("/leave", auth, organizationController.leaveOrganization);
 
+// Promote member to manager (owner only) - NEW ROUTE
+router.put("/member/promote/:memberId", auth, organizationController.promoteMember);
+
 module.exports = router;

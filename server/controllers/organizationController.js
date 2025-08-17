@@ -39,7 +39,6 @@ exports.createOrganization = async (req, res) => {
     const existingMembership = await Organization.findOne({
       $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
     });
-
     if (existingMembership) {
       return res.status(400).json({
         success: false,
@@ -49,7 +48,6 @@ exports.createOrganization = async (req, res) => {
 
     // Generate unique code
     const code = await generateUniqueCode();
-
     // Create organization with owner as first member
     const organization = new Organization({
       name: name.trim(),
@@ -66,7 +64,6 @@ exports.createOrganization = async (req, res) => {
     });
 
     await organization.save();
-
     // Populate the owner and members for the response
     await organization.populate([
       { path: "owner", select: "name email" },
@@ -141,7 +138,6 @@ exports.joinOrganization = async (req, res) => {
     const existingMembership = await Organization.findOne({
       $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
     });
-
     if (existingMembership) {
       return res.status(400).json({
         success: false,
@@ -153,7 +149,6 @@ exports.joinOrganization = async (req, res) => {
     const organization = await Organization.findOne({
       code: code.trim().toUpperCase(),
     });
-
     if (!organization) {
       return res.status(404).json({
         success: false,
@@ -165,7 +160,6 @@ exports.joinOrganization = async (req, res) => {
     const alreadyMember = organization.members.some(
       (member) => member.user.toString() === req.user._id.toString()
     );
-
     if (alreadyMember) {
       return res.status(400).json({
         success: false,
@@ -181,7 +175,6 @@ exports.joinOrganization = async (req, res) => {
     });
 
     await organization.save();
-
     // Populate the response
     await organization.populate([
       { path: "owner", select: "name email" },
@@ -214,7 +207,6 @@ exports.updateOrganization = async (req, res) => {
 
     const { name, description } = req.body;
     const organization = await Organization.findOne({ owner: req.user._id });
-
     if (!organization) {
       return res.status(404).json({
         success: false,
@@ -231,7 +223,6 @@ exports.updateOrganization = async (req, res) => {
     }
 
     await organization.save();
-
     // Populate after saving
     await organization.populate([
       { path: "owner", select: "name email" },
@@ -249,17 +240,15 @@ exports.updateOrganization = async (req, res) => {
   }
 };
 
-// Remove member from organization (only owner allowed) - FIXED VERSION
+// Remove member from organization (only owner allowed)
 exports.removeMember = async (req, res) => {
   try {
     const { memberId } = req.params;
-
     console.log("Attempting to remove member:", memberId);
     console.log("Request user:", req.user._id);
 
     // Find organization where current user is the owner
     const organization = await Organization.findOne({ owner: req.user._id });
-
     if (!organization) {
       return res.status(404).json({
         success: false,
@@ -284,7 +273,6 @@ exports.removeMember = async (req, res) => {
     );
 
     console.log("Member index found:", memberIndex);
-
     if (memberIndex === -1) {
       return res.status(404).json({
         success: false,
@@ -295,7 +283,6 @@ exports.removeMember = async (req, res) => {
     // Remove the member
     organization.members.splice(memberIndex, 1);
     await organization.save();
-
     console.log("Member removed successfully");
 
     res.json({
@@ -354,7 +341,6 @@ exports.leaveOrganization = async (req, res) => {
 exports.deleteOrganization = async (req, res) => {
   try {
     const organization = await Organization.findOne({ owner: req.user._id });
-
     if (!organization) {
       return res.status(404).json({
         success: false,
@@ -370,6 +356,63 @@ exports.deleteOrganization = async (req, res) => {
     });
   } catch (error) {
     console.error("Delete Organization Error:", error);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+};
+
+// Promote member to manager (NEW FUNCTION)
+exports.promoteMember = async (req, res) => {
+  try {
+    const { memberId } = req.params;
+
+    // Find organization where current user is the owner
+    const organization = await Organization.findOne({ owner: req.user._id });
+    if (!organization) {
+      return res.status(403).json({
+        success: false,
+        msg: "Only organization owners can promote members",
+      });
+    }
+
+    // Find the member to promote
+    const memberIndex = organization.members.findIndex(
+      (member) => member.user.toString() === memberId
+    );
+
+    if (memberIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        msg: "Member not found in organization",
+      });
+    }
+
+    const member = organization.members[memberIndex];
+
+    // Validation checks
+    if (member.role === "owner") {
+      return res.status(400).json({
+        success: false,
+        msg: "Cannot promote the owner",
+      });
+    }
+
+    if (member.role === "manager") {
+      return res.status(400).json({
+        success: false,
+        msg: "Member is already a manager",
+      });
+    }
+
+    // Promote employee to manager
+    organization.members[memberIndex].role = "manager";
+    await organization.save();
+
+    res.json({
+      success: true,
+      msg: "Member promoted to manager successfully",
+    });
+  } catch (error) {
+    console.error("Promote Member Error:", error);
     res.status(500).json({ success: false, msg: "Server error" });
   }
 };
