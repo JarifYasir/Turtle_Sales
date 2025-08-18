@@ -27,7 +27,7 @@ const Dashboard = () => {
 
     try {
       const response = await axios.delete(
-        "http://localhost:3000/api/v1/delete-account",
+        `${import.meta.env.VITE_API_URL}/auth/delete-account`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -60,7 +60,7 @@ const Dashboard = () => {
 
     try {
       const response = await axios.put(
-        "http://localhost:3000/api/v1/update-profile",
+        `${import.meta.env.VITE_API_URL}/auth/update-profile`,
         { name: newName },
         {
           headers: {

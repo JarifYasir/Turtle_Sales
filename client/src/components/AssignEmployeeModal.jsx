@@ -11,6 +11,9 @@ const AssignEmployeeModal = ({
   fetchTimeslots,
   employees,
   onDeleteTimeslot,
+  isWorkday = false,
+  onAssign = null,
+  isCreating = false,
 }) => {
   const [selectedEmployee, setSelectedEmployee] = useState("");
   const [notes, setNotes] = useState("");
@@ -53,12 +56,22 @@ const AssignEmployeeModal = ({
       return;
     }
 
+    // If we're in creation mode, use the local callback
+    if (isCreating && onAssign) {
+      onAssign(selectedEmployee, notes);
+      return;
+    }
+
     try {
       setLoading(true);
       const authToken = JSON.parse(localStorage.getItem("auth"));
 
+      const url = isWorkday
+        ? `http://localhost:3000/api/v1/workdays/${timeslot.workdayId}/timeslots/${timeslot._id}/assign`
+        : `http://localhost:3000/api/v1/timeslots/assign/${timeslot._id}`;
+
       await axios.put(
-        `http://localhost:3000/api/v1/timeslots/assign/${timeslot._id}`,
+        url,
         {
           userId: selectedEmployee,
           notes,
@@ -91,12 +104,13 @@ const AssignEmployeeModal = ({
       setDeleteLoading(true);
       const authToken = JSON.parse(localStorage.getItem("auth"));
 
-      await axios.delete(
-        `http://localhost:3000/api/v1/timeslots/${timeslot._id}`,
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
-        }
-      );
+      const url = isWorkday
+        ? `http://localhost:3000/api/v1/workdays/${timeslot.workdayId}/timeslots/${timeslot._id}`
+        : `http://localhost:3000/api/v1/timeslots/${timeslot._id}`;
+
+      await axios.delete(url, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
 
       toast.success("Timeslot deleted successfully!");
       fetchTimeslots();
@@ -169,11 +183,15 @@ const AssignEmployeeModal = ({
                       onChange={(e) => setSelectedEmployee(e.target.value)}
                     >
                       <option value="">-- Select employee --</option>
-                      {employees.map((employee) => (
-                        <option key={employee._id} value={employee._id}>
-                          {employee.name}
-                        </option>
-                      ))}
+                      {employees && employees.length > 0 ? (
+                        employees.map((employee) => (
+                          <option key={employee._id} value={employee._id}>
+                            {employee.name}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>No employees available</option>
+                      )}
                     </select>
                   </div>
 
@@ -195,14 +213,15 @@ const AssignEmployeeModal = ({
                     Current Assignments
                   </h4>
                   <div className="current-assignments-container">
-                    {timeslot.assignments && timeslot.assignments.length > 0 ? (
+                    {timeslot.assignedUsers &&
+                    timeslot.assignedUsers.length > 0 ? (
                       <div className="modal-assigned-users compact-users">
-                        {timeslot.assignments.map((assignment) => (
+                        {timeslot.assignedUsers.map((assignment) => (
                           <div
-                            key={assignment._id}
+                            key={assignment.user._id}
                             className="modal-assigned-user compact-user"
                           >
-                            {assignment.employee?.name || "Unknown Employee"}
+                            {assignment.user?.name || "Unknown Employee"}
                             {assignment.notes && (
                               <span className="compact-notes">
                                 {assignment.notes}

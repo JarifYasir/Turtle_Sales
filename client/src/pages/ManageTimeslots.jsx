@@ -1,23 +1,27 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/ManageTimeslots.css";
+import "../styles/WorkdayStyles.css";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
-import AssignEmployeeModal from "../components/AssignEmployeeModal";
+import CreateWorkdayModal from "../components/CreateWorkdayModal";
+import ManageWorkdayModal from "../components/ManageWorkdayModal";
 
 const ManageTimeslots = () => {
   const { user, token } = useContext(UserContext);
   const navigate = useNavigate();
 
-  const [timeslots, setTimeslots] = useState([]);
+  const [workdays, setWorkdays] = useState([]);
   const [orgMembers, setOrgMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
   const [selectedWeekStart, setSelectedWeekStart] = useState(new Date());
-  const [showAssignModal, setShowAssignModal] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showManageModal, setShowManageModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedWorkday, setSelectedWorkday] = useState(null);
 
   useEffect(() => {
     if (!token) {
@@ -26,12 +30,11 @@ const ManageTimeslots = () => {
     }
 
     fetchOrgMembers();
-    generateTimeslots();
   }, [token, navigate]);
 
   useEffect(() => {
     if (orgMembers.length > 0) {
-      fetchTimeslots();
+      fetchWorkdays();
     }
   }, [selectedWeekStart, orgMembers]);
 
@@ -39,7 +42,7 @@ const ManageTimeslots = () => {
     try {
       const authToken = JSON.parse(localStorage.getItem("auth"));
       const response = await axios.get(
-        "http://localhost:3000/api/v1/organization",
+        `${import.meta.env.VITE_API_URL}/organization`,
         {
           headers: { Authorization: `Bearer ${authToken}` },
         }
@@ -61,23 +64,7 @@ const ManageTimeslots = () => {
     }
   };
 
-  const generateTimeslots = async () => {
-    try {
-      const authToken = JSON.parse(localStorage.getItem("auth"));
-      await axios.post(
-        "http://localhost:3000/api/v1/timeslots/generate",
-        {},
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
-        }
-      );
-    } catch (err) {
-      console.error("Error generating timeslots:", err);
-      // Don't show error for generation as it might just mean slots already exist
-    }
-  };
-
-  const fetchTimeslots = async () => {
+  const fetchWorkdays = async () => {
     try {
       setLoading(true);
       const authToken = JSON.parse(localStorage.getItem("auth"));
@@ -89,73 +76,61 @@ const ManageTimeslots = () => {
       endDate.setDate(startDate.getDate() + 7);
 
       const response = await axios.get(
-        `http://localhost:3000/api/v1/timeslots?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}&management=true`,
+        `${
+          import.meta.env.VITE_API_URL
+        }/workdays?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
         {
           headers: { Authorization: `Bearer ${authToken}` },
         }
       );
 
       if (response.data.success) {
-        setTimeslots(response.data.timeslots);
+        setWorkdays(response.data.workdays);
         setIsOwner(response.data.isOwner);
       }
     } catch (err) {
-      console.error("Error fetching timeslots:", err);
-      toast.error("Failed to load timeslots");
+      console.error("Error fetching workdays:", err);
+      toast.error("Failed to load workdays");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAssignSlot = async (
-    timeslotId,
-    userId,
-    notes,
-    action = "assign"
-  ) => {
-    try {
-      const authToken = JSON.parse(localStorage.getItem("auth"));
-
-      const response = await axios.put(
-        `http://localhost:3000/api/v1/timeslots/assign/${timeslotId}`,
-        { userId, notes, action },
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
-        }
-      );
-
-      if (response.data.success) {
-        toast.success(response.data.msg);
-        fetchTimeslots();
-      }
-    } catch (err) {
-      console.error("Error assigning timeslot:", err);
-      if (err.response?.data?.msg) {
-        toast.error(err.response.data.msg);
-      } else {
-        toast.error("Failed to assign timeslot");
-      }
-    }
+  const handleCreateWorkday = (date) => {
+    setSelectedDate(date);
+    setShowCreateModal(true);
   };
 
-  const handleDeleteSlot = async (timeslotId) => {
+  const handleManageWorkday = (workday) => {
+    setSelectedWorkday(workday);
+    setShowManageModal(true);
+  };
+
+  const handleDeleteWorkday = async (workdayId) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this entire workday? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
     try {
       const authToken = JSON.parse(localStorage.getItem("auth"));
-
       const response = await axios.delete(
-        `http://localhost:3000/api/v1/timeslots/${timeslotId}`,
+        `${import.meta.env.VITE_API_URL}/workdays/${workdayId}`,
         {
           headers: { Authorization: `Bearer ${authToken}` },
         }
       );
 
       if (response.data.success) {
-        toast.success("Timeslot deleted successfully");
-        fetchTimeslots();
+        toast.success("Workday deleted successfully");
+        fetchWorkdays();
       }
     } catch (err) {
-      console.error("Error deleting timeslot:", err);
-      toast.error("Failed to delete timeslot");
+      console.error("Error deleting workday:", err);
+      toast.error("Failed to delete workday");
     }
   };
 
@@ -188,16 +163,11 @@ const ManageTimeslots = () => {
     return dates;
   };
 
-  const groupTimeslotsByDate = () => {
-    const grouped = {};
-    timeslots.forEach((slot) => {
-      const dateKey = new Date(slot.date).toDateString();
-      if (!grouped[dateKey]) {
-        grouped[dateKey] = [];
-      }
-      grouped[dateKey].push(slot);
-    });
-    return grouped;
+  const getWorkdayByDate = (date) => {
+    const dateKey = date.toDateString();
+    return workdays.find(
+      (workday) => new Date(workday.date).toDateString() === dateKey
+    );
   };
 
   const goToPreviousWeek = () => {
@@ -222,26 +192,27 @@ const ManageTimeslots = () => {
     setSelectedWeekStart(startOfWeek);
   };
 
-  const handleOpenAssignModal = (slot) => {
-    setSelectedSlot(slot);
-    setShowAssignModal(true);
+  const getTotalEmployeesForDay = (workday) => {
+    if (!workday || !workday.timeslots) return 0;
+    return workday.timeslots.reduce(
+      (total, slot) => total + (slot.assignedUsers?.length || 0),
+      0
+    );
   };
 
-  const handleCloseAssignModal = () => {
-    setSelectedSlot(null);
-    setShowAssignModal(false);
+  const getTotalTimeslotsForDay = (workday) => {
+    return workday ? workday.timeslots?.length || 0 : 0;
   };
 
   if (loading) {
     return (
       <div className="manage-timeslots-container loading">
         <div className="loading-spinner"></div>
-        <p>Loading timeslots...</p>
+        <p>Loading workdays...</p>
       </div>
     );
   }
 
-  const groupedSlots = groupTimeslotsByDate();
   const weekDates = getWeekDates();
 
   return (
@@ -252,8 +223,10 @@ const ManageTimeslots = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1>Manage Work Timeslots</h1>
-        <p>Assign employees to work timeslots for your organization</p>
+        <h1>Manage Workdays</h1>
+        <p>
+          Create and manage workdays with custom timeslots for your organization
+        </p>
       </motion.div>
 
       <motion.div
@@ -279,18 +252,17 @@ const ManageTimeslots = () => {
       </motion.div>
 
       <motion.div
-        className="timeslots-grid"
+        className="workdays-grid"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
         {weekDates.map((date) => {
-          const dateKey = date.toDateString();
-          const daySlots = groupedSlots[dateKey] || [];
+          const workday = getWorkdayByDate(date);
 
           return (
             <motion.div
-              key={dateKey}
+              key={date.toDateString()}
               className="day-column"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -298,22 +270,40 @@ const ManageTimeslots = () => {
             >
               <div className="day-header">
                 <h3>{formatDate(date)}</h3>
+                <div className="day-info">
+                  {workday ? (
+                    <>
+                      <span className="workday-stats">
+                        {getTotalTimeslotsForDay(workday)} timeslots •{" "}
+                        {getTotalEmployeesForDay(workday)} employees
+                      </span>
+                    </>
+                  ) : (
+                    <span className="no-workday">No workday scheduled</span>
+                  )}
+                </div>
               </div>
 
-              <div className="timeslots-list">
-                {daySlots.length === 0 ? (
-                  <div className="no-slots">No timeslots available</div>
+              <div className="workday-content">
+                {workday ? (
+                  <WorkdayCard
+                    workday={workday}
+                    onManage={() => handleManageWorkday(workday)}
+                    onDelete={() => handleDeleteWorkday(workday._id)}
+                    formatTime={formatTime}
+                  />
                 ) : (
-                  daySlots.map((slot) => (
-                    <TimeslotCard
-                      key={slot._id}
-                      slot={slot}
-                      onAssign={handleAssignSlot}
-                      onDelete={handleDeleteSlot}
-                      onOpenAssignModal={() => handleOpenAssignModal(slot)}
-                      formatTime={formatTime}
-                    />
-                  ))
+                  <div className="no-workday-card">
+                    <div className="no-workday-message">
+                      <p>No workday scheduled</p>
+                      <button
+                        onClick={() => handleCreateWorkday(date)}
+                        className="create-workday-btn"
+                      >
+                        Create Workday
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
             </motion.div>
@@ -321,79 +311,110 @@ const ManageTimeslots = () => {
         })}
       </motion.div>
 
-      {/* Assignment Modal */}
-      <AssignEmployeeModal
-        show={showAssignModal}
-        onClose={handleCloseAssignModal}
-        timeslot={selectedSlot}
-        fetchTimeslots={fetchTimeslots}
+      {/* Create Workday Modal */}
+      <CreateWorkdayModal
+        show={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        date={selectedDate}
+        onWorkdayCreated={fetchWorkdays}
         employees={orgMembers.map((member) => member.user)}
-        onDeleteTimeslot={handleDeleteSlot}
+      />
+
+      {/* Manage Workday Modal */}
+      <ManageWorkdayModal
+        show={showManageModal}
+        onClose={() => setShowManageModal(false)}
+        workday={selectedWorkday}
+        onWorkdayUpdated={fetchWorkdays}
+        employees={orgMembers.map((member) => member.user)}
       />
     </div>
   );
 };
 
-const TimeslotCard = ({ slot, onAssign, onOpenAssignModal, formatTime }) => {
-  const handleRemoveUser = (userId) => {
-    onAssign(slot._id, userId, "", "remove");
+const WorkdayCard = ({ workday, onManage, onDelete, formatTime }) => {
+  const getTotalAssignedEmployees = () => {
+    return workday.timeslots.reduce(
+      (total, slot) => total + (slot.assignedUsers?.length || 0),
+      0
+    );
   };
 
-  const canAddMore =
-    (slot.assignedUsers?.length || 0) < (slot.maxEmployees || 2);
+  const getTotalCapacity = () => {
+    return workday.timeslots.reduce(
+      (total, slot) => total + (slot.maxEmployees || 0),
+      0
+    );
+  };
+
+  const getTimeRange = () => {
+    if (!workday.timeslots || workday.timeslots.length === 0)
+      return "No timeslots";
+
+    const startTimes = workday.timeslots.map((slot) => slot.startTime).sort();
+    const endTimes = workday.timeslots.map((slot) => slot.endTime).sort();
+
+    return `${formatTime(startTimes[0])} - ${formatTime(
+      endTimes[endTimes.length - 1]
+    )}`;
+  };
 
   return (
     <motion.div
-      className={`timeslot-card ${
-        slot.assignedUsers?.length > 0 ? "assigned" : "unassigned"
-      }`}
+      className="workday-card"
       layout
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.2 }}
     >
-      <div className="slot-time">
-        {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-      </div>
-
-      <div className="slot-capacity">
-        {slot.assignedUsers?.length || 0} / {slot.maxEmployees || 2} employees
-      </div>
-
-      {slot.assignedUsers && slot.assignedUsers.length > 0 ? (
-        <div className="assigned-info">
-          {slot.assignedUsers.map((assignment) => (
-            <div key={assignment.user._id} className="assigned-user-item">
-              <div className="assigned-user">
-                <strong>{assignment.user.name}</strong>
-                <button
-                  onClick={() => handleRemoveUser(assignment.user._id)}
-                  className="remove-user-btn"
-                  aria-label="Remove user"
-                >
-                  ×
-                </button>
-              </div>
-              {assignment.notes && (
-                <div className="slot-notes">{assignment.notes}</div>
-              )}
-            </div>
-          ))}
-
-          {canAddMore && (
-            <button onClick={onOpenAssignModal} className="add-more-btn">
-              Add Employee
-            </button>
-          )}
+      <div className="workday-summary">
+        <div className="workday-time-range">{getTimeRange()}</div>
+        <div className="workday-capacity">
+          {getTotalAssignedEmployees()} / {getTotalCapacity()} employees
+          assigned
         </div>
-      ) : (
-        <div className="unassigned-info">
-          <span className="unassigned-text">No employees assigned</span>
-          <button onClick={onOpenAssignModal} className="assign-btn">
-            Assign Employee
-          </button>
+        <div className="workday-slots-count">
+          {workday.timeslots.length} timeslot
+          {workday.timeslots.length !== 1 ? "s" : ""}
+        </div>
+      </div>
+
+      {workday.notes && (
+        <div className="workday-notes">
+          <small>{workday.notes}</small>
         </div>
       )}
+
+      <div className="workday-timeslots-preview">
+        {workday.timeslots.slice(0, 3).map((slot) => (
+          <div key={slot._id} className="timeslot-preview">
+            <span className="preview-time">
+              {formatTime(slot.startTime)}-{formatTime(slot.endTime)}
+            </span>
+            <span className="preview-capacity">
+              ({slot.assignedUsers?.length || 0}/{slot.maxEmployees})
+            </span>
+          </div>
+        ))}
+        {workday.timeslots.length > 3 && (
+          <div className="more-timeslots">
+            +{workday.timeslots.length - 3} more
+          </div>
+        )}
+      </div>
+
+      <div className="workday-actions">
+        <button onClick={onManage} className="manage-btn">
+          Manage Workday
+        </button>
+        <button
+          onClick={onDelete}
+          className="delete-workday-btn"
+          title="Delete entire workday"
+        >
+          Delete
+        </button>
+      </div>
     </motion.div>
   );
 };

@@ -53,8 +53,7 @@ timeslotSchema.index(
   { unique: true }
 );
 
-// Index for faster queries
-timeslotSchema.index({ organization: 1, date: 1 });
+// Index for faster queries (organization+date index is covered by the compound index above)
 timeslotSchema.index({ "assignedUsers.user": 1 });
 
 module.exports = mongoose.model("Timeslot", timeslotSchema);

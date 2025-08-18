@@ -14,14 +14,13 @@ export const UserProvider = ({ children }) => {
     const fetchUserData = async () => {
       if (token) {
         try {
-          const response = await axios.get(
-            "http://localhost:3000/api/v1/dashboard",
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+          const apiUrl =
+            import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
+          const response = await axios.get(`${apiUrl}/auth/dashboard`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
           setUser(response.data.user);
         } catch (error) {
           console.error("Failed to fetch user data:", error);

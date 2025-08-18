@@ -37,7 +37,7 @@ const ManageOrg = () => {
     try {
       const authToken = JSON.parse(localStorage.getItem("auth"));
       const response = await axios.get(
-        "http://localhost:3000/api/v1/organization",
+        `${import.meta.env.VITE_API_URL}/organization`,
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
       if (response.data.success) {
@@ -75,7 +75,7 @@ const ManageOrg = () => {
     try {
       const authToken = JSON.parse(localStorage.getItem("auth"));
       const response = await axios.put(
-        "http://localhost:3000/api/v1/organization",
+        `${import.meta.env.VITE_API_URL}/organization`,
         {
           name: orgDetails.name,
           description: orgDetails.description,
@@ -94,9 +94,7 @@ const ManageOrg = () => {
           const errorMsg = err.response.data.errors[0].msg;
           toast.error(errorMsg);
         } else {
-          toast.error(
-            err.response.data.msg || "Failed to update organization"
-          );
+          toast.error(err.response.data.msg || "Failed to update organization");
         }
       } else {
         toast.error("Failed to update organization");
@@ -120,7 +118,7 @@ const ManageOrg = () => {
       try {
         const authToken = JSON.parse(localStorage.getItem("auth"));
         const response = await axios.delete(
-          "http://localhost:3000/api/v1/organization",
+          `${import.meta.env.VITE_API_URL}/organization`,
           { headers: { Authorization: `Bearer ${authToken}` } }
         );
         if (response.data.success) {
@@ -130,9 +128,7 @@ const ManageOrg = () => {
       } catch (err) {
         console.error("Error deleting organization:", err);
         if (err.response && err.response.data) {
-          toast.error(
-            err.response.data.msg || "Failed to delete organization"
-          );
+          toast.error(err.response.data.msg || "Failed to delete organization");
         } else {
           toast.error("Failed to delete organization");
         }
@@ -156,7 +152,7 @@ const ManageOrg = () => {
       try {
         const authToken = JSON.parse(localStorage.getItem("auth"));
         const response = await axios.delete(
-          `http://localhost:3000/api/v1/organization/member/${memberId}`,
+          `${import.meta.env.VITE_API_URL}/organization/member/${memberId}`,
           { headers: { Authorization: `Bearer ${authToken}` } }
         );
         if (response.data.success) {
@@ -166,9 +162,7 @@ const ManageOrg = () => {
       } catch (err) {
         console.error("Error removing member:", err);
         if (err.response && err.response.data) {
-          toast.error(
-            err.response.data.msg || "Failed to remove member"
-          );
+          toast.error(err.response.data.msg || "Failed to remove member");
         } else {
           toast.error("Failed to remove member");
         }
@@ -181,14 +175,14 @@ const ManageOrg = () => {
   // --- Promotion handler ---
   const handlePromoteMember = async (memberId, memberName) => {
     if (!isOwner) return;
-    if (
-      !window.confirm(`Promote ${memberName} to manager?`)
-    ) return;
+    if (!window.confirm(`Promote ${memberName} to manager?`)) return;
     setUpdateLoading(true);
     try {
       const authToken = JSON.parse(localStorage.getItem("auth"));
       const response = await axios.put(
-        `http://localhost:3000/api/v1/organization/member/promote/${memberId}`,
+        `${
+          import.meta.env.VITE_API_URL
+        }/organization/member/promote/${memberId}`,
         {},
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
@@ -199,10 +193,7 @@ const ManageOrg = () => {
         toast.error(response.data.msg || "Promotion failed");
       }
     } catch (err) {
-      toast.error(
-        err.response?.data?.msg ||
-        "Error promoting member"
-      );
+      toast.error(err.response?.data?.msg || "Error promoting member");
     } finally {
       setUpdateLoading(false);
     }
@@ -247,11 +238,7 @@ const ManageOrg = () => {
     <div className="manage-org-container">
       <div className="manage-org-content">
         <div className="manage-org-header">
-          <h1>
-            {orgDetails.name
-              ? orgDetails.name
-              : "Organization"}
-          </h1>
+          <h1>{orgDetails.name ? orgDetails.name : "Organization"}</h1>
           <p>
             {isOwner
               ? "Configure your organization settings and manage team members"
@@ -277,9 +264,7 @@ const ManageOrg = () => {
               {copySuccess ? "Copied!" : "Copy"}
             </button>
           </div>
-          <p>
-            Invitation code is valid until the organization is deleted.
-          </p>
+          <p>Invitation code is valid until the organization is deleted.</p>
         </div>
 
         <div className="members-card">
@@ -310,9 +295,7 @@ const ManageOrg = () => {
                       </span>
                     </div>
                     <div className="member-meta">
-                      <span>
-                        Joined {formatJoinDate(member.joinedAt)}
-                      </span>
+                      <span>Joined {formatJoinDate(member.joinedAt)}</span>
                     </div>
                   </div>
                   {isOwner && member.user._id !== user.id && (
@@ -336,14 +319,10 @@ const ManageOrg = () => {
                       <button
                         className="remove-btn"
                         disabled={
-                          removingMember === member.user._id ||
-                          updateLoading
+                          removingMember === member.user._id || updateLoading
                         }
                         onClick={() =>
-                          handleRemoveMember(
-                            member.user._id,
-                            member.user.name
-                          )
+                          handleRemoveMember(member.user._id, member.user.name)
                         }
                       >
                         {removingMember === member.user._id
@@ -355,9 +334,7 @@ const ManageOrg = () => {
                 </div>
               ))
             ) : (
-              <p className="no-members">
-                No members in this organization yet.
-              </p>
+              <p className="no-members">No members in this organization yet.</p>
             )}
           </div>
         </div>

@@ -24,7 +24,7 @@ const TurtlePortal = () => {
     try {
       const authToken = JSON.parse(localStorage.getItem("auth"));
       const response = await axios.get(
-        "http://localhost:3000/api/v1/organization",
+        `${import.meta.env.VITE_API_URL}/organization`,
         {
           headers: { Authorization: `Bearer ${authToken}` },
         }

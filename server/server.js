@@ -1,6 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const helmet = require("helmet");
+const compression = require("compression");
+const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
 const connectDB = require("./config/db");
 
 // Load environment variables
@@ -11,22 +15,102 @@ connectDB();
 
 const app = express();
 
-// Middleware
+// Security middleware
 app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "https:"],
+        scriptSrc: ["'self'"],
+        connectSrc: ["'self'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
   })
 );
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// Compression middleware
+app.use(compression());
+
+// Logging middleware
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+} else {
+  app.use(morgan("combined"));
+}
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: {
+    error: "Too many requests from this IP, please try again later.",
+  },
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: process.env.NODE_ENV === "development" ? 50 : 5, // More lenient in development
+  message: {
+    error: "Too many login attempts, please try again later.",
+  },
+  skip: (req) => {
+    // Skip rate limiting for localhost in development
+    if (process.env.NODE_ENV === "development") {
+      const ip = req.ip || req.connection.remoteAddress;
+      return ip === "127.0.0.1" || ip === "::1" || ip.includes("192.168.");
+    }
+    return false;
+  },
+});
+
+app.use(limiter);
+
+// CORS middleware
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://192.168.2.24:5173",
+        "http://localhost:3000",
+        "http://192.168.2.24:3000",
+        process.env.CLIENT_URL,
+      ].filter(Boolean); // Remove undefined values
+
+      if (
+        allowedOrigins.includes(origin) ||
+        process.env.NODE_ENV === "development"
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// Body parsing middleware
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Routes
-app.use("/api/v1", require("./routes/authRoutes"));
+app.use("/api/v1/auth", authLimiter, require("./routes/authRoutes"));
 app.use("/api/v1/organization", require("./routes/organizationRoutes"));
 const timeslotRoutes = require("./routes/timeslotRoutes");
 app.use("/api/v1/timeslots", timeslotRoutes);
-app.use('/api/v1/sales', require("./routes/saleRoutes"));
+app.use("/api/v1/workdays", require("./routes/workdayRoutes"));
+app.use("/api/v1/sales", require("./routes/saleRoutes"));
 
 app.get("/", (req, res) => {
   res.json({ message: "Server is running!" });
@@ -35,9 +119,47 @@ app.get("/", (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({
+
+  // Mongoose validation error
+  if (err.name === "ValidationError") {
+    const errors = Object.values(err.errors).map((e) => e.message);
+    return res.status(400).json({
+      success: false,
+      msg: "Validation Error",
+      errors,
+    });
+  }
+
+  // Mongoose duplicate key error
+  if (err.code === 11000) {
+    const field = Object.keys(err.keyValue)[0];
+    return res.status(400).json({
+      success: false,
+      msg: `${field} already exists`,
+    });
+  }
+
+  // JWT errors
+  if (err.name === "JsonWebTokenError") {
+    return res.status(401).json({
+      success: false,
+      msg: "Invalid token",
+    });
+  }
+
+  if (err.name === "TokenExpiredError") {
+    return res.status(401).json({
+      success: false,
+      msg: "Token expired",
+    });
+  }
+
+  res.status(err.statusCode || 500).json({
     success: false,
-    msg: "Something went wrong!",
+    msg:
+      process.env.NODE_ENV === "production"
+        ? "Something went wrong!"
+        : err.message,
   });
 });
 
@@ -49,6 +171,10 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const HOST = process.env.HOST || "0.0.0.0"; // Listen on all network interfaces
+
+app.listen(PORT, HOST, () => {
+  console.log(`Server running on http://${HOST}:${PORT}`);
+  console.log(`Local: http://localhost:${PORT}`);
+  console.log(`Network: http://192.168.2.24:${PORT}`);
 });
