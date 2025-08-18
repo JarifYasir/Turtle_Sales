@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/ViewSales.css";
-import axios from "axios";
+import api from "../utils/api";
 import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
@@ -34,13 +34,7 @@ const ViewSales = () => {
 
   const fetchOrganizationInfo = async () => {
     try {
-      const authToken = JSON.parse(localStorage.getItem("auth"));
-      const response = await axios.get(
-        "http://localhost:3000/api/v1/organization",
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
-        }
-      );
+      const response = await api.get("/organization");
 
       if (response.data.success) {
         setIsOwner(response.data.isOwner);
@@ -57,10 +51,7 @@ const ViewSales = () => {
   const fetchSales = async () => {
     try {
       setLoading(true);
-      const authToken = JSON.parse(localStorage.getItem("auth"));
-      const response = await axios.get("http://localhost:3000/api/v1/sales", {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
+      const response = await api.get("/sales");
 
       if (response.data.success) {
         setSales(response.data.sales);
@@ -77,13 +68,7 @@ const ViewSales = () => {
     if (!isOwner) return;
 
     try {
-      const authToken = JSON.parse(localStorage.getItem("auth"));
-      const response = await axios.delete(
-        `http://localhost:3000/api/v1/sales/${saleId}`,
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
-        }
-      );
+      const response = await api.delete(`/sales/${saleId}`);
 
       if (response.data.success) {
         toast.success("Sale deleted successfully");

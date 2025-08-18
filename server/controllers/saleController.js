@@ -2,6 +2,7 @@
 const Sale = require("../models/Sale");
 const Timeslot = require("../models/Timeslot");
 const Organization = require("../models/Organizations");
+const Workday = require("../models/Workday");
 
 // Get all sales for organization
 exports.getSales = async (req, res) => {
@@ -64,12 +65,8 @@ exports.deleteSale = async (req, res) => {
       });
     }
 
-    // Find the associated timeslot and increase available spots
-    const timeslot = await Timeslot.findById(sale.timeslot);
-    if (timeslot) {
-      timeslot.maxEmployees = timeslot.maxEmployees + 1;
-      await timeslot.save();
-    }
+    // Note: We don't need to modify timeslot.maxEmployees when deleting a sale
+    // Sales availability is calculated dynamically based on assignedUsers count vs actual sales count
 
     await sale.deleteOne();
 
@@ -82,21 +79,23 @@ exports.deleteSale = async (req, res) => {
 
 exports.createSale = async (req, res) => {
   try {
-    const { timeslotId, name, number, address, price, details } = req.body;
+    const { timeslotId, workdayId, name, number, address, price, details } =
+      req.body;
 
-    const timeslot = await Timeslot.findById(timeslotId);
+    // Find the workday and the specific timeslot within it
+    const workday = await Workday.findById(workdayId);
+    if (!workday) {
+      return res.status(404).json({ success: false, msg: "Workday not found" });
+    }
+
+    const timeslot = workday.timeslots.id(timeslotId);
     if (!timeslot) {
       return res
         .status(404)
         .json({ success: false, msg: "Timeslot not found" });
     }
 
-    // Check existing sales count for this timeslot
-    const existingSalesCount = await Sale.countDocuments({
-      timeslot: timeslotId,
-    });
-
-    // Get number of assigned cleaners (max sales allowed = number of cleaners)
+    // Get number of assigned cleaners (x = max sales allowed)
     const assignedCleanersCount = timeslot.assignedUsers
       ? timeslot.assignedUsers.length
       : 0;
@@ -108,7 +107,15 @@ exports.createSale = async (req, res) => {
       });
     }
 
-    if (existingSalesCount >= assignedCleanersCount) {
+    // Check existing sales count for this timeslot
+    const existingSalesCount = await Sale.countDocuments({
+      timeslot: timeslotId,
+    });
+
+    // Calculate remaining sales slots (y = sales still allowed)
+    const remainingSalesSlots = assignedCleanersCount - existingSalesCount;
+
+    if (remainingSalesSlots <= 0) {
       return res.status(400).json({
         success: false,
         msg: `Maximum of ${assignedCleanersCount} sale${
@@ -119,15 +126,9 @@ exports.createSale = async (req, res) => {
       });
     }
 
-    if (timeslot.maxEmployees <= 0) {
-      return res
-        .status(400)
-        .json({ success: false, msg: "No spots available" });
-    }
-
     // Verify user is member of the organization
     const organization = await Organization.findOne({
-      _id: timeslot.organization,
+      _id: workday.organization,
       $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
     });
 
@@ -147,14 +148,15 @@ exports.createSale = async (req, res) => {
       salesRepName: req.user.name,
       user: req.user._id,
       timeslot: timeslotId,
-      organization: timeslot.organization,
+      workday: workdayId,
+      timeslotId: timeslotId, // Store for workday system
+      organization: workday.organization,
     });
 
     await sale.save();
 
-    // Reduce available spots
-    timeslot.maxEmployees = timeslot.maxEmployees - 1;
-    await timeslot.save();
+    // Note: We don't modify timeslot.maxEmployees as it represents total capacity
+    // Sales availability is calculated dynamically based on assignedUsers count vs actual sales count
 
     res.json({ success: true, msg: "Sale recorded successfully", sale });
   } catch (error) {

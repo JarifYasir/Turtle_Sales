@@ -347,7 +347,6 @@ const ViewTimeslots = () => {
                         ? timeslot.assignedUsers.length
                         : 0;
                       const canClick =
-                        timeslot.maxEmployees > 0 &&
                         salesCount < assignedCleanersCount &&
                         assignedCleanersCount > 0;
 
@@ -466,7 +465,7 @@ const ViewTimeslots = () => {
 
                           {(!timeslot.sales || timeslot.sales.length === 0) &&
                             !isOwner &&
-                            timeslot.maxEmployees > 0 && (
+                            assignedCleanersCount > 0 && (
                               <div
                                 style={{
                                   marginTop: "8px",
@@ -509,7 +508,6 @@ const ViewTimeslots = () => {
                           )}
 
                           {!isOwner &&
-                            timeslot.maxEmployees > 0 &&
                             salesCount >= assignedCleanersCount &&
                             assignedCleanersCount > 0 && (
                               <div
