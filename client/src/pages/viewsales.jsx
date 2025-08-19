@@ -12,9 +12,8 @@ const ViewSales = () => {
   const [sales, setSales] = useState([]);
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [showMySales, setShowMySales] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [employees, setEmployees] = useState([]);
+  const [filterType, setFilterType] = useState("none"); // "none", "rep", "worker"
+  const [selectedFilter, setSelectedFilter] = useState("");
   const [weekStartDate, setWeekStartDate] = useState(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -29,24 +28,7 @@ const ViewSales = () => {
       return;
     }
     fetchSales();
-    fetchOrganizationInfo();
   }, [token, navigate]);
-
-  const fetchOrganizationInfo = async () => {
-    try {
-      const response = await api.get("/organization");
-
-      if (response.data.success) {
-        setIsOwner(response.data.isOwner);
-        if (response.data.isOwner) {
-          setEmployees(response.data.organization.members || []);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching organization info:", error);
-      toast.error("Failed to load organization information");
-    }
-  };
 
   const fetchSales = async () => {
     try {
@@ -65,8 +47,6 @@ const ViewSales = () => {
   };
 
   const handleDeleteSale = async (saleId) => {
-    if (!isOwner) return;
-
     try {
       const response = await api.delete(`/sales/${saleId}`);
 
@@ -82,12 +62,38 @@ const ViewSales = () => {
 
   const getDisplaySales = () => {
     let filteredSales = sales;
-    if (isOwner && selectedEmployee) {
-      filteredSales = sales.filter((sale) => sale.userId === selectedEmployee);
-    } else if (!isOwner && showMySales) {
-      filteredSales = sales.filter((sale) => sale.userId === user.id);
+
+    if (filterType === "rep" && selectedFilter) {
+      filteredSales = sales.filter(
+        (sale) => sale.salesRepName === selectedFilter
+      );
+    } else if (filterType === "worker" && selectedFilter) {
+      filteredSales = sales.filter(
+        (sale) => sale.timeslot?.assignedWorker?.user?.name === selectedFilter
+      );
     }
+
     return groupSalesByDate(filteredSales);
+  };
+
+  // Get unique sales reps
+  const getUniqueSalesReps = () => {
+    const reps = [
+      ...new Set(sales.map((sale) => sale.salesRepName).filter(Boolean)),
+    ];
+    return reps.sort();
+  };
+
+  // Get unique workers
+  const getUniqueWorkers = () => {
+    const workers = [
+      ...new Set(
+        sales
+          .map((sale) => sale.timeslot?.assignedWorker?.user?.name)
+          .filter(Boolean)
+      ),
+    ];
+    return workers.sort();
   };
 
   const groupSalesByDate = (sales) => {
@@ -120,7 +126,7 @@ const ViewSales = () => {
       const dateKey = date.toDateString();
       return displaySales[dateKey] && displaySales[dateKey].length > 0;
     });
-  }, [weekDates, sales, selectedEmployee, showMySales, user]);
+  }, [weekDates, sales, filterType, selectedFilter]);
 
   const isCurrentDay = (date) => {
     const today = new Date();
@@ -198,29 +204,80 @@ const ViewSales = () => {
         transition={{ duration: 0.5 }}
       >
         <h1>Sales Overview</h1>
-        <div className="filter-controls">
-          {isOwner ? (
-            <select
-              value={selectedEmployee || ""}
-              onChange={(e) => setSelectedEmployee(e.target.value || null)}
-              className="employee-select"
-            >
-              <option value="">All Sales</option>
-              {employees.map((emp) => (
-                <option key={emp.user} value={emp.user}>
-                  {emp.name}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <button
-              className="toggle-btn"
-              onClick={() => setShowMySales(!showMySales)}
-            >
-              {showMySales ? "Show All Sales" : "Show My Sales"}
-            </button>
-          )}
+      </motion.div>
+
+      {/* Filter Controls */}
+      <motion.div
+        className="filter-section"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "15px",
+          margin: "20px 0",
+          padding: "15px",
+          backgroundColor: "#f8f9fa",
+          borderRadius: "8px",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <label style={{ fontWeight: "500", color: "#333" }}>Filter by:</label>
+          <select
+            value={filterType}
+            onChange={(e) => {
+              setFilterType(e.target.value);
+              setSelectedFilter("");
+            }}
+            style={{
+              padding: "8px 12px",
+              borderRadius: "4px",
+              border: "1px solid #ddd",
+              fontSize: "14px",
+            }}
+          >
+            <option value="none">No Filter</option>
+            <option value="rep">Sales Rep</option>
+            <option value="worker">Worker</option>
+          </select>
         </div>
+
+        {filterType !== "none" && (
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <label style={{ fontWeight: "500", color: "#333" }}>
+              {filterType === "rep" ? "Sales Rep:" : "Worker:"}
+            </label>
+            <select
+              value={selectedFilter}
+              onChange={(e) => setSelectedFilter(e.target.value)}
+              style={{
+                padding: "8px 12px",
+                borderRadius: "4px",
+                border: "1px solid #ddd",
+                fontSize: "14px",
+                minWidth: "150px",
+              }}
+            >
+              <option value="">
+                All {filterType === "rep" ? "Reps" : "Workers"}
+              </option>
+              {filterType === "rep"
+                ? getUniqueSalesReps().map((rep) => (
+                    <option key={rep} value={rep}>
+                      {rep}
+                    </option>
+                  ))
+                : getUniqueWorkers().map((worker) => (
+                    <option key={worker} value={worker}>
+                      {worker}
+                    </option>
+                  ))}
+            </select>
+          </div>
+        )}
       </motion.div>
 
       <motion.div
@@ -277,24 +334,31 @@ const ViewSales = () => {
                         transition={{ duration: 0.3 }}
                       >
                         <div className="sale-header">
-                          <h3>{sale.salesRepName || "Unknown"}</h3>
-                          {isOwner && (
-                            <button
-                              className="delete-btn"
-                              onClick={() => {
-                                if (
-                                  window.confirm(
-                                    "Are you sure you want to delete this sale?"
-                                  )
-                                ) {
-                                  handleDeleteSale(sale._id);
-                                }
-                              }}
-                              title="Delete sale"
-                            >
-                              ×
-                            </button>
-                          )}
+                          <h3>
+                            Rep: {sale.salesRepName || "Unknown"}
+                            {sale.timeslot?.assignedWorker && (
+                              <>
+                                , Worker:{" "}
+                                {sale.timeslot.assignedWorker.user?.name ||
+                                  "Unknown"}
+                              </>
+                            )}
+                          </h3>
+                          <button
+                            className="delete-btn"
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  "Are you sure you want to delete this sale?"
+                                )
+                              ) {
+                                handleDeleteSale(sale._id);
+                              }
+                            }}
+                            title="Delete sale"
+                          >
+                            ×
+                          </button>
                         </div>
                         <div className="sale-time">
                           {sale.timeslot.startTime} - {sale.timeslot.endTime}

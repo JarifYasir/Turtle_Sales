@@ -334,8 +334,23 @@ const ViewTimeslots = () => {
               </div>
               <div className="day-timeslots">
                 {groupedWorkdays[date.toDateString()] ? (
-                  groupedWorkdays[date.toDateString()].timeslots.map(
-                    (timeslot) => {
+                  groupedWorkdays[date.toDateString()].timeslots
+                    .filter((timeslot) => {
+                      // Only show timeslots that are not full
+                      const salesCount = timeslot.sales
+                        ? timeslot.sales.length
+                        : 0;
+                      const assignedWorkersCount = timeslot.assignedUsers
+                        ? timeslot.assignedUsers.length
+                        : 0;
+
+                      // Hide if: no workers assigned OR all workers have sales (x = y)
+                      return (
+                        assignedWorkersCount > 0 &&
+                        salesCount < assignedWorkersCount
+                      );
+                    })
+                    .map((timeslot) => {
                       const workdayId =
                         groupedWorkdays[date.toDateString()]._id;
                       const timeslotWithWorkday = { ...timeslot, workdayId };
@@ -529,8 +544,7 @@ const ViewTimeslots = () => {
                             )}
                         </motion.div>
                       );
-                    }
-                  )
+                    })
                 ) : (
                   <div className="no-timeslots">No workday scheduled</div>
                 )}

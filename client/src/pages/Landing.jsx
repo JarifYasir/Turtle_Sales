@@ -95,12 +95,12 @@ const Landing = () => {
               whileHover={{ scale: 1.02 }}
             >
               <div className="feature-header">
-                <span className="feature-icon">📍</span>
-                <h3>Live Activity Tracking</h3>
+                <span className="feature-icon">�</span>
+                <h3>Recording Sales</h3>
               </div>
               <p>
-                Monitor team progress in real time for complete accountability
-                and measurable results.
+                Easily track and record sales with detailed customer information
+                and real-time updates for your team.
               </p>
             </motion.div>
 
@@ -110,12 +110,12 @@ const Landing = () => {
               whileHover={{ scale: 1.02 }}
             >
               <div className="feature-header">
-                <span className="feature-icon">📊</span>
-                <h3>Performance Analytics</h3>
+                <span className="feature-icon">�</span>
+                <h3>Generating Paystub</h3>
               </div>
               <p>
-                Gain actionable insights into team and personal performance to
-                optimize sales outcomes.
+                Automatically generate detailed paystubs for employees based on
+                their completed work and sales performance.
               </p>
             </motion.div>
           </motion.div>

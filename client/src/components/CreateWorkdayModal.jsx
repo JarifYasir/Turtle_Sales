@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import axios from "axios";
-import AssignEmployeeModal from "./AssignEmployeeModal";
 
 const CreateWorkdayModal = ({
   show,
@@ -21,8 +20,6 @@ const CreateWorkdayModal = ({
   ]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showAssignModal, setShowAssignModal] = useState(false);
-  const [selectedTimeslotIndex, setSelectedTimeslotIndex] = useState(null);
 
   const addTimeslot = () => {
     setTimeslots([
@@ -49,6 +46,45 @@ const CreateWorkdayModal = ({
     setTimeslots(updated);
   };
 
+  const handleEmployeeToggle = (timeslotIndex, employeeId) => {
+    const slot = timeslots[timeslotIndex];
+    const isSelected = slot.assignedUsers?.some(
+      (au) => au.user._id === employeeId
+    );
+
+    let newAssignedUsers;
+
+    if (isSelected) {
+      // Remove employee
+      newAssignedUsers = slot.assignedUsers.filter(
+        (au) => au.user._id !== employeeId
+      );
+    } else {
+      // Add employee if under limit
+      if (slot.assignedUsers.length >= slot.maxEmployees) {
+        toast.error(
+          `You can only select ${slot.maxEmployees} worker${
+            slot.maxEmployees !== 1 ? "s" : ""
+          } for this timeslot`
+        );
+        return;
+      }
+
+      const employee = employees.find((emp) => emp._id === employeeId);
+      const newAssignment = {
+        user: {
+          _id: employeeId,
+          name: employee ? employee.name : "Unknown",
+        },
+        notes: "",
+      };
+
+      newAssignedUsers = [...slot.assignedUsers, newAssignment];
+    }
+
+    updateTimeslot(timeslotIndex, "assignedUsers", newAssignedUsers);
+  };
+
   const validateTimeslots = () => {
     for (let slot of timeslots) {
       if (!slot.startTime || !slot.endTime) {
@@ -65,7 +101,17 @@ const CreateWorkdayModal = ({
       }
 
       if (slot.maxEmployees < 1 || slot.maxEmployees > 10) {
-        toast.error("Max employees must be between 1 and 10");
+        toast.error("Number of workers must be between 1 and 10");
+        return false;
+      }
+
+      // Validate that exactly the required number of workers are assigned
+      if (slot.assignedUsers.length !== slot.maxEmployees) {
+        toast.error(
+          `You must select exactly ${slot.maxEmployees} worker${
+            slot.maxEmployees !== 1 ? "s" : ""
+          } for the ${slot.startTime} - ${slot.endTime} timeslot`
+        );
         return false;
       }
     }
@@ -142,75 +188,6 @@ const CreateWorkdayModal = ({
     }
   };
 
-  const handleAssignEmployee = (timeslotIndex) => {
-    setSelectedTimeslotIndex(timeslotIndex);
-    setShowAssignModal(true);
-  };
-
-  const handleEmployeeAssignment = (employeeId, notes) => {
-    if (selectedTimeslotIndex !== null) {
-      const employee = employees.find((emp) => emp._id === employeeId);
-      if (employee) {
-        const updatedTimeslots = [...timeslots];
-        const timeslot = updatedTimeslots[selectedTimeslotIndex];
-
-        // Check if employee is already assigned
-        const isAlreadyAssigned = timeslot.assignedUsers.some(
-          (assignment) => assignment.user._id === employeeId
-        );
-
-        if (isAlreadyAssigned) {
-          toast.error("Employee is already assigned to this timeslot");
-          return;
-        }
-
-        // Check if we've reached max employees
-        if (timeslot.assignedUsers.length >= timeslot.maxEmployees) {
-          toast.error(
-            `Maximum ${timeslot.maxEmployees} employees allowed for this timeslot`
-          );
-          return;
-        }
-
-        // Add the assignment
-        const newAssignment = {
-          user: {
-            _id: employee._id,
-            name: employee.name,
-            email: employee.email,
-          },
-          notes: notes || "",
-        };
-
-        updatedTimeslots[selectedTimeslotIndex] = {
-          ...timeslot,
-          assignedUsers: [...timeslot.assignedUsers, newAssignment],
-        };
-
-        setTimeslots(updatedTimeslots);
-        toast.success(`${employee.name} assigned successfully`);
-      }
-    }
-    setShowAssignModal(false);
-    setSelectedTimeslotIndex(null);
-  };
-
-  const handleRemoveEmployee = (timeslotIndex, userIndex) => {
-    const updatedTimeslots = [...timeslots];
-    const timeslot = updatedTimeslots[timeslotIndex];
-    const removedEmployee = timeslot.assignedUsers[userIndex];
-
-    updatedTimeslots[timeslotIndex] = {
-      ...timeslot,
-      assignedUsers: timeslot.assignedUsers.filter(
-        (_, index) => index !== userIndex
-      ),
-    };
-
-    setTimeslots(updatedTimeslots);
-    toast.success(`${removedEmployee.user.name} removed from timeslot`);
-  };
-
   const handleClose = () => {
     setTimeslots([
       {
@@ -221,8 +198,6 @@ const CreateWorkdayModal = ({
       },
     ]);
     setNotes("");
-    setShowAssignModal(false);
-    setSelectedTimeslotIndex(null);
     onClose();
   };
 
@@ -389,79 +364,87 @@ const CreateWorkdayModal = ({
                           </div>
 
                           <div className="input-group">
-                            <label>Max Employees</label>
+                            <label># of Workers</label>
                             <select
                               value={slot.maxEmployees}
-                              onChange={(e) =>
-                                updateTimeslot(
-                                  index,
-                                  "maxEmployees",
-                                  parseInt(e.target.value)
-                                )
-                              }
+                              onChange={(e) => {
+                                const newCount = parseInt(e.target.value);
+                                updateTimeslot(index, "maxEmployees", newCount);
+                                // Reset assigned users if the new count is less than current assignments
+                                if (slot.assignedUsers.length > newCount) {
+                                  updateTimeslot(index, "assignedUsers", []);
+                                }
+                              }}
                               className="modern-select"
                             >
                               {[...Array(10)].map((_, i) => (
                                 <option key={i + 1} value={i + 1}>
-                                  {i + 1} {i === 0 ? "employee" : "employees"}
+                                  {i + 1} {i === 0 ? "worker" : "workers"}
                                 </option>
                               ))}
                             </select>
                           </div>
 
                           <div className="input-group">
-                            <div className="employee-assignment-inline">
-                              <label>
-                                Employees ({slot.assignedUsers?.length || 0}/
-                                {slot.maxEmployees})
-                              </label>
-                              <button
-                                type="button"
-                                onClick={() => handleAssignEmployee(index)}
-                                className="assign-employee-btn-small"
-                                disabled={
+                            <label>
+                              Select Workers ({slot.assignedUsers?.length || 0}/
+                              {slot.maxEmployees})
+                            </label>
+                            <div
+                              className={`custom-multiselect ${
+                                slot.assignedUsers?.length === slot.maxEmployees
+                                  ? "complete"
+                                  : ""
+                              }`}
+                            >
+                              {employees.map((employee) => {
+                                const isSelected = slot.assignedUsers?.some(
+                                  (au) => au.user._id === employee._id
+                                );
+                                const isDisabled =
                                   slot.assignedUsers?.length >=
-                                  slot.maxEmployees
-                                }
-                              >
-                                <svg
-                                  width="14"
-                                  height="14"
-                                  fill="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                                </svg>
-                                Assign
-                              </button>
-                            </div>
+                                    slot.maxEmployees && !isSelected;
 
-                            {slot.assignedUsers?.length > 0 && (
-                              <div className="assigned-employees-compact">
-                                {slot.assignedUsers.map(
-                                  (assignment, userIndex) => (
-                                    <div
-                                      key={userIndex}
-                                      className="assigned-employee-compact"
-                                    >
-                                      <span className="employee-name-compact">
-                                        {assignment.user.name}
+                                return (
+                                  <div
+                                    key={employee._id}
+                                    className={`employee-option ${
+                                      isSelected ? "selected" : ""
+                                    } ${isDisabled ? "disabled" : ""}`}
+                                    onClick={() =>
+                                      !isDisabled &&
+                                      handleEmployeeToggle(index, employee._id)
+                                    }
+                                  >
+                                    <div className="employee-info">
+                                      <span className="employee-name">
+                                        {employee.name}
                                       </span>
-                                      <button
-                                        type="button"
-                                        onClick={() =>
-                                          handleRemoveEmployee(index, userIndex)
-                                        }
-                                        className="remove-employee-btn-small"
-                                        title="Remove employee"
-                                      >
-                                        ×
-                                      </button>
+                                      <span className="employee-email">
+                                        {employee.email}
+                                      </span>
                                     </div>
-                                  )
-                                )}
-                              </div>
-                            )}
+                                    <div className="selection-indicator">
+                                      {isSelected && (
+                                        <svg
+                                          width="16"
+                                          height="16"
+                                          viewBox="0 0 24 24"
+                                          fill="currentColor"
+                                        >
+                                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                        </svg>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <small className="multiselect-help-text">
+                              Click to select/unselect workers. You must select
+                              exactly {slot.maxEmployees} worker
+                              {slot.maxEmployees !== 1 ? "s" : ""}.
+                            </small>
                           </div>
                         </div>
 
@@ -581,26 +564,6 @@ const CreateWorkdayModal = ({
           </motion.div>
         </motion.div>
       )}
-
-      <AssignEmployeeModal
-        show={showAssignModal}
-        onClose={() => {
-          setShowAssignModal(false);
-          setSelectedTimeslotIndex(null);
-        }}
-        timeslot={
-          selectedTimeslotIndex !== null
-            ? {
-                ...timeslots[selectedTimeslotIndex],
-                _id: `temp-${selectedTimeslotIndex}`,
-                date: date,
-              }
-            : null
-        }
-        employees={employees}
-        onAssign={handleEmployeeAssignment}
-        isCreating={true}
-      />
     </AnimatePresence>
   );
 };

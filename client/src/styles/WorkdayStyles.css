@@ -1137,3 +1137,178 @@
   justify-content: flex-end;
   margin-top: 1rem;
 }
+
+/* Multiselect Dropdown Styling */
+.multiselect-dropdown {
+  margin-bottom: 1rem;
+}
+
+.multiselect-dropdown label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.modern-select.multiselect {
+  min-height: 120px;
+  max-height: 180px;
+  padding: 0.75rem;
+  border: 2px solid var(--border-light);
+  border-radius: var(--border-radius);
+  background: var(--white);
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: var(--transition-fast);
+  resize: vertical;
+}
+
+.modern-select.multiselect:focus {
+  outline: none;
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.modern-select.multiselect option {
+  padding: 0.5rem;
+  margin: 0.2rem 0;
+  border-radius: 4px;
+  background: var(--white);
+  color: var(--text-primary);
+}
+
+.modern-select.multiselect option:checked {
+  background: var(--primary-green);
+  color: var(--white);
+  font-weight: 500;
+}
+
+.modern-select.multiselect option:hover {
+  background: var(--bg-light);
+}
+
+/* Custom Multiselect Component */
+.custom-multiselect {
+  border: 2px solid var(--border-light);
+  border-radius: var(--border-radius);
+  background: var(--white);
+  max-height: 240px;
+  overflow-y: auto;
+  transition: var(--transition-fast);
+}
+
+.custom-multiselect.complete {
+  border-color: var(--primary-green);
+  background: #f0f8f0;
+}
+
+.employee-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  user-select: none;
+}
+
+.employee-option:last-child {
+  border-bottom: none;
+}
+
+.employee-option:hover:not(.disabled) {
+  background: var(--bg-light);
+}
+
+.employee-option.selected {
+  background: var(--primary-green);
+  color: var(--white);
+}
+
+.employee-option.selected:hover {
+  background: #45a049;
+}
+
+.employee-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.employee-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.employee-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.employee-email {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.employee-option.selected .employee-email {
+  opacity: 0.9;
+}
+
+.selection-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.multiselect-help-text {
+  color: #666;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .custom-multiselect {
+    max-height: 180px;
+  }
+
+  .employee-option {
+    padding: 1rem 0.75rem;
+  }
+
+  .employee-name {
+    font-size: 1rem;
+  }
+
+  .employee-email {
+    font-size: 0.85rem;
+  }
+
+  .multiselect-help-text {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .employee-option {
+    padding: 1.25rem 0.75rem;
+  }
+
+  .employee-info {
+    gap: 0.5rem;
+  }
+
+  .employee-name {
+    font-size: 1.1rem;
+  }
+
+  .employee-email {
+    font-size: 0.9rem;
+  }
+}

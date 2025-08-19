@@ -24,11 +24,56 @@ exports.getSales = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate("user", "name")
       .populate({
-        path: "timeslot",
-        select: "date startTime endTime",
+        path: "workday",
+        populate: {
+          path: "timeslots.assignedUsers.user",
+          select: "name",
+        },
       });
 
-    res.json({ success: true, sales });
+    // Process sales to include timeslot data and assign specific worker to each sale
+    const salesWithTimeslots = sales.map((sale) => {
+      const saleObj = sale.toObject();
+
+      if (sale.workday && sale.timeslotId) {
+        // Find the specific timeslot within the workday
+        const timeslot = sale.workday.timeslots.find(
+          (ts) => ts._id.toString() === sale.timeslotId.toString()
+        );
+        if (timeslot) {
+          // Get all sales for this specific timeslot
+          const timeslotSales = sales.filter(
+            (s) =>
+              s.workday &&
+              s.timeslotId &&
+              s.timeslotId.toString() === sale.timeslotId.toString()
+          );
+
+          // Find the index of this sale among all sales for this timeslot
+          const saleIndex = timeslotSales.findIndex(
+            (s) => s._id.toString() === sale._id.toString()
+          );
+
+          // Assign worker in round-robin fashion
+          const assignedUsers = timeslot.assignedUsers || [];
+          const assignedWorker =
+            assignedUsers.length > 0
+              ? assignedUsers[saleIndex % assignedUsers.length]
+              : null;
+
+          saleObj.timeslot = {
+            date: sale.workday.date,
+            startTime: timeslot.startTime,
+            endTime: timeslot.endTime,
+            assignedWorker: assignedWorker,
+          };
+        }
+      }
+
+      return saleObj;
+    });
+
+    res.json({ success: true, sales: salesWithTimeslots });
   } catch (error) {
     console.error("Get Sales Error:", error);
     res.status(500).json({ success: false, msg: "Server error" });
