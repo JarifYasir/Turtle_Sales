@@ -5,6 +5,7 @@ import api from "../utils/api";
 import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
+import LoadingSpinner from "../components/LoadingComponents";
 
 const ViewSales = () => {
   const navigate = useNavigate();
@@ -211,20 +212,12 @@ const ViewSales = () => {
   // Show loading if data is loading or user is not yet available
   if (loading || (!user && token)) {
     return (
-      <div className="view-sales-container">
-        <motion.div
-          className="sales-header"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1>Sales Overview</h1>
-        </motion.div>
-        <div className="loading-spinner"></div>
-        <p style={{ textAlign: "center", color: "var(--gray)" }}>
-          {loading ? "Loading sales data..." : "Loading user data..."}
-        </p>
-      </div>
+      <LoadingSpinner
+        size="large"
+        text={loading ? "Loading sales data..." : "Loading user data..."}
+        variant="turtle"
+        fullScreen={false}
+      />
     );
   }
 

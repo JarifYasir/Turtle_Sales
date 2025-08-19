@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import "../styles/EmployeePaystub.css";
+import LoadingSpinner from "../components/LoadingComponents";
 
 const EmployeePaystub = () => {
   const navigate = useNavigate();
@@ -255,12 +256,12 @@ const EmployeePaystub = () => {
 
   if (loading) {
     return (
-      <div className="employee-paystub-container">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Loading sales data...</p>
-        </div>
-      </div>
+      <LoadingSpinner
+        size="large"
+        text="Loading sales data..."
+        variant="turtle"
+        fullScreen={false}
+      />
     );
   }
 

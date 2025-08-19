@@ -2,6 +2,7 @@ import React from "react";
 import "../styles/Landing.css";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import Logo from "../assets/logo.png";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -10,19 +11,34 @@ const Landing = () => {
     navigate("/login");
   };
 
+  const handleLearnMore = () => {
+    document.getElementById("features-section").scrollIntoView({
+      behavior: "smooth",
+    });
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        duration: 0.5,
-        staggerChildren: 0.2,
+        duration: 0.8,
+        staggerChildren: 0.15,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.7, ease: "easeOut" },
+    },
+  };
+
+  const featureVariants = {
+    hidden: { opacity: 0, y: 40 },
     visible: {
       opacity: 1,
       y: 0,
@@ -30,8 +46,17 @@ const Landing = () => {
     },
   };
 
-  const featureVariants = {
-    hidden: { opacity: 0, x: 50 },
+  const statsVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
+  };
+
+  const stepsVariants = {
+    hidden: { opacity: 0, x: -30 },
     visible: {
       opacity: 1,
       x: 0,
@@ -47,80 +72,196 @@ const Landing = () => {
         initial="hidden"
         animate="visible"
       >
+        {/* Hero Section */}
         <motion.div className="hero-section" variants={itemVariants}>
-          <motion.h1 className="title" variants={itemVariants}>
-            Streamline Your Door-to-Door Sales Workflow
+          <motion.div className="hero-badge" variants={itemVariants}>
+            <span className="badge-text">🚀 Streamline Your Sales Process</span>
+          </motion.div>
+
+          <motion.h1 className="hero-title" variants={itemVariants}>
+            Organize Your
+            <span className="gradient-text"> Door-to-Door Sales </span>
+            Team
           </motion.h1>
-          <motion.p className="subtitle" variants={itemVariants}>
-            Organize schedules, track sales activities, and monitor performance
-            — all in one centralized hub designed for modern teams.
+
+          <motion.p className="hero-subtitle" variants={itemVariants}>
+            A simple platform to manage schedules, track sales activities, and
+            generate paystubs for your door-to-door sales team. Keep everything
+            organized in one place.
           </motion.p>
-          <motion.button
-            className="get-started-btn"
-            variants={itemVariants}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={handleGetStarted}
-          >
-            Get Started – Try Turtle Free
-          </motion.button>
-          <motion.p className="trust-indicator" variants={itemVariants}>
-            No credit card required • Free 14-day trial
-          </motion.p>
+
+          <motion.div className="hero-actions" variants={itemVariants}>
+            <motion.button
+              className="cta-primary"
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleGetStarted}
+            >
+              Get Started
+              <span className="cta-arrow">→</span>
+            </motion.button>
+
+            <motion.button
+              className="cta-secondary"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleLearnMore}
+            >
+              Learn More
+            </motion.button>
+          </motion.div>
+
+          <motion.div className="trust-indicators" variants={itemVariants}>
+            <div className="trust-item">
+              <span className="trust-icon">✓</span>
+              <span>Easy to Use</span>
+            </div>
+            <div className="trust-item">
+              <span className="trust-icon">✓</span>
+              <span>Organized Workflow</span>
+            </div>
+            <div className="trust-item">
+              <span className="trust-icon">✓</span>
+              <span>Team Management</span>
+            </div>
+          </motion.div>
         </motion.div>
 
-        <motion.div className="features-section">
-          <motion.h2 className="features-title" variants={itemVariants}>
-            Why Choose Turtle?
-          </motion.h2>
-          <motion.div className="features">
-            <motion.div
-              className="feature-card"
-              variants={featureVariants}
-              whileHover={{ scale: 1.02 }}
+        {/* Key Benefits Section */}
+        <motion.div
+          className="benefits-section"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+        >
+          <motion.div className="benefit-card" variants={statsVariants}>
+            <div className="benefit-icon">🎯</div>
+            <h3>Organized Workflow</h3>
+            <p>Streamline your door-to-door sales operations</p>
+          </motion.div>
+          <motion.div className="benefit-card" variants={statsVariants}>
+            <div className="benefit-icon">📈</div>
+            <h3>Track Performance</h3>
+            <p>Monitor sales activities and team progress</p>
+          </motion.div>
+          <motion.div className="benefit-card" variants={statsVariants}>
+            <div className="benefit-icon">💼</div>
+            <h3>Manage Teams</h3>
+            <p>Coordinate schedules and assignments efficiently</p>
+          </motion.div>
+        </motion.div>
+
+        {/* Features Section - Compact */}
+        <motion.div className="features-section compact" id="features-section">
+          <motion.div className="section-header" variants={itemVariants}>
+            <motion.h2
+              className="section-title compact"
+              variants={itemVariants}
             >
-              <div className="feature-header">
-                <span className="feature-icon">🗓️</span>
-                <h3>Centralized Scheduling</h3>
+              Key Features
+            </motion.h2>
+          </motion.div>
+
+          <motion.div
+            className="features-grid compact"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+          >
+            <motion.div
+              className="feature-card compact"
+              variants={featureVariants}
+              whileHover={{
+                y: -6,
+                transition: { duration: 0.3, ease: "easeOut" },
+              }}
+            >
+              <div className="feature-icon-wrapper compact">
+                <div className="feature-icon">🗓️</div>
               </div>
-              <p>
-                Assign and update sales routes instantly and keep your team
-                coordinated with real-time updates.
+              <h3 className="feature-title">Schedule Management</h3>
+              <p className="feature-description compact">
+                Create work schedules, assign time slots, and track hours
               </p>
             </motion.div>
 
             <motion.div
-              className="feature-card"
+              className="feature-card compact"
               variants={featureVariants}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{
+                y: -6,
+                transition: { duration: 0.3, ease: "easeOut" },
+              }}
             >
-              <div className="feature-header">
-                <span className="feature-icon">�</span>
-                <h3>Recording Sales</h3>
+              <div className="feature-icon-wrapper compact">
+                <div className="feature-icon">📊</div>
               </div>
-              <p>
-                Easily track and record sales with detailed customer information
-                and real-time updates for your team.
+              <h3 className="feature-title">Sales Tracking</h3>
+              <p className="feature-description compact">
+                Record sales activities and monitor team performance
               </p>
             </motion.div>
 
             <motion.div
-              className="feature-card"
+              className="feature-card compact"
               variants={featureVariants}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{
+                y: -6,
+                transition: { duration: 0.3, ease: "easeOut" },
+              }}
             >
-              <div className="feature-header">
-                <span className="feature-icon">�</span>
-                <h3>Generating Paystub</h3>
+              <div className="feature-icon-wrapper compact">
+                <div className="feature-icon">💰</div>
               </div>
-              <p>
-                Automatically generate detailed paystubs for employees based on
-                their completed work and sales performance.
+              <h3 className="feature-title">Payroll & Paystubs</h3>
+              <p className="feature-description compact">
+                Generate paystubs based on work hours and performance
               </p>
             </motion.div>
           </motion.div>
         </motion.div>
+
+        {/* CTA Section */}
+        <motion.div className="cta-section" variants={itemVariants}>
+          <motion.div className="cta-content" variants={itemVariants}>
+            <h2 className="cta-title">Ready to Organize Your Sales Team?</h2>
+            <p className="cta-description">
+              Start managing your door-to-door sales operations more
+              effectively. Create schedules, track sales, and generate paystubs
+              all in one place.
+            </p>
+            <motion.button
+              className="cta-final"
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleGetStarted}
+            >
+              Get Started Today
+              <span className="cta-arrow">→</span>
+            </motion.button>
+          </motion.div>
+        </motion.div>
       </motion.div>
+
+      {/* Footer */}
+      <motion.footer
+        className="footer"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 1 }}
+      >
+        <div className="footer-content">
+          <div className="footer-logo">
+            <img src={Logo} alt="Turtle Sales" className="footer-logo-img" />
+            <span className="footer-logo-text">Turtle Sales</span>
+          </div>
+          <p className="footer-text">
+            © 2025 Turtle Sales. Streamlining door-to-door sales operations.
+          </p>
+        </div>
+      </motion.footer>
     </div>
   );
 };

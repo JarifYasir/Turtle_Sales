@@ -13,6 +13,7 @@ const OptimizedHomeLayout = () => {
               <LoadingSpinner
                 size="large"
                 text="Loading page..."
+                variant="turtle"
                 fullScreen={true}
               />
             }

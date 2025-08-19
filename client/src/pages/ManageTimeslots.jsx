@@ -8,6 +8,7 @@ import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
 import CreateWorkdayModal from "../components/CreateWorkdayModal";
 import ManageWorkdayModal from "../components/ManageWorkdayModal";
+import LoadingSpinner from "../components/LoadingComponents";
 
 const ManageTimeslots = () => {
   const { user, token } = useContext(UserContext);
@@ -206,10 +207,12 @@ const ManageTimeslots = () => {
 
   if (loading) {
     return (
-      <div className="manage-timeslots-container loading">
-        <div className="loading-spinner"></div>
-        <p>Loading workdays...</p>
-      </div>
+      <LoadingSpinner
+        size="large"
+        text="Loading workdays..."
+        variant="turtle"
+        fullScreen={false}
+      />
     );
   }
 

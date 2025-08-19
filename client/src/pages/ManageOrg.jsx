@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
+import LoadingSpinner, { InlineLoader } from "../components/LoadingComponents";
 
 const ManageOrg = () => {
   const { user, token } = useContext(UserContext);
@@ -274,10 +275,12 @@ const ManageOrg = () => {
 
   if (loading) {
     return (
-      <div className="manage-org-container loading">
-        <div className="loading-spinner"></div>
-        <p>Loading organization details...</p>
-      </div>
+      <LoadingSpinner
+        size="large"
+        text="Loading organization details..."
+        variant="turtle"
+        fullScreen={false}
+      />
     );
   }
 
@@ -404,7 +407,7 @@ const ManageOrg = () => {
               >
                 {deleteLoading ? (
                   <>
-                    <span className="loading-spinner-small"></span>
+                    <InlineLoader size="small" color="#fff" />
                     Deleting...
                   </>
                 ) : (

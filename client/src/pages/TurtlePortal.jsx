@@ -3,7 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { motion } from "framer-motion";
+import {
+  FiUser,
+  FiCalendar,
+  FiBarChart2,
+  FiHome,
+  FiClock,
+  FiDollarSign,
+  FiTrendingUp,
+  FiUsers,
+  FiArrowRight,
+  FiLogOut,
+} from "react-icons/fi";
 import "../styles/TurtlePortal.css";
+import LoadingSpinner from "../components/LoadingComponents";
 
 const TurtlePortal = () => {
   const { user, token, setUser, setToken } = useContext(UserContext);
@@ -44,73 +58,256 @@ const TurtlePortal = () => {
     }
   };
 
+  const handleLogout = () => {
+    // Clear all authentication data
+    localStorage.removeItem("auth");
+    localStorage.removeItem("user");
+
+    // Clear context state
+    setUser(null);
+    setToken(null);
+
+    // Show success message
+    toast.success("Logged out successfully");
+
+    // Redirect to login page
+    navigate("/login");
+  };
+
   if (loading) {
     return (
-      <div className="turtle-portal-container loading">
-        <div className="loading-spinner"></div>
-        <p>Loading portal...</p>
-      </div>
+      <LoadingSpinner
+        size="large"
+        text="Loading portal..."
+        variant="turtle"
+        fullScreen={false}
+      />
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const cardVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  const employeeActions = [
+    {
+      icon: FiUser,
+      title: "Profile",
+      description: "View and manage your profile settings",
+      route: "/dashboard",
+      color: "blue",
+    },
+    {
+      icon: FiCalendar,
+      title: "Track Sales",
+      description: "Record and track your daily sales activities",
+      route: "/track-sales",
+      color: "green",
+    },
+    {
+      icon: FiBarChart2,
+      title: "View Sales",
+      description: "Analyze your sales performance and metrics",
+      route: "/view-sales",
+      color: "purple",
+    },
+  ];
+
+  const managerActions = [
+    {
+      icon: FiHome,
+      title: "Manage Organization",
+      description: "Configure organization settings and manage team",
+      route: "/manage-org",
+      color: "orange",
+    },
+    {
+      icon: FiClock,
+      title: "Manage Timeslots",
+      description: "Assign work schedules and manage team availability",
+      route: "/manage-timeslots",
+      color: "teal",
+    },
+    {
+      icon: FiDollarSign,
+      title: "Employee Paystub",
+      description: "Manage and view employee payroll information",
+      route: "/employee-paystub",
+      color: "red",
+    },
+  ];
+
   return (
-    <div className="turtle-portal-container">
-      <div className="portal-header">
-        <h1>Turtle Portal</h1>
-        <p>Welcome to your sales management dashboard</p>
-      </div>
+    <motion.div
+      className="turtle-portal-container"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div className="portal-header" variants={cardVariants}>
+        <div className="header-content">
+          <div className="header-top">
+            <div className="portal-brand">
+              <div className="brand-icon">
+                <FiTrendingUp />
+              </div>
+              <div className="brand-text">
+                <h1>Turtle Portal</h1>
+                <p className="brand-subtitle">Sales Management Platform</p>
+              </div>
+            </div>
 
-      <div className="portal-actions">
-        <div className="action-card" onClick={() => navigate("/dashboard")}>
-          <div className="action-icon">👤</div>
-          <h3>Profile</h3>
-          <p>View and manage your profile settings</p>
-        </div>
+            <div className="header-center">
+              <div className="time-greeting">
+                <h2>
+                  Good{" "}
+                  {new Date().getHours() < 12
+                    ? "Morning"
+                    : new Date().getHours() < 18
+                    ? "Afternoon"
+                    : "Evening"}
+                </h2>
+                <p>Ready to boost your sales performance</p>
+              </div>
+              <div className="quick-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Role</span>
+                  <span className="stat-value">
+                    {isOwner ? "Manager" : "Employee"}
+                  </span>
+                </div>
+                <div className="stat-divider"></div>
+                <div className="stat-item">
+                  <span className="stat-label">Today</span>
+                  <span className="stat-value">
+                    {new Date().toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
+              </div>
+            </div>
 
-        <div className="action-card" onClick={() => navigate("/track-sales")}>
-          <div className="action-icon">📅</div>
-          <h3>Track sales</h3>
-          <p>Check your work schedule and team assignments</p>
+            <div className="user-section">
+              <div className="user-info">
+                <div className="user-avatar">
+                  <FiUser />
+                </div>
+                <div className="user-details">
+                  <span className="user-name">{user?.name || "User"}</span>
+                  <span className="user-status">Online</span>
+                </div>
+              </div>
+              <button
+                className="logout-btn"
+                onClick={handleLogout}
+                title="Logout"
+              >
+                <FiLogOut />
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
         </div>
+      </motion.div>
 
-        <div className="action-card" onClick={() => navigate("/view-sales")}>
-          <div className="action-icon">📊</div>
-          <h3>View Sales</h3>
-          <p>View sales data and performance analytics</p>
-        </div>
+      <div className="portal-content">
+        <motion.div className="section-header" variants={cardVariants}>
+          <h2>Quick Actions</h2>
+          <p>Access your most used features quickly</p>
+        </motion.div>
+
+        <motion.div className="portal-grid" variants={cardVariants}>
+          {employeeActions.map((action, index) => (
+            <motion.div
+              key={action.title}
+              className={`action-card ${action.color}`}
+              onClick={() => navigate(action.route)}
+              variants={cardVariants}
+              whileHover={{
+                y: -8,
+                transition: { duration: 0.2 },
+              }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="card-header">
+                <div className={`action-icon ${action.color}`}>
+                  <action.icon />
+                </div>
+                <FiArrowRight className="arrow-icon" />
+              </div>
+              <div className="card-content">
+                <h3>{action.title}</h3>
+                <p>{action.description}</p>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
 
         {isOwner && (
           <>
-            <div
-              className="action-card"
-              onClick={() => navigate("/manage-org")}
+            <motion.div
+              className="section-header manager-section"
+              variants={cardVariants}
             >
-              <div className="action-icon">🏢</div>
-              <h3>Manage Organization</h3>
-              <p>Configure organization settings and manage team</p>
-            </div>
+              <h2>Manager Tools</h2>
+              <p>Administrative functions for organization management</p>
+            </motion.div>
 
-            <div
-              className="action-card"
-              onClick={() => navigate("/manage-timeslots")}
+            <motion.div
+              className="portal-grid manager-grid"
+              variants={cardVariants}
             >
-              <div className="action-icon">⏰</div>
-              <h3>Manage Timeslots</h3>
-              <p>Assign work schedules and manage team availability</p>
-            </div>
-
-            <div
-              className="action-card"
-              onClick={() => navigate("/employee-paystub")}
-            >
-              <div className="action-icon">💰</div>
-              <h3>Employee Paystub</h3>
-              <p>Manage and view employee payroll information</p>
-            </div>
+              {managerActions.map((action, index) => (
+                <motion.div
+                  key={action.title}
+                  className={`action-card manager-card ${action.color}`}
+                  onClick={() => navigate(action.route)}
+                  variants={cardVariants}
+                  whileHover={{
+                    y: -8,
+                    transition: { duration: 0.2 },
+                  }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="card-header">
+                    <div className={`action-icon ${action.color}`}>
+                      <action.icon />
+                    </div>
+                    <FiArrowRight className="arrow-icon" />
+                  </div>
+                  <div className="card-content">
+                    <h3>{action.title}</h3>
+                    <p>{action.description}</p>
+                  </div>
+                  <div className="manager-badge">Manager</div>
+                </motion.div>
+              ))}
+            </motion.div>
           </>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

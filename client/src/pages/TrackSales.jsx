@@ -285,6 +285,7 @@ const TrackSales = () => {
         <LoadingSpinner
           size="large"
           text="Loading user data..."
+          variant="turtle"
           fullScreen={false}
         />
       </div>
@@ -297,6 +298,7 @@ const TrackSales = () => {
         <LoadingSpinner
           size="large"
           text="Loading workdays..."
+          variant="turtle"
           fullScreen={false}
         />
         <div

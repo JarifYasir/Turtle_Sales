@@ -1,0 +1,155 @@
+/* Consistent Loading Styles for Turtle Sales */
+
+.turtle-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  width: 100%;
+  padding: 2rem;
+  gap: 1.5rem;
+}
+
+.turtle-loading-container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  min-height: 100vh;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+}
+
+.turtle-loading-container.page-loading {
+  min-height: calc(100vh - 80px); /* Account for header */
+}
+
+/* Legacy spinner for backwards compatibility */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e9ecef;
+  border-top: 4px solid #4caf50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+.loading-spinner-small {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e9ecef;
+  border-top: 2px solid #4caf50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Turtle loading animation */
+.turtle-loading-icon {
+  animation: turtleBob 2s ease-in-out infinite;
+}
+
+@keyframes turtleBob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-10px) rotate(-2deg);
+  }
+}
+
+/* Loading text styles */
+.loading-text {
+  color: #4caf50;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 0.5rem 0;
+}
+
+.loading-subtext {
+  color: #81c784;
+  font-size: 0.875rem;
+  font-style: italic;
+  text-align: center;
+  margin: 0;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Container loading states */
+.manage-timeslots-container.loading,
+.manage-org-container.loading,
+.view-sales-container.loading,
+.turtle-portal-container.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 80px);
+  padding: 2rem;
+  gap: 1.5rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .turtle-loading-container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .loading-text {
+    font-size: 0.9rem;
+  }
+
+  .loading-subtext {
+    font-size: 0.8rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .turtle-loading-container.fullscreen {
+    background: rgba(0, 0, 0, 0.95);
+  }
+
+  .loading-spinner {
+    border-color: #444;
+    border-top-color: #4caf50;
+  }
+
+  .loading-spinner-small {
+    border-color: #444;
+    border-top-color: #4caf50;
+  }
+}

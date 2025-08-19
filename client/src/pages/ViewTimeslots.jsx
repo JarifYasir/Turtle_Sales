@@ -281,6 +281,7 @@ const ViewTimeslots = () => {
         <LoadingSpinner
           size="large"
           text="Loading workdays..."
+          variant="turtle"
           fullScreen={false}
         />
         <div

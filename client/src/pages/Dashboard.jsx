@@ -7,6 +7,7 @@ import defaultProfilePic from "../assets/profile-pictures/default.jpg";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
 import EditNameModal from "../components/EditNameModal";
 import axios from "axios";
+import LoadingSpinner from "../components/LoadingComponents";
 
 const Dashboard = () => {
   const { user, token, setUser, setToken } = useContext(UserContext);
@@ -155,9 +156,12 @@ const Dashboard = () => {
             </div>
           </div>
         ) : (
-          <div className="loading">
-            <p>Loading user data...</p>
-          </div>
+          <LoadingSpinner
+            size="medium"
+            text="Loading user data..."
+            variant="turtle"
+            fullScreen={false}
+          />
         )}
       </div>
 

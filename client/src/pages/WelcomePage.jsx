@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
+import LoadingSpinner from "../components/LoadingComponents";
 
 const WelcomePage = () => {
   const { user, token } = useContext(UserContext);
@@ -219,14 +220,12 @@ const WelcomePage = () => {
 
   if (checkingOrg) {
     return (
-      <div className="welcome-container">
-        <div className="welcome-content">
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p className="loading-text">Checking organization status...</p>
-          </div>
-        </div>
-      </div>
+      <LoadingSpinner
+        size="large"
+        text="Checking organization status..."
+        variant="turtle"
+        fullScreen={false}
+      />
     );
   }
 
