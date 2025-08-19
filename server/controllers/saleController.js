@@ -425,3 +425,97 @@ exports.createSale = async (req, res) => {
     res.status(500).json({ success: false, msg: "Server error" });
   }
 };
+
+// Get leaderboard data
+exports.getLeaderboard = async (req, res) => {
+  try {
+    // Find the organization the user belongs to
+    const organization = await Organization.findOne({
+      $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
+    })
+      .populate("owner", "name")
+      .populate("members.user", "name");
+
+    if (!organization) {
+      return res.status(404).json({
+        success: false,
+        msg: "User not associated with any organization",
+      });
+    }
+
+    // Get all organization members including owner (avoid duplicates)
+    const allMembers = [];
+
+    // Add owner
+    allMembers.push({
+      user: { _id: organization.owner._id, name: organization.owner.name },
+    });
+
+    // Add members (excluding owner if they're also in members array)
+    organization.members.forEach((member) => {
+      const isOwnerAlreadyAdded = allMembers.some(
+        (existing) =>
+          existing.user._id.toString() === member.user._id.toString()
+      );
+      if (!isOwnerAlreadyAdded) {
+        allMembers.push(member);
+      }
+    });
+
+    // Get sales data aggregated by user
+    const salesStats = await Sale.aggregate([
+      { $match: { organization: organization._id } },
+      {
+        $group: {
+          _id: "$user",
+          totalSales: { $sum: 1 },
+          totalRevenue: { $sum: "$price" },
+          avgSaleValue: { $avg: "$price" },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "userInfo",
+        },
+      },
+      { $unwind: "$userInfo" },
+      {
+        $project: {
+          _id: 1,
+          name: "$userInfo.name",
+          totalSales: 1,
+          totalRevenue: { $round: ["$totalRevenue", 2] },
+          avgSaleValue: { $round: ["$avgSaleValue", 2] },
+        },
+      },
+    ]);
+
+    // Include members with zero sales and ensure uniqueness
+    const memberMap = new Map();
+
+    allMembers.forEach((member) => {
+      const userId = member.user._id.toString();
+      if (!memberMap.has(userId)) {
+        const stats = salesStats.find((stat) => stat._id.toString() === userId);
+
+        memberMap.set(userId, {
+          _id: member.user._id,
+          name: member.user.name,
+          totalSales: stats ? stats.totalSales : 0,
+          totalRevenue: stats ? stats.totalRevenue : 0,
+          avgSaleValue: stats ? stats.avgSaleValue : 0,
+        });
+      }
+    });
+
+    const leaderboardData = Array.from(memberMap.values());
+
+    res.json({ success: true, leaderboard: leaderboardData });
+  } catch (error) {
+    console.error("Get Leaderboard Error:", error);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+};

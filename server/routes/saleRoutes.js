@@ -6,6 +6,7 @@ const {
   getSales,
   deleteSale,
   getWeeklySalesReport,
+  getLeaderboard,
   cleanupOrphanedSales,
 } = require("../controllers/saleController");
 const authMiddleware = require("../middleware/auth");
@@ -15,6 +16,9 @@ router.post("/", authMiddleware, createSale);
 
 // Get weekly sales report for employee paystub (must come before generic GET /)
 router.get("/weekly-report", authMiddleware, getWeeklySalesReport);
+
+// Get leaderboard data (must come before generic GET /)
+router.get("/leaderboard", authMiddleware, getLeaderboard);
 
 // Cleanup orphaned sales (owner only)
 router.post("/cleanup", authMiddleware, cleanupOrphanedSales);

@@ -130,6 +130,13 @@ const TurtlePortal = () => {
       route: "/view-sales",
       color: "purple",
     },
+    {
+      icon: FiTrendingUp,
+      title: "Leaderboard",
+      description: "View team performance rankings and achievements",
+      route: "/sales-leaderboard",
+      color: "orange",
+    },
   ];
 
   const managerActions = [

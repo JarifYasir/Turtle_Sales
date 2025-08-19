@@ -597,15 +597,15 @@ const TrackSales = () => {
         <div className="legend">
           <div className="legend-item">
             <div className="legend-color my-assignment"></div>
-            <span>You are assigned as cleaner</span>
+            <span>You are assigned as worker</span>
           </div>
           <div className="legend-item">
             <div className="legend-color other-assignment"></div>
-            <span>Others assigned as cleaners</span>
+            <span>Others assigned as worker</span>
           </div>
           <div className="legend-item">
             <div className="legend-color unassigned"></div>
-            <span>No cleaners assigned</span>
+            <span>No workers assigned</span>
           </div>
         </div>
 

@@ -37,6 +37,7 @@ import ManageTimeslots from "./pages/ManageTimeslots";
 import TrackSales from "./pages/TrackSales";
 import ViewSales from "./pages/viewsales";
 import EmployeePaystub from "./pages/EmployeePaystub";
+import SalesLeaderboard from "./pages/SalesLeaderboard";
 
 const router = createBrowserRouter([
   {
@@ -90,6 +91,10 @@ const router = createBrowserRouter([
       {
         path: "employee-paystub",
         element: <EmployeePaystub />,
+      },
+      {
+        path: "sales-leaderboard",
+        element: <SalesLeaderboard />,
       },
     ],
   },
