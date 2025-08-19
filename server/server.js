@@ -6,7 +6,11 @@ const compression = require("compression");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const connectDB = require("./config/db");
-const { getNetworkIP, getCorsOrigins, isLocalIP } = require("./config/environment");
+const {
+  getNetworkIP,
+  getCorsOrigins,
+  isLocalIP,
+} = require("./config/environment");
 
 // Load environment variables
 dotenv.config();

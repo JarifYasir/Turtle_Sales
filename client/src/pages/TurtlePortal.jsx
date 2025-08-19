@@ -23,6 +23,7 @@ const TurtlePortal = () => {
   const { user, token, setUser, setToken } = useContext(UserContext);
   const navigate = useNavigate();
   const [isOwner, setIsOwner] = useState(false);
+  const [isManager, setIsManager] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,6 +47,7 @@ const TurtlePortal = () => {
 
       if (response.data.success) {
         setIsOwner(response.data.isOwner);
+        setIsManager(response.data.isManager || response.data.isOwner); // Owner is also a manager
       }
     } catch (err) {
       // User doesn't have an organization
@@ -216,7 +218,7 @@ const TurtlePortal = () => {
                 <div className="stat-item">
                   <span className="stat-label">Role</span>
                   <span className="stat-value">
-                    {isOwner ? "Manager" : "Employee"}
+                    {isOwner ? "Owner" : isManager ? "Manager" : "Employee"}
                   </span>
                 </div>
                 <div className="stat-divider"></div>
@@ -288,13 +290,13 @@ const TurtlePortal = () => {
           ))}
         </motion.div>
 
-        {isOwner && (
+        {isManager && (
           <>
             <motion.div
               className="section-header manager-section"
               variants={cardVariants}
             >
-              <h2>Manager Tools</h2>
+              <h2>{isOwner ? "Owner Tools" : "Manager Tools"}</h2>
               <p>Administrative functions for organization management</p>
             </motion.div>
 
@@ -324,7 +326,9 @@ const TurtlePortal = () => {
                     <h3>{action.title}</h3>
                     <p>{action.description}</p>
                   </div>
-                  <div className="manager-badge">Manager</div>
+                  <div className="manager-badge">
+                    {isOwner ? "Owner" : "Manager"}
+                  </div>
                 </motion.div>
               ))}
             </motion.div>

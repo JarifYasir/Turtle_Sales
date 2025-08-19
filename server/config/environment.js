@@ -1,4 +1,4 @@
-const os = require('os');
+const os = require("os");
 
 /**
  * Get the network IP address of the current machine
@@ -8,7 +8,7 @@ const getNetworkIP = () => {
   const interfaces = os.networkInterfaces();
   for (const name of Object.keys(interfaces)) {
     for (const interface of interfaces[name]) {
-      if (interface.family === 'IPv4' && !interface.internal) {
+      if (interface.family === "IPv4" && !interface.internal) {
         return interface.address;
       }
     }
@@ -24,7 +24,7 @@ const getCorsOrigins = () => {
   const defaultOrigins = [
     "http://localhost:5173",
     "http://localhost:5174",
-    "http://127.0.0.1:5173", 
+    "http://127.0.0.1:5173",
     "http://127.0.0.1:5174",
     "http://localhost:3000",
     process.env.CLIENT_URL,
@@ -42,7 +42,9 @@ const getCorsOrigins = () => {
 
   // Add additional origins from environment variable
   if (process.env.ADDITIONAL_ORIGINS) {
-    const additionalOrigins = process.env.ADDITIONAL_ORIGINS.split(',').map(origin => origin.trim());
+    const additionalOrigins = process.env.ADDITIONAL_ORIGINS.split(",").map(
+      (origin) => origin.trim()
+    );
     defaultOrigins.push(...additionalOrigins);
   }
 
@@ -56,7 +58,7 @@ const getCorsOrigins = () => {
  */
 const isLocalIP = (ip) => {
   if (!ip) return false;
-  
+
   return (
     ip === "127.0.0.1" ||
     ip === "::1" ||

@@ -18,6 +18,7 @@ const ManageTimeslots = () => {
   const [orgMembers, setOrgMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
+  const [isManager, setIsManager] = useState(false);
   const [selectedWeekStart, setSelectedWeekStart] = useState(new Date());
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showManageModal, setShowManageModal] = useState(false);
@@ -52,9 +53,10 @@ const ManageTimeslots = () => {
       if (response.data.success) {
         setOrgMembers(response.data.organization.members || []);
         setIsOwner(response.data.isOwner);
+        setIsManager(response.data.isManager || response.data.isOwner);
 
-        if (!response.data.isOwner) {
-          toast.error("Only organization owners can manage timeslots");
+        if (!response.data.isManager && !response.data.isOwner) {
+          toast.error("Only organization owners and managers can manage timeslots");
           navigate("/turtle-portal");
         }
       }
@@ -88,6 +90,7 @@ const ManageTimeslots = () => {
       if (response.data.success) {
         setWorkdays(response.data.workdays);
         setIsOwner(response.data.isOwner);
+        setIsManager(response.data.isManager || response.data.isOwner);
       }
     } catch (err) {
       console.error("Error fetching workdays:", err);

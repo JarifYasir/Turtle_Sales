@@ -15,6 +15,7 @@ A full-stack web application for managing sales, timeslots, workdays, and employ
 ## Tech Stack
 
 ### Frontend
+
 - React 18
 - Vite
 - React Router
@@ -24,6 +25,7 @@ A full-stack web application for managing sales, timeslots, workdays, and employ
 - Axios
 
 ### Backend
+
 - Node.js
 - Express
 - MongoDB with Mongoose
@@ -35,6 +37,7 @@ A full-stack web application for managing sales, timeslots, workdays, and employ
 ## Setup Instructions
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - MongoDB database (local or cloud)
 - npm or yarn package manager
@@ -42,32 +45,37 @@ A full-stack web application for managing sales, timeslots, workdays, and employ
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd Turtle_Sales
    ```
 
 2. **Set up environment variables**
-   
+
    **For the client:**
+
    ```bash
    cd client
    cp .env.example .env
    ```
-   
+
    **For the server:**
+
    ```bash
    cd server
    cp .env.example .env
    ```
 
 3. **Configure environment variables**
-   
+
    **Client (.env):**
+
    - Update `VITE_API_URL` with your backend server URL
    - Update `VITE_CLIENT_URL` with your frontend URL
-   
+
    **Server (.env):**
+
    - Update `MONGODB_URI` with your MongoDB connection string
    - Update `JWT_SECRET` with a secure secret key
    - Update `CLIENT_URL` with your frontend URL
@@ -75,29 +83,33 @@ A full-stack web application for managing sales, timeslots, workdays, and employ
    - Optional: Set `ADDITIONAL_ORIGINS` for extra CORS origins
 
 4. **Install dependencies**
-   
+
    **Install server dependencies:**
+
    ```bash
    cd server
    npm install
    ```
-   
+
    **Install client dependencies:**
+
    ```bash
    cd client
    npm install
    ```
 
 5. **Run the application**
-   
+
    **Start the server (from server directory):**
+
    ```bash
    npm run dev
    # or for production
    npm start
    ```
-   
+
    **Start the client (from client directory):**
+
    ```bash
    npm run dev
    ```
@@ -141,26 +153,31 @@ Turtle_Sales/
 ## API Endpoints
 
 ### Authentication
+
 - `POST /api/v1/auth/register` - Register new user
 - `POST /api/v1/auth/login` - User login
 - `GET /api/v1/auth/dashboard` - Get user dashboard data
 
 ### Organization
+
 - `POST /api/v1/organization` - Create organization
 - `GET /api/v1/organization` - Get organization details
 - `PUT /api/v1/organization` - Update organization
 
 ### Sales
+
 - `GET /api/v1/sales` - Get sales data
 - `POST /api/v1/sales` - Create sale record
 - `GET /api/v1/sales/stats` - Get sales statistics
 
 ### Timeslots
+
 - `GET /api/v1/timeslots` - Get timeslots
 - `POST /api/v1/timeslots` - Create timeslot
 - `PUT /api/v1/timeslots/:id` - Update timeslot
 
 ### Workdays
+
 - `GET /api/v1/workdays` - Get workdays
 - `POST /api/v1/workdays` - Create workday
 - `PUT /api/v1/workdays/:id` - Update workday

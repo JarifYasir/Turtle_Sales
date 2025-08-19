@@ -251,9 +251,11 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-width: 800px;
-  max-height: 85vh;
+  max-height: 90vh;
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .modern-modal {
@@ -714,8 +716,9 @@
 .modern-body {
   padding: 0;
   background: var(--off-white);
-  max-height: calc(85vh - 120px);
+  flex: 1;
   overflow-y: auto;
+  min-height: 0; /* Important for flex scrolling */
 }
 
 .form-content {
@@ -934,6 +937,7 @@
   justify-content: flex-end;
   gap: 1rem;
   margin: 0;
+  flex-shrink: 0; /* Prevent actions from shrinking */
 }
 
 .modern-cancel-btn,
@@ -1011,14 +1015,14 @@
 
 @media (max-width: 768px) {
   .modern-modal {
-    width: 95%;
-    max-width: 95vw;
+    width: 98%;
+    max-width: 98vw;
     max-height: 95vh;
-    margin: 1rem;
+    margin: 0.5rem;
   }
 
   .modern-header {
-    padding: 1.5rem;
+    padding: 1.25rem;
   }
 
   .header-content {
@@ -1036,13 +1040,20 @@
     width: 100%;
   }
 
-  .header-text h2 {
-    font-size: 1.5rem;
+  .header-text h1 {
+    font-size: 1.4rem;
   }
 
-  .form-content,
+  .header-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .form-content {
+    padding: 1.25rem;
+  }
+
   .modal-body {
-    padding: 1.5rem;
+    padding: 1.25rem;
   }
 
   .modern-inputs {
@@ -1053,6 +1064,8 @@
   .modern-actions {
     flex-direction: column;
     gap: 0.75rem;
+    padding: 1.25rem;
+    margin: 0;
   }
 
   .modern-cancel-btn,
@@ -1084,6 +1097,28 @@
   .section-title h3 {
     text-align: center;
   }
+
+  /* Make employee selection more compact on mobile */
+  .custom-multiselect {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .employee-option {
+    padding: 0.75rem;
+  }
+
+  .employee-info {
+    flex: 1;
+  }
+
+  .employee-name {
+    font-size: 0.9rem;
+  }
+
+  .employee-email {
+    font-size: 0.8rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1099,15 +1134,18 @@
     padding: 1rem;
   }
 
-  .header-text h2 {
-    font-size: 1.25rem;
+  .header-text h1 {
+    font-size: 1.2rem;
   }
 
   .header-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
 
-  .form-content,
+  .form-content {
+    padding: 1rem;
+  }
+
   .modal-body {
     padding: 1rem;
   }
@@ -1117,7 +1155,8 @@
   }
 
   .input-group label {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
   }
 
   .modern-input,
@@ -1132,14 +1171,54 @@
   }
 
   .modern-actions {
-    gap: 1rem;
-    padding-top: 1rem;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin: 0;
   }
 
   .modern-cancel-btn,
   .modern-create-btn {
     padding: 0.875rem 1rem;
     font-size: 1rem;
+  }
+
+  /* Further compact employee selection for very small screens */
+  .custom-multiselect {
+    max-height: 150px;
+    overflow-y: auto;
+  }
+
+  .employee-option {
+    padding: 0.5rem;
+  }
+
+  .employee-name {
+    font-size: 0.85rem;
+  }
+
+  .employee-email {
+    font-size: 0.75rem;
+  }
+
+  .multiselect-help-text {
+    font-size: 0.8rem;
+  }
+
+  /* Compact timeslot items */
+  .modern-timeslot-item {
+    padding: 1rem;
+  }
+
+  .timeslot-inputs {
+    gap: 0.75rem;
+  }
+
+  .slot-number {
+    font-size: 0.9rem;
+  }
+
+  .time-preview {
+    font-size: 0.85rem;
   }
 }
 
@@ -1463,6 +1542,24 @@
 .modern-overlay {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
+}
+
+/* Responsive overlay padding */
+@media (max-width: 768px) {
+  .modal-overlay,
+  .modern-overlay {
+    padding: 0.5rem;
+    align-items: flex-start;
+    padding-top: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay,
+  .modern-overlay {
+    padding: 0;
+    align-items: stretch;
+  }
 }
 
 @media (max-width: 768px) {

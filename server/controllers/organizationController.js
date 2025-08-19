@@ -101,12 +101,19 @@ exports.getOrganization = async (req, res) => {
     // Check if current user is the owner
     const isOwner =
       organization.owner._id.toString() === req.user._id.toString();
+    
+    // Check if current user is a manager or owner
+    const userMember = organization.members.find(
+      member => member.user._id.toString() === req.user._id.toString()
+    );
+    const isManager = userMember && (userMember.role === 'manager' || userMember.role === 'owner');
 
     res.json({
       success: true,
       organization,
       memberCount: organization.members.length,
       isOwner,
+      isManager,
     });
   } catch (error) {
     console.error("Get Organization Error:", error);
