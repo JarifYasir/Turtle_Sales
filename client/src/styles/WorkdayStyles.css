@@ -260,16 +260,7 @@
   border: 1px solid rgba(76, 175, 80, 0.1);
 }
 
-.manage-workday-modal {
-  background: var(--white);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-large);
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative;
-}
+/* Removed - now using .modern-modal for consistency */
 
 .modal-header {
   background: linear-gradient(
@@ -631,8 +622,7 @@
     gap: 1rem;
   }
 
-  .create-workday-modal,
-  .manage-workday-modal {
+  .create-workday-modal {
     width: 95%;
     max-height: 95vh;
   }
@@ -857,6 +847,13 @@
   align-items: end;
 }
 
+@media (max-width: 900px) {
+  .modern-inputs {
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.75rem;
+  }
+}
+
 .modern-input,
 .modern-select {
   padding: 0.75rem;
@@ -1000,16 +997,51 @@
 }
 
 /* Responsive Design for Modern Modal */
+@media (max-width: 1024px) {
+  .modern-modal {
+    width: 95%;
+    max-width: 95vw;
+  }
+
+  .modern-inputs {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
 @media (max-width: 768px) {
+  .modern-modal {
+    width: 95%;
+    max-width: 95vw;
+    max-height: 95vh;
+    margin: 1rem;
+  }
+
   .modern-header {
     padding: 1.5rem;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .header-icon {
+    align-self: center;
+  }
+
+  .header-text {
+    text-align: center;
+    width: 100%;
   }
 
   .header-text h2 {
     font-size: 1.5rem;
   }
 
-  .form-content {
+  .form-content,
+  .modal-body {
     padding: 1.5rem;
   }
 
@@ -1042,6 +1074,72 @@
 
   .modern-add-btn {
     align-self: flex-start;
+    width: 100%;
+  }
+
+  .section-title {
+    align-items: center;
+  }
+
+  .section-title h3 {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .modern-modal {
+    width: 100%;
+    max-width: 100vw;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .modern-header {
+    padding: 1rem;
+  }
+
+  .header-text h2 {
+    font-size: 1.25rem;
+  }
+
+  .header-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .form-content,
+  .modal-body {
+    padding: 1rem;
+  }
+
+  .modern-inputs {
+    gap: 0.75rem;
+  }
+
+  .input-group label {
+    font-size: 1rem;
+  }
+
+  .modern-input,
+  .modern-select {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+
+  .modern-textarea {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+
+  .modern-actions {
+    gap: 1rem;
+    padding-top: 1rem;
+  }
+
+  .modern-cancel-btn,
+  .modern-create-btn {
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
   }
 }
 
@@ -1272,10 +1370,11 @@
   display: block;
 }
 
-/* Mobile Responsive */
+/* Mobile Responsive for Custom Multiselect */
 @media (max-width: 768px) {
   .custom-multiselect {
-    max-height: 180px;
+    max-height: 200px;
+    font-size: 1rem;
   }
 
   .employee-option {
@@ -1292,12 +1391,27 @@
 
   .multiselect-help-text {
     font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .selection-indicator {
+    width: 24px;
+    height: 24px;
+  }
+
+  .input-group {
+    margin-bottom: 1.5rem;
   }
 }
 
 @media (max-width: 480px) {
+  .custom-multiselect {
+    max-height: 160px;
+  }
+
   .employee-option {
     padding: 1.25rem 0.75rem;
+    min-height: 60px;
   }
 
   .employee-info {
@@ -1306,9 +1420,64 @@
 
   .employee-name {
     font-size: 1.1rem;
+    line-height: 1.3;
   }
 
   .employee-email {
     font-size: 0.9rem;
+    line-height: 1.2;
+  }
+
+  .selection-indicator {
+    width: 28px;
+    height: 28px;
+  }
+
+  .multiselect-help-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-top: 0.75rem;
+  }
+
+  .input-group {
+    margin-bottom: 2rem;
+  }
+}
+
+/* Modal Overlay Responsive Styles */
+.modal-overlay,
+.modern-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modern-overlay {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+@media (max-width: 768px) {
+  .modal-overlay,
+  .modern-overlay {
+    padding: 0.5rem;
+    align-items: flex-start;
+    padding-top: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay,
+  .modern-overlay {
+    padding: 0;
+    align-items: stretch;
   }
 }

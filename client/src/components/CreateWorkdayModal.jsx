@@ -22,11 +22,23 @@ const CreateWorkdayModal = ({
   const [loading, setLoading] = useState(false);
 
   const addTimeslot = () => {
+    // Get the end time of the last timeslot as the start time for the new one
+    const lastTimeslot = timeslots[timeslots.length - 1];
+    const newStartTime = lastTimeslot ? lastTimeslot.endTime : "09:00";
+
+    // Calculate a default end time (2 hours after start time)
+    const startHour = parseInt(newStartTime.split(":")[0]);
+    const startMinute = parseInt(newStartTime.split(":")[1]);
+    const endHour = startHour + 2;
+    const newEndTime = `${endHour.toString().padStart(2, "0")}:${startMinute
+      .toString()
+      .padStart(2, "0")}`;
+
     setTimeslots([
       ...timeslots,
       {
-        startTime: "12:00",
-        endTime: "14:00",
+        startTime: newStartTime,
+        endTime: newEndTime,
         maxEmployees: 2,
         assignedUsers: [],
       },
@@ -160,7 +172,7 @@ const CreateWorkdayModal = ({
 
       const authToken = JSON.parse(localStorage.getItem("auth"));
       const response = await axios.post(
-        "http://localhost:3000/api/v1/workdays",
+        `${import.meta.env.VITE_API_URL}/workdays`,
         {
           date: date.toISOString(),
           timeslots,
@@ -250,7 +262,7 @@ const CreateWorkdayModal = ({
                   </svg>
                 </div>
                 <div className="header-text">
-                  <h2>Create New Workday</h2>
+                  <h1>Create New Workday</h1>
                   <p className="header-subtitle">{date && formatDate(date)}</p>
                 </div>
               </div>

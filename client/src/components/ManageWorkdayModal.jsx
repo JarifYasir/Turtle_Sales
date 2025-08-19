@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import axios from "axios";
-import AssignEmployeeModal from "./AssignEmployeeModal";
 
 const ManageWorkdayModal = ({
   show,
@@ -14,8 +13,6 @@ const ManageWorkdayModal = ({
   const [timeslots, setTimeslots] = useState([]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showAssignModal, setShowAssignModal] = useState(false);
-  const [selectedTimeslot, setSelectedTimeslot] = useState(null);
 
   useEffect(() => {
     if (workday) {
@@ -25,11 +22,23 @@ const ManageWorkdayModal = ({
   }, [workday]);
 
   const addTimeslot = () => {
+    // Get the end time of the last timeslot as the start time for the new one
+    const lastTimeslot = timeslots[timeslots.length - 1];
+    const newStartTime = lastTimeslot ? lastTimeslot.endTime : "09:00";
+
+    // Calculate a default end time (2 hours after start time)
+    const startHour = parseInt(newStartTime.split(":")[0]);
+    const startMinute = parseInt(newStartTime.split(":")[1]);
+    const endHour = startHour + 2;
+    const newEndTime = `${endHour.toString().padStart(2, "0")}:${startMinute
+      .toString()
+      .padStart(2, "0")}`;
+
     setTimeslots([
       ...timeslots,
       {
-        startTime: "12:00",
-        endTime: "14:00",
+        startTime: newStartTime,
+        endTime: newEndTime,
         maxEmployees: 2,
         assignedUsers: [],
         _id: new Date().getTime().toString(), // Temporary ID for new slots
@@ -56,7 +65,9 @@ const ManageWorkdayModal = ({
       try {
         const authToken = JSON.parse(localStorage.getItem("auth"));
         await axios.delete(
-          `http://localhost:3000/api/v1/workdays/${workday._id}/timeslots/${timeslotId}`,
+          `${import.meta.env.VITE_API_URL}/workdays/${
+            workday._id
+          }/timeslots/${timeslotId}`,
           {
             headers: { Authorization: `Bearer ${authToken}` },
           }
@@ -82,6 +93,45 @@ const ManageWorkdayModal = ({
     setTimeslots(updated);
   };
 
+  const handleEmployeeToggle = (timeslotIndex, employeeId) => {
+    const slot = timeslots[timeslotIndex];
+    const isSelected = slot.assignedUsers?.some(
+      (au) => au.user._id === employeeId
+    );
+
+    let newAssignedUsers;
+
+    if (isSelected) {
+      // Remove employee
+      newAssignedUsers = slot.assignedUsers.filter(
+        (au) => au.user._id !== employeeId
+      );
+    } else {
+      // Add employee if under limit
+      if (slot.assignedUsers.length >= slot.maxEmployees) {
+        toast.error(
+          `You can only select ${slot.maxEmployees} worker${
+            slot.maxEmployees !== 1 ? "s" : ""
+          } for this timeslot`
+        );
+        return;
+      }
+
+      const employee = employees.find((emp) => emp._id === employeeId);
+      const newAssignment = {
+        user: {
+          _id: employeeId,
+          name: employee ? employee.name : "Unknown",
+        },
+        notes: "",
+      };
+
+      newAssignedUsers = [...slot.assignedUsers, newAssignment];
+    }
+
+    updateTimeslot(timeslotIndex, "assignedUsers", newAssignedUsers);
+  };
+
   const validateTimeslots = () => {
     for (let slot of timeslots) {
       if (!slot.startTime || !slot.endTime) {
@@ -98,7 +148,7 @@ const ManageWorkdayModal = ({
       }
 
       if (slot.maxEmployees < 1 || slot.maxEmployees > 10) {
-        toast.error("Max employees must be between 1 and 10");
+        toast.error("Number of workers must be between 1 and 10");
         return false;
       }
     }
@@ -132,7 +182,7 @@ const ManageWorkdayModal = ({
     try {
       const authToken = JSON.parse(localStorage.getItem("auth"));
       const response = await axios.put(
-        `http://localhost:3000/api/v1/workdays/${workday._id}`,
+        `${import.meta.env.VITE_API_URL}/workdays/${workday._id}`,
         {
           timeslots,
           notes,
@@ -180,152 +230,123 @@ const ManageWorkdayModal = ({
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  const handleAssignEmployee = (timeslot) => {
-    setSelectedTimeslot({
-      ...timeslot,
-      _id: timeslot._id,
-      workdayId: workday._id,
-    });
-    setShowAssignModal(true);
-  };
-
-  const handleRemoveUser = async (timeslotId, userId) => {
-    try {
-      const authToken = JSON.parse(localStorage.getItem("auth"));
-      await axios.put(
-        `http://localhost:3000/api/v1/workdays/${workday._id}/timeslots/${timeslotId}/assign`,
-        { userId, action: "remove" },
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
-        }
-      );
-
-      toast.success("Employee removed successfully");
-      onWorkdayUpdated();
-    } catch (err) {
-      console.error("Error removing employee:", err);
-      toast.error("Failed to remove employee");
-    }
-  };
-
   if (!workday) return null;
 
   return (
     <AnimatePresence>
       {show && (
         <motion.div
-          className="modal-overlay"
+          className="modal-overlay modern-overlay"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={handleClose}
         >
           <motion.div
-            className="manage-workday-modal"
-            initial={{ opacity: 0, scale: 0.8, y: 50 }}
+            className="create-workday-modal modern-modal"
+            initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 50 }}
+            exit={{ opacity: 0, scale: 0.9, y: 30 }}
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="modal-header">
-              <h2>Manage Workday</h2>
-              <p>{formatDate(workday.date)}</p>
-              <button className="close-btn" onClick={handleClose}>
-                ×
+            {/* Enhanced Header */}
+            <div className="modal-header modern-header">
+              <div className="header-content">
+                <div className="header-icon">
+                  <svg
+                    width="28"
+                    height="28"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                  </svg>
+                </div>
+                <div className="header-text">
+                  <h1>Manage Workday</h1>
+                  <p className="header-subtitle">{formatDate(workday.date)}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="close-btn modern-close"
+                onClick={handleClose}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                </svg>
               </button>
             </div>
 
-            <div className="modal-body">
-              {/* Current Assignments */}
-              <div className="assignments-section">
-                <h3>Current Timeslots & Assignments</h3>
-                <div className="current-timeslots">
-                  {timeslots.map((slot, index) => (
-                    <div key={slot._id || index} className="timeslot-summary">
-                      <div className="timeslot-header">
-                        <span className="time-range">
-                          {formatTime(slot.startTime)} -{" "}
-                          {formatTime(slot.endTime)}
-                        </span>
-                        <span className="capacity">
-                          {slot.assignedUsers?.length || 0}/{slot.maxEmployees}
-                        </span>
-                      </div>
-
-                      {slot.assignedUsers && slot.assignedUsers.length > 0 ? (
-                        <div className="assigned-employees">
-                          {slot.assignedUsers.map((assignment) => (
-                            <div
-                              key={assignment.user._id}
-                              className="employee-assignment"
-                            >
-                              <span className="employee-name">
-                                {assignment.user.name}
-                              </span>
-                              <button
-                                onClick={() =>
-                                  handleRemoveUser(
-                                    slot._id,
-                                    assignment.user._id
-                                  )
-                                }
-                                className="remove-btn"
-                                title="Remove employee"
-                              >
-                                ×
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="no-assignments">
-                          No employees assigned
-                        </div>
-                      )}
-
-                      <div className="timeslot-actions">
-                        <button
-                          type="button"
-                          onClick={() => handleAssignEmployee(slot)}
-                          className="assign-employee-btn"
-                          disabled={
-                            slot.assignedUsers?.length >= slot.maxEmployees
-                          }
-                        >
-                          {slot.assignedUsers?.length >= slot.maxEmployees
-                            ? "Full"
-                            : "Assign Employee"}
-                        </button>
+            <form onSubmit={handleSubmit} className="modal-body modern-body">
+              <div className="form-content">
+                {/* Timeslots Section */}
+                <div className="form-section timeslots-section">
+                  <div className="section-header modern-section-header">
+                    <div className="section-title">
+                      <svg
+                        width="20"
+                        height="20"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                        className="section-icon"
+                      >
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" />
+                        <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+                      </svg>
+                      <div>
+                        <h3>Timeslots Configuration</h3>
+                        <p className="section-subtitle">
+                          Update work shifts and employee assignments
+                        </p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Edit Timeslots */}
-              <form onSubmit={handleSubmit}>
-                <div className="timeslots-section">
-                  <div className="section-header">
-                    <h3>Edit Timeslots</h3>
                     <button
                       type="button"
                       onClick={addTimeslot}
-                      className="add-timeslot-btn"
+                      className="add-timeslot-btn modern-add-btn"
                     >
-                      + Add Timeslot
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                      </svg>
+                      Add Timeslot
                     </button>
                   </div>
 
-                  <div className="timeslots-list">
+                  <div className="timeslots-list modern-timeslots-list">
                     {timeslots.map((slot, index) => (
                       <motion.div
                         key={slot._id || index}
-                        className="timeslot-item"
+                        className="timeslot-item modern-timeslot-item"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <div className="timeslot-inputs">
+                        <div className="timeslot-header">
+                          <div className="slot-indicator">
+                            <span className="slot-number">{index + 1}</span>
+                          </div>
+                          <div className="time-preview">
+                            {slot.startTime &&
+                              slot.endTime &&
+                              `${formatTime(slot.startTime)} - ${formatTime(
+                                slot.endTime
+                              )}`}
+                          </div>
+                        </div>
+
+                        <div className="timeslot-inputs modern-inputs">
                           <div className="input-group">
                             <label>Start Time</label>
                             <input
@@ -339,8 +360,10 @@ const ManageWorkdayModal = ({
                                 )
                               }
                               required
+                              className="modern-input"
                             />
                           </div>
+
                           <div className="input-group">
                             <label>End Time</label>
                             <input
@@ -350,93 +373,214 @@ const ManageWorkdayModal = ({
                                 updateTimeslot(index, "endTime", e.target.value)
                               }
                               required
+                              className="modern-input"
                             />
                           </div>
+
                           <div className="input-group">
-                            <label>Max Employees</label>
+                            <label># of Workers</label>
                             <select
                               value={slot.maxEmployees}
-                              onChange={(e) =>
-                                updateTimeslot(
-                                  index,
-                                  "maxEmployees",
-                                  parseInt(e.target.value)
-                                )
-                              }
+                              onChange={(e) => {
+                                const newCount = parseInt(e.target.value);
+                                updateTimeslot(index, "maxEmployees", newCount);
+                                // Reset assigned users if the new count is less than current assignments
+                                if (slot.assignedUsers.length > newCount) {
+                                  updateTimeslot(
+                                    index,
+                                    "assignedUsers",
+                                    slot.assignedUsers.slice(0, newCount)
+                                  );
+                                }
+                              }}
+                              className="modern-select"
                             >
                               {[...Array(10)].map((_, i) => (
                                 <option key={i + 1} value={i + 1}>
-                                  {i + 1}
+                                  {i + 1} {i === 0 ? "worker" : "workers"}
                                 </option>
                               ))}
                             </select>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => removeTimeslot(index, slot._id)}
-                            className="remove-timeslot-btn"
-                            title="Remove timeslot"
-                          >
-                            ×
-                          </button>
-                        </div>
-                        {slot.assignedUsers?.length > 0 && (
-                          <div className="assigned-warning">
-                            ⚠️ {slot.assignedUsers.length} employee(s) assigned
+
+                          <div className="input-group">
+                            <label>
+                              Select Workers ({slot.assignedUsers?.length || 0}/
+                              {slot.maxEmployees})
+                            </label>
+                            <div
+                              className={`custom-multiselect ${
+                                slot.assignedUsers?.length === slot.maxEmployees
+                                  ? "complete"
+                                  : ""
+                              }`}
+                            >
+                              {employees.map((employee) => {
+                                const isSelected = slot.assignedUsers?.some(
+                                  (au) => au.user._id === employee._id
+                                );
+                                const isDisabled =
+                                  slot.assignedUsers?.length >=
+                                    slot.maxEmployees && !isSelected;
+
+                                return (
+                                  <div
+                                    key={employee._id}
+                                    className={`employee-option ${
+                                      isSelected ? "selected" : ""
+                                    } ${isDisabled ? "disabled" : ""}`}
+                                    onClick={() =>
+                                      !isDisabled &&
+                                      handleEmployeeToggle(index, employee._id)
+                                    }
+                                  >
+                                    <div className="employee-info">
+                                      <span className="employee-name">
+                                        {employee.name}
+                                      </span>
+                                      <span className="employee-email">
+                                        {employee.email}
+                                      </span>
+                                    </div>
+                                    <div className="selection-indicator">
+                                      {isSelected && (
+                                        <svg
+                                          width="16"
+                                          height="16"
+                                          viewBox="0 0 24 24"
+                                          fill="currentColor"
+                                        >
+                                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                        </svg>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <small className="multiselect-help-text">
+                              Click to select/unselect workers. Capacity:{" "}
+                              {slot.maxEmployees} worker
+                              {slot.maxEmployees !== 1 ? "s" : ""}.
+                            </small>
                           </div>
-                        )}
+                        </div>
+
+                        <div className="timeslot-actions">
+                          {timeslots.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeTimeslot(index, slot._id)}
+                              className="remove-timeslot-btn modern-remove-btn"
+                              title="Remove this timeslot"
+                            >
+                              <svg
+                                width="16"
+                                height="16"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
                       </motion.div>
                     ))}
                   </div>
                 </div>
 
-                <div className="notes-section">
-                  <label htmlFor="workday-notes">
-                    <h3>Notes</h3>
-                  </label>
+                {/* Notes Section */}
+                <div className="form-section notes-section modern-notes-section">
+                  <div className="section-header modern-section-header">
+                    <div className="section-title">
+                      <svg
+                        width="20"
+                        height="20"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                        className="section-icon"
+                      >
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                      </svg>
+                      <div>
+                        <h3>Additional Notes</h3>
+                        <p className="section-subtitle">
+                          Optional instructions or special requirements
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <textarea
                     id="workday-notes"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Add any notes about this workday..."
+                    placeholder="Add any special instructions, requirements, or important information for this workday..."
                     maxLength={500}
-                    rows={3}
+                    rows={4}
+                    className="modern-textarea"
                   />
-                  <small>{notes.length}/500 characters</small>
+                  <div className="char-count">
+                    <small>{notes.length}/500 characters</small>
+                  </div>
                 </div>
+              </div>
 
-                <div className="modal-actions">
-                  <button
-                    type="button"
-                    onClick={handleClose}
-                    className="cancel-btn"
-                    disabled={loading}
+              {/* Enhanced Actions */}
+              <div className="modal-actions modern-actions">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="cancel-btn modern-cancel-btn"
+                  disabled={loading}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    Cancel
-                  </button>
-                  <button type="submit" className="save-btn" disabled={loading}>
-                    {loading ? "Saving..." : "Save Changes"}
-                  </button>
-                </div>
-              </form>
-            </div>
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                  </svg>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="create-btn modern-create-btn"
+                  disabled={loading || timeslots.length === 0}
+                >
+                  {loading ? (
+                    <>
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                        className="spinner"
+                      >
+                        <path d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z" />
+                      </svg>
+                      Updating Workday...
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+                      </svg>
+                      Update Workday
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </motion.div>
         </motion.div>
-      )}
-
-      {/* Assignment Modal */}
-      {selectedTimeslot && (
-        <AssignEmployeeModal
-          show={showAssignModal}
-          onClose={() => {
-            setShowAssignModal(false);
-            setSelectedTimeslot(null);
-          }}
-          timeslot={selectedTimeslot}
-          fetchTimeslots={onWorkdayUpdated}
-          employees={employees}
-          isWorkday={true}
-        />
       )}
     </AnimatePresence>
   );
