@@ -24,21 +24,42 @@ export default function Header() {
     <div style={{ paddingBottom: "70px" }}>
       <Navbar
         expand="lg"
-        className="bg-body-tertiary"
+        className="bg-body-tertiary header-enhanced"
         fixed="top"
         style={{ zIndex: 1050 }}
       >
         <Container fluid className="px-3">
           <Navbar.Brand
             href="/"
-            style={{ fontSize: "1.5rem", fontWeight: "bold" }}
+            style={{
+              fontSize: "1.5rem",
+              fontWeight: "bold",
+              color: "var(--primary-green)",
+              textDecoration: "none",
+            }}
           >
-            Turtle Sales
+            🐢 Turtle Sales
           </Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Toggle
+            aria-controls="basic-navbar-nav"
+            style={{
+              border: "none",
+              padding: "0.25rem 0.5rem",
+              fontSize: "1.25rem",
+            }}
+          />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              <Nav.Link href="/" style={{ padding: "0.5rem 1rem" }}>
+              <Nav.Link
+                href="/"
+                style={{
+                  padding: "0.5rem 1rem",
+                  borderRadius: "0.5rem",
+                  margin: "0 0.25rem",
+                  transition: "all 0.2s ease",
+                }}
+                className="nav-link-enhanced"
+              >
                 Home
               </Nav.Link>
 
@@ -46,19 +67,40 @@ export default function Header() {
                 <>
                   <Nav.Link
                     href="/dashboard"
-                    style={{ padding: "0.5rem 1rem" }}
+                    style={{
+                      padding: "0.5rem 1rem",
+                      borderRadius: "0.5rem",
+                      margin: "0 0.25rem",
+                      transition: "all 0.2s ease",
+                    }}
+                    className="nav-link-enhanced"
                   >
                     Profile
                   </Nav.Link>
                   <Nav.Link
                     href="/turtle-portal"
-                    style={{ padding: "0.5rem 1rem" }}
+                    style={{
+                      padding: "0.5rem 1rem",
+                      borderRadius: "0.5rem",
+                      margin: "0 0.25rem",
+                      transition: "all 0.2s ease",
+                    }}
+                    className="nav-link-enhanced"
                   >
                     Turtle Portal
                   </Nav.Link>
                 </>
               ) : (
-                <Nav.Link href="/register" style={{ padding: "0.5rem 1rem" }}>
+                <Nav.Link
+                  href="/register"
+                  style={{
+                    padding: "0.5rem 1rem",
+                    borderRadius: "0.5rem",
+                    margin: "0 0.25rem",
+                    transition: "all 0.2s ease",
+                  }}
+                  className="nav-link-enhanced"
+                >
                   Register/Login
                 </Nav.Link>
               )}

@@ -85,6 +85,38 @@
   outline-offset: 2px;
 }
 
+/* Enhanced Header Styles */
+.header-enhanced {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid var(--accent-green);
+  box-shadow: 0 2px 12px rgba(76, 175, 80, 0.1);
+}
+
+.nav-link-enhanced:hover {
+  background-color: var(--pale-green) !important;
+  color: var(--dark-green) !important;
+  transform: translateY(-1px);
+}
+
+.navbar-brand:hover {
+  color: var(--secondary-green) !important;
+}
+
+.navbar-toggler {
+  border: 2px solid var(--accent-green) !important;
+  border-radius: 8px !important;
+  padding: 0.5rem !important;
+}
+
+.navbar-toggler:focus {
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.25) !important;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%234caf50' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
 /* Remove focus outline from navbar links */
 .navbar a:focus,
 .navbar .nav-link:focus {

@@ -192,8 +192,25 @@ const TurtlePortal = () => {
                     : new Date().getHours() < 18
                     ? "Afternoon"
                     : "Evening"}
+                  , {user?.name?.split(" ")[0] || "User"}!
                 </h2>
-                <p>Ready to boost your sales performance</p>
+                <p>Ready to boost your sales performance 🚀</p>
+              </div>
+              <div className="quick-actions-header">
+                <div
+                  className="quick-action-btn"
+                  onClick={() => navigate("/track-sales")}
+                >
+                  <FiBarChart2 />
+                  <span>Quick Sale</span>
+                </div>
+                <div
+                  className="quick-action-btn"
+                  onClick={() => navigate("/view-sales")}
+                >
+                  <FiTrendingUp />
+                  <span>View Sales</span>
+                </div>
               </div>
               <div className="quick-stats">
                 <div className="stat-item">

@@ -769,6 +769,65 @@
   }
 }
 
+/* Quick Actions Styling */
+.quick-actions-header {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.quick-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(
+    135deg,
+    var(--primary-green),
+    var(--secondary-green)
+  );
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+  min-height: 44px;
+  text-decoration: none;
+}
+
+.quick-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+  color: white;
+}
+
+.quick-action-btn:active {
+  transform: translateY(0);
+}
+
+.quick-action-btn svg {
+  font-size: 1.1rem;
+}
+
+/* Mobile optimization for quick actions */
+@media (max-width: 768px) {
+  .quick-actions-header {
+    gap: 0.5rem;
+  }
+
+  .quick-action-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+    min-width: 120px;
+    justify-content: center;
+  }
+}
+
 /* Focus states for accessibility */
 .action-card:focus {
   outline: 2px solid var(--primary-green);
@@ -777,5 +836,10 @@
 
 .action-card:focus-visible {
   outline: 2px solid var(--primary-green);
+  outline-offset: 2px;
+}
+
+.quick-action-btn:focus {
+  outline: 2px solid var(--white);
   outline-offset: 2px;
 }

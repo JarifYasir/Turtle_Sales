@@ -10,10 +10,10 @@ export default defineConfig({
     __DEV__: JSON.stringify(true),
   },
   server: {
-    port: 5173,
-    host: true,
+    port: 3000,
+    host: "0.0.0.0",
     hmr: {
-      port: 5173,
+      port: 3000,
     },
   },
   build: {

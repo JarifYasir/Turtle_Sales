@@ -38,11 +38,27 @@ const TurtleIcon = ({ size = 60, color = "#4CAF50" }) => (
   </svg>
 );
 
+// Skeleton Loading Component for better UX
+const SkeletonCard = () => (
+  <motion.div
+    className="skeleton-card"
+    animate={{ opacity: [0.6, 1, 0.6] }}
+    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+  >
+    <div className="skeleton-header"></div>
+    <div className="skeleton-line"></div>
+    <div className="skeleton-line short"></div>
+    <div className="skeleton-line"></div>
+  </motion.div>
+);
+
 const LoadingSpinner = ({
   size = "medium",
   text = "Loading...",
   fullScreen = false,
   variant = "turtle", // "turtle" or "spinner"
+  showProgress = false,
+  progress = 0,
 }) => {
   const sizes = {
     small: { spinner: 30, text: "0.875rem" },

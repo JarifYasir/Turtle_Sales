@@ -119,8 +119,17 @@ function App() {
             pauseOnHover
             theme="light"
             toastStyle={{
-              borderRadius: "8px",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              borderRadius: "12px",
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+              fontSize: "0.875rem",
+              fontWeight: "600",
+            }}
+            bodyStyle={{
+              padding: "12px 16px",
+            }}
+            progressStyle={{
+              background:
+                "linear-gradient(90deg, var(--primary-green), var(--secondary-green))",
             }}
           />
         </UserProvider>

@@ -299,11 +299,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    touch-action: manipulation;
   }
 
   .form-control,
   .form-select {
     min-height: 44px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  /* Add haptic feedback simulation */
+  .btn:active,
+  button:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  /* Improve scroll behavior on mobile */
+  .scrollable-container {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
 }
 
@@ -311,6 +326,26 @@
 * {
   max-width: 100%;
   box-sizing: border-box;
+}
+
+/* Enhanced form validation styles */
+.form-field-error {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1) !important;
+}
+
+.form-error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.form-success {
+  border-color: var(--primary-green) !important;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1) !important;
 }
 
 /* Improve text readability */
@@ -324,5 +359,20 @@
   textarea,
   select {
     font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  /* Better button spacing on mobile */
+  .btn + .btn {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+
+  /* Improved focus states for mobile */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: 2px solid var(--primary-green);
+    outline-offset: 2px;
+    border-color: var(--primary-green);
   }
 }
