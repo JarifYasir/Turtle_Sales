@@ -70,35 +70,50 @@ const authLimiter = rateLimit({
 app.use(limiter);
 
 // CORS middleware
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
+if (process.env.NODE_ENV === "development") {
+  // In development, allow all origins
+  app.use(
+    cors({
+      origin: true, // Allow all origins in development
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+      exposedHeaders: ["Content-Length"],
+      optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
+    })
+  );
+} else {
+  // In production, be more restrictive
+  app.use(
+    cors({
+      origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
 
-      const allowedOrigins = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://192.168.2.24:5173",
-        "http://localhost:3000",
-        "http://192.168.2.24:3000",
-        process.env.CLIENT_URL,
-      ].filter(Boolean); // Remove undefined values
+        const allowedOrigins = [
+          "http://localhost:5173",
+          "http://127.0.0.1:5173",
+          "http://192.168.2.24:5173",
+          "http://localhost:3000",
+          "http://192.168.2.24:3000",
+          process.env.CLIENT_URL,
+        ].filter(Boolean); // Remove undefined values
 
-      if (
-        allowedOrigins.includes(origin) ||
-        process.env.NODE_ENV === "development"
-      ) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    })
+  );
+}
+
+// Handle preflight requests explicitly
+app.options("*", cors()); // Enable preflight for all routes
 
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));

@@ -80,6 +80,222 @@ exports.getSales = async (req, res) => {
   }
 };
 
+// Get weekly sales report for employee paystub
+exports.getWeeklySalesReport = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    // Find the organization the user belongs to
+    const organization = await Organization.findOne({
+      $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
+    });
+
+    if (!organization) {
+      return res.status(404).json({
+        success: false,
+        msg: "User not associated with any organization",
+      });
+    }
+
+    // Parse dates
+    const start = startDate ? new Date(startDate) : new Date();
+    const end = endDate ? new Date(endDate) : new Date();
+
+    // Set to start of day for start date and end of day for end date
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
+
+    // Get sales within the date range
+    const allSales = await Sale.find({
+      organization: organization._id,
+      createdAt: {
+        $gte: start,
+        $lte: end,
+      },
+    })
+      .sort({ createdAt: -1 })
+      .populate("user", "name")
+      .populate({
+        path: "workday",
+        populate: {
+          path: "timeslots.assignedUsers.user",
+          select: "name",
+        },
+      })
+      .populate("timeslot", "date startTime endTime")
+      .select(
+        "salesRepName price createdAt user name address workday timeslot timeslotId"
+      );
+
+    // Filter out sales with deleted/invalid timeslots or workdays
+    const sales = allSales.filter((sale) => {
+      // If sale has workday and timeslotId, check if the specific timeslot still exists
+      if (sale.workday && sale.timeslotId) {
+        const timeslot = sale.workday.timeslots.find(
+          (ts) => ts._id.toString() === sale.timeslotId.toString()
+        );
+        return !!timeslot; // Only include if timeslot exists
+      }
+
+      // If sale has legacy timeslot, check if it still exists
+      if (sale.timeslot) {
+        return true; // Legacy timeslot exists (populated successfully)
+      }
+
+      // If no timeslot reference, exclude from paystub
+      return false;
+    });
+
+    // Group sales by sales rep
+    const salesByRep = {};
+    let totalRevenue = 0;
+
+    sales.forEach((sale) => {
+      const repName = sale.salesRepName;
+      if (!salesByRep[repName]) {
+        salesByRep[repName] = {
+          salesRepName: repName,
+          sales: [],
+          totalAmount: 0,
+          salesCount: 0,
+        };
+      }
+
+      // Get timeslot information
+      let timeslotInfo = null;
+      if (sale.workday && sale.timeslotId) {
+        // Find the specific timeslot within the workday
+        const timeslot = sale.workday.timeslots.find(
+          (ts) => ts._id.toString() === sale.timeslotId.toString()
+        );
+        if (timeslot) {
+          timeslotInfo = {
+            date: sale.workday.date,
+            startTime: timeslot.startTime,
+            endTime: timeslot.endTime,
+          };
+        }
+      } else if (sale.timeslot) {
+        // Legacy timeslot system
+        timeslotInfo = {
+          date: sale.timeslot.date,
+          startTime: sale.timeslot.startTime,
+          endTime: sale.timeslot.endTime,
+        };
+      }
+
+      salesByRep[repName].sales.push({
+        amount: sale.price,
+        date: sale.createdAt,
+        saleId: sale._id,
+        clientName: sale.name,
+        clientAddress: sale.address,
+        timeslot: timeslotInfo,
+      });
+      salesByRep[repName].totalAmount += sale.price;
+      salesByRep[repName].salesCount += 1;
+      totalRevenue += sale.price;
+    });
+
+    // Convert to array and sort by total amount (highest first)
+    const salesReport = Object.values(salesByRep).sort(
+      (a, b) => b.totalAmount - a.totalAmount
+    );
+
+    res.json({
+      success: true,
+      data: {
+        period: {
+          startDate: start,
+          endDate: end,
+        },
+        salesReport,
+        summary: {
+          totalRevenue,
+          totalSales: sales.length,
+          totalReps: salesReport.length,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Get Weekly Sales Report Error:", error);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+};
+
+// Cleanup orphaned sales (sales with no valid timeslot reference)
+exports.cleanupOrphanedSales = async (req, res) => {
+  try {
+    // Find the organization the user belongs to
+    const organization = await Organization.findOne({
+      $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
+    });
+
+    if (!organization) {
+      return res.status(404).json({
+        success: false,
+        msg: "User not associated with any organization",
+      });
+    }
+
+    // Only allow organization owners to run cleanup
+    if (organization.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        msg: "Only organization owners can run cleanup operations",
+      });
+    }
+
+    // Find all sales for this organization
+    const allSales = await Sale.find({ organization: organization._id })
+      .populate("workday")
+      .populate("timeslot");
+
+    const orphanedSales = [];
+
+    for (const sale of allSales) {
+      let isOrphaned = false;
+
+      if (sale.workday && sale.timeslotId) {
+        // Check if the specific timeslot still exists in the workday
+        const timeslot = sale.workday.timeslots.find(
+          (ts) => ts._id.toString() === sale.timeslotId.toString()
+        );
+        if (!timeslot) {
+          isOrphaned = true;
+        }
+      } else if (sale.timeslot) {
+        // Legacy timeslot - if populate failed, it's orphaned
+        if (!sale.timeslot) {
+          isOrphaned = true;
+        }
+      } else {
+        // No timeslot reference at all
+        isOrphaned = true;
+      }
+
+      if (isOrphaned) {
+        orphanedSales.push(sale._id);
+      }
+    }
+
+    // Delete orphaned sales
+    const deleteResult = await Sale.deleteMany({
+      _id: { $in: orphanedSales },
+      organization: organization._id,
+    });
+
+    res.json({
+      success: true,
+      msg: `Cleanup completed. ${deleteResult.deletedCount} orphaned sales removed.`,
+      deletedCount: deleteResult.deletedCount,
+    });
+  } catch (error) {
+    console.error("Cleanup Orphaned Sales Error:", error);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+};
+
 // Delete a sale (manager only)
 exports.deleteSale = async (req, res) => {
   try {

@@ -34,7 +34,7 @@ import { UserProvider } from "./usercontext/UserContext";
 import WelcomePage from "./pages/WelcomePage";
 import ManageOrg from "./pages/ManageOrg";
 import ManageTimeslots from "./pages/ManageTimeslots";
-import ViewTimeslots from "./pages/ViewTimeslots";
+import TrackSales from "./pages/TrackSales";
 import ViewSales from "./pages/viewsales";
 import EmployeePaystub from "./pages/EmployeePaystub";
 
@@ -80,8 +80,8 @@ const router = createBrowserRouter([
         element: <ManageTimeslots />,
       },
       {
-        path: "view-timeslots",
-        element: <ViewTimeslots />,
+        path: "track-sales",
+        element: <TrackSales />,
       },
       {
         path: "view-sales",

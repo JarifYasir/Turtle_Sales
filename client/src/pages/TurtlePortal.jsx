@@ -67,12 +67,9 @@ const TurtlePortal = () => {
           <p>View and manage your profile settings</p>
         </div>
 
-        <div
-          className="action-card"
-          onClick={() => navigate("/view-timeslots")}
-        >
+        <div className="action-card" onClick={() => navigate("/track-sales")}>
           <div className="action-icon">📅</div>
-          <h3>View Timeslots</h3>
+          <h3>Track sales</h3>
           <p>Check your work schedule and team assignments</p>
         </div>
 

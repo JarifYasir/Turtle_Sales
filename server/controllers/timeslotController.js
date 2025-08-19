@@ -129,29 +129,31 @@ exports.getTimeslots = async (req, res) => {
         const timeslotObj = {
           ...timeslot.toObject(),
           salesCount: sales.length,
-          sales: sales.map(sale => ({
+          sales: sales.map((sale) => ({
             id: sale._id,
             name: sale.name,
             price: sale.price,
             salesRepName: sale.salesRepName,
-            createdAt: sale.createdAt
+            createdAt: sale.createdAt,
           })),
         };
 
         // For non-management views, only include timeslots with available slots
         if (!req.query.management) {
-          const availableSlots = timeslot.assignedUsers ? timeslot.assignedUsers.length - sales.length : 0;
+          const availableSlots = timeslot.assignedUsers
+            ? timeslot.assignedUsers.length - sales.length
+            : 0;
           if (availableSlots <= 0) {
             return null;
           }
         }
-        
+
         return timeslotObj;
       })
     );
 
     // Filter out null values (if any)
-    const validTimeslots = timeslotsWithSales.filter(slot => slot !== null);
+    const validTimeslots = timeslotsWithSales.filter((slot) => slot !== null);
 
     res.json({
       success: true,
@@ -290,9 +292,15 @@ exports.deleteTimeslot = async (req, res) => {
       });
     }
 
+    // Clean up associated sales - remove sales that reference this deleted timeslot
+    await Sale.deleteMany({
+      timeslot: timeslotId,
+      organization: organization._id,
+    });
+
     res.json({
       success: true,
-      msg: "Timeslot deleted successfully",
+      msg: "Timeslot and associated sales deleted successfully",
     });
   } catch (error) {
     console.error("Delete Timeslot Error:", error);

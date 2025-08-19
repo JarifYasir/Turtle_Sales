@@ -19,7 +19,7 @@ const saleSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      maxlength: [200, "Address cannot exceed 200 characters"],
+      maxlength: [300, "Address cannot exceed 300 characters"],
     },
     price: {
       type: Number,

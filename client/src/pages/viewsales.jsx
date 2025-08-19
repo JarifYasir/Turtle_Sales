@@ -222,6 +222,7 @@ const ViewSales = () => {
           backgroundColor: "#f8f9fa",
           borderRadius: "8px",
           boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+          flexWrap: "wrap",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>

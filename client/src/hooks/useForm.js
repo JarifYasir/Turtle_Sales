@@ -17,7 +17,7 @@ export const saleSchema = yup.object({
     .string()
     .required("Address is required")
     .min(5, "Please enter a complete address")
-    .max(200, "Address cannot exceed 200 characters"),
+    .max(300, "Address cannot exceed 300 characters"),
   price: yup
     .number()
     .required("Price is required")
@@ -26,7 +26,6 @@ export const saleSchema = yup.object({
   details: yup
     .string()
     .required("Sale details are required")
-    .min(10, "Please provide more details")
     .max(500, "Details cannot exceed 500 characters"),
 });
 

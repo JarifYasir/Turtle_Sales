@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/ViewTimeslots.css";
+import "../styles/TrackSales.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
@@ -20,8 +20,34 @@ import {
 } from "../components/FormComponents";
 import LoadingSpinner, { CardSkeleton } from "../components/LoadingComponents";
 import ErrorBoundary from "../components/ErrorBoundary";
+import AddressAutocomplete from "../components/AddressAutocomplete";
 
-const ViewTimeslots = () => {
+// Phone number formatting utility
+const formatPhoneNumber = (value) => {
+  if (!value) return value;
+
+  // Remove all non-digits
+  const phoneNumber = value.replace(/[^\d]/g, "");
+
+  // Format based on length
+  if (phoneNumber.length < 4) {
+    return phoneNumber;
+  } else if (phoneNumber.length < 7) {
+    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+  } else if (phoneNumber.length < 11) {
+    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(
+      3,
+      6
+    )}-${phoneNumber.slice(6)}`;
+  } else {
+    return `+${phoneNumber.slice(0, 1)} (${phoneNumber.slice(
+      1,
+      4
+    )}) ${phoneNumber.slice(4, 7)}-${phoneNumber.slice(7, 11)}`;
+  }
+};
+
+const TrackSales = () => {
   const { user, token } = useContext(UserContext);
   const navigate = useNavigate();
   const [selectedWeekStart, setSelectedWeekStart] = useState(new Date());
@@ -627,6 +653,11 @@ const ViewTimeslots = () => {
                         type="tel"
                         placeholder="(555) 123-4567"
                         error={saleForm.formState.errors.number}
+                        onChange={(e) => {
+                          const formatted = formatPhoneNumber(e.target.value);
+                          e.target.value = formatted;
+                          saleForm.setValue("number", formatted);
+                        }}
                       />
                     </FormField>
                   </div>
@@ -651,11 +682,16 @@ const ViewTimeslots = () => {
                     error={saleForm.formState.errors.address?.message}
                     required
                   >
-                    <TextArea
+                    <AddressAutocomplete
                       {...saleForm.register("address")}
-                      placeholder="Enter complete address"
-                      rows={2}
+                      placeholder="Start typing address for suggestions..."
                       error={saleForm.formState.errors.address}
+                      value={saleForm.watch("address")}
+                      onChange={(e) => {
+                        saleForm.setValue("address", e.target.value, {
+                          shouldValidate: true,
+                        });
+                      }}
                     />
                   </FormField>
 
@@ -706,4 +742,4 @@ const ViewTimeslots = () => {
   );
 };
 
-export default ViewTimeslots;
+export default TrackSales;

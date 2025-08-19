@@ -42,6 +42,8 @@ const ManageOrg = () => {
       );
       if (response.data.success) {
         const org = response.data.organization;
+        console.log("Fetched organization data:", org);
+        console.log("Organization code from server:", org.code);
         setOrgDetails(org);
         setMembers(org.members || []);
         setIsOwner(response.data.isOwner);
@@ -201,15 +203,60 @@ const ManageOrg = () => {
 
   const copyOrgCode = async () => {
     try {
-      await navigator.clipboard.writeText(orgDetails.code);
-      setCopySuccess(true);
-      toast.success("Organization code copied to clipboard!");
-      setTimeout(() => {
-        setCopySuccess(false);
-      }, 2000);
+      // Debug: Check if orgDetails.code exists
+      console.log("Organization details:", orgDetails);
+      console.log("Organization code:", orgDetails.code);
+
+      if (!orgDetails.code) {
+        toast.error("Organization code is not available");
+        return;
+      }
+
+      // Check if clipboard API is available
+      if (navigator.clipboard && window.isSecureContext) {
+        // Try the modern clipboard API first
+        await navigator.clipboard.writeText(orgDetails.code);
+        setCopySuccess(true);
+        toast.success("Organization code copied to clipboard!");
+        setTimeout(() => {
+          setCopySuccess(false);
+        }, 2000);
+      } else {
+        // Fallback for older browsers or non-secure contexts
+        const textArea = document.createElement("textarea");
+        textArea.value = orgDetails.code;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        const successful = document.execCommand("copy");
+        document.body.removeChild(textArea);
+
+        if (successful) {
+          setCopySuccess(true);
+          toast.success("Organization code copied to clipboard!");
+          setTimeout(() => {
+            setCopySuccess(false);
+          }, 2000);
+        } else {
+          throw new Error("execCommand failed");
+        }
+      }
     } catch (err) {
       console.error("Failed to copy:", err);
-      toast.error("Failed to copy organization code");
+      console.error("Error details:", err.message);
+      // Provide a more helpful error message
+      if (orgDetails.code) {
+        toast.error(
+          "Failed to copy organization code. Please copy manually: " +
+            orgDetails.code
+        );
+      } else {
+        toast.error("Organization code is not available");
+      }
     }
   };
 
@@ -339,9 +386,34 @@ const ManageOrg = () => {
           </div>
         </div>
 
-        <div className="danger-zone">
-          {/* ...danger zone rendering for org deletion... */}
-        </div>
+        {isOwner && (
+          <div className="danger-zone">
+            <h3>Danger Zone</h3>
+            <div className="danger-content">
+              <div className="danger-info">
+                <h4>Delete Organization</h4>
+                <p>
+                  Permanently delete this organization and remove all members.
+                  This action cannot be undone.
+                </p>
+              </div>
+              <button
+                className="delete-org-btn"
+                disabled={deleteLoading}
+                onClick={handleDeleteOrg}
+              >
+                {deleteLoading ? (
+                  <>
+                    <span className="loading-spinner-small"></span>
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete Organization"
+                )}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

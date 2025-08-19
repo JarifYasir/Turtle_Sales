@@ -426,9 +426,15 @@ exports.deleteWorkday = async (req, res) => {
       });
     }
 
+    // Clean up associated sales - remove all sales that reference this deleted workday
+    await Sale.deleteMany({
+      workday: workdayId,
+      organization: organization._id,
+    });
+
     res.json({
       success: true,
-      msg: "Workday deleted successfully",
+      msg: "Workday and associated sales deleted successfully",
     });
   } catch (error) {
     console.error("Delete Workday Error:", error);
@@ -476,9 +482,16 @@ exports.deleteTimeslot = async (req, res) => {
     await workday.save();
     await workday.populate("timeslots.assignedUsers.user", "name email");
 
+    // Clean up associated sales - remove sales that reference this deleted timeslot
+    await Sale.deleteMany({
+      workday: workdayId,
+      timeslotId: timeslotId,
+      organization: organization._id,
+    });
+
     res.json({
       success: true,
-      msg: "Timeslot deleted successfully",
+      msg: "Timeslot and associated sales deleted successfully",
       workday,
     });
   } catch (error) {
