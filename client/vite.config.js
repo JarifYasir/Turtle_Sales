@@ -11,9 +11,10 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    host: "0.0.0.0",
+    host: "0.0.0.0", // This allows external connections
     hmr: {
       port: 5173,
+      host: "0.0.0.0", // Make sure HMR also accepts external connections
     },
   },
   build: {

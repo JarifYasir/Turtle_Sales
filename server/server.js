@@ -6,6 +6,7 @@ const compression = require("compression");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const connectDB = require("./config/db");
+const { getNetworkIP, getCorsOrigins, isLocalIP } = require("./config/environment");
 
 // Load environment variables
 dotenv.config();
@@ -53,12 +54,7 @@ const limiter = rateLimit({
     // Skip rate limiting for local development
     if (process.env.NODE_ENV === "development") {
       const ip = req.ip || req.connection.remoteAddress;
-      return (
-        ip === "127.0.0.1" ||
-        ip === "::1" ||
-        ip.includes("192.168.") ||
-        ip === "::ffff:127.0.0.1"
-      );
+      return isLocalIP(ip);
     }
     return false;
   },
@@ -74,12 +70,7 @@ const authLimiter = rateLimit({
     // Skip rate limiting for localhost in development
     if (process.env.NODE_ENV === "development") {
       const ip = req.ip || req.connection.remoteAddress;
-      return (
-        ip === "127.0.0.1" ||
-        ip === "::1" ||
-        ip.includes("192.168.") ||
-        ip === "::ffff:127.0.0.1"
-      );
+      return isLocalIP(ip);
     }
     return false;
   },
@@ -96,15 +87,7 @@ if (process.env.NODE_ENV === "development") {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
 
-        const allowedOrigins = [
-          "http://localhost:5173",
-          "http://localhost:5174",
-          "http://127.0.0.1:5173",
-          "http://127.0.0.1:5174",
-          "http://192.168.2.24:5173",
-          "http://192.168.2.24:5174",
-          process.env.CLIENT_URL,
-        ].filter(Boolean);
+        const allowedOrigins = getCorsOrigins();
 
         if (allowedOrigins.includes(origin)) {
           callback(null, true);
@@ -134,14 +117,7 @@ if (process.env.NODE_ENV === "development") {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
 
-        const allowedOrigins = [
-          "http://localhost:5173",
-          "http://127.0.0.1:5173",
-          "http://192.168.2.24:5173",
-          "http://localhost:3000",
-          "http://192.168.2.24:3000",
-          process.env.CLIENT_URL,
-        ].filter(Boolean); // Remove undefined values
+        const allowedOrigins = getCorsOrigins();
 
         if (allowedOrigins.includes(origin)) {
           callback(null, true);
@@ -246,7 +222,10 @@ const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || "0.0.0.0"; // Listen on all network interfaces
 
 app.listen(PORT, HOST, () => {
+  const networkIP = getNetworkIP();
   console.log(`Server running on http://${HOST}:${PORT}`);
   console.log(`Local: http://localhost:${PORT}`);
-  console.log(`Network: http://192.168.2.24:${PORT}`);
+  if (networkIP) {
+    console.log(`Network: http://${networkIP}:${PORT}`);
+  }
 });
