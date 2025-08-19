@@ -4,10 +4,11 @@ import { toast } from "react-toastify";
 // Create axios instance with default config
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1",
-  timeout: 10000,
+  timeout: 15000, // Increased timeout
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: false, // Set to false to avoid potential CORS issues
 });
 
 // Request interceptor to add auth token
@@ -36,18 +37,37 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    console.error("API Error:", error);
+
+    // Handle different types of errors
     if (error.code === "ECONNABORTED") {
       toast.error("Request timeout. Please check your connection.");
-    } else if (!error.response) {
+    } else if (error.code === "NETWORK_ERROR" || error.code === "ERR_NETWORK") {
       toast.error("Network error. Please check your internet connection.");
+    } else if (!error.response) {
+      // This is usually a network error, CORS error, or server is down
+      const errorMessage = error.message || "Network error occurred";
+      if (
+        errorMessage.includes("ERR_FAILED") ||
+        errorMessage.includes("fetch")
+      ) {
+        toast.error(
+          "Unable to connect to server. Please check if the server is running."
+        );
+      } else {
+        toast.error("Network error. Please check your internet connection.");
+      }
     } else {
       const { status, data } = error.response;
 
       switch (status) {
         case 401:
-          toast.error("Authentication failed. Please login again.");
-          localStorage.removeItem("auth");
-          window.location.href = "/login";
+          // Only show auth error if not already on login page
+          if (!window.location.pathname.includes("/login")) {
+            toast.error("Session expired. Please login again.");
+            localStorage.removeItem("auth");
+            window.location.href = "/login";
+          }
           break;
         case 403:
           toast.error(
@@ -58,7 +78,7 @@ api.interceptors.response.use(
           toast.error("Requested resource not found.");
           break;
         case 429:
-          toast.error("Too many requests. Please try again later.");
+          toast.error("Too many requests. Please try again in a moment.");
           break;
         case 500:
           toast.error("Server error. Please try again later.");

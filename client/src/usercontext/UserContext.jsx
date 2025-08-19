@@ -20,17 +20,32 @@ export const UserProvider = ({ children }) => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
+            timeout: 10000,
           });
           setUser(response.data.user);
         } catch (error) {
           console.error("Failed to fetch user data:", error);
-          // Clear invalid token
-          localStorage.removeItem("auth");
-          setToken("");
+
+          // Only clear token for authentication errors, not network errors
+          if (error.response?.status === 401) {
+            console.log("Token expired, clearing auth");
+            localStorage.removeItem("auth");
+            setToken("");
+            setUser(null);
+          } else if (error.response?.status === 429) {
+            // Rate limited - don't clear token, just log it
+            console.log("Rate limited on user data fetch");
+          } else if (!error.response) {
+            // Network error - don't clear token, server might be temporarily down
+            console.log("Network error on user data fetch - keeping token");
+          }
         }
       }
     };
-    fetchUserData();
+
+    // Add a small delay to prevent rapid-fire requests
+    const timeoutId = setTimeout(fetchUserData, 100);
+    return () => clearTimeout(timeoutId);
   }, [token]);
 
   return (

@@ -27,8 +27,22 @@ const ViewSales = () => {
       navigate("/login");
       return;
     }
-    fetchSales();
-  }, [token, navigate]);
+    if (user) {
+      fetchSales();
+    }
+  }, [token, navigate, user]);
+
+  // Refetch sales when window regains focus (handles case where sales were deleted by other users)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (user && token) {
+        fetchSales();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [user, token]);
 
   const fetchSales = async () => {
     try {
@@ -36,11 +50,22 @@ const ViewSales = () => {
       const response = await api.get("/sales");
 
       if (response.data.success) {
-        setSales(response.data.sales);
+        // Filter out any sales with missing required data to prevent render errors
+        const validSales = (response.data.sales || []).filter(
+          (sale) => sale && sale._id && sale.timeslot && sale.timeslot.date
+        );
+        setSales(validSales);
       }
     } catch (error) {
       console.error("Error fetching sales:", error);
-      toast.error("Failed to load sales data");
+
+      // Handle specific error types
+      if (error.response?.status === 404) {
+        toast.error("Please join an organization first");
+        navigate("/welcome");
+      } else {
+        toast.error("Failed to load sales data");
+      }
     } finally {
       setLoading(false);
     }
@@ -61,15 +86,18 @@ const ViewSales = () => {
   };
 
   const getDisplaySales = () => {
+    if (!Array.isArray(sales)) return {};
+
     let filteredSales = sales;
 
     if (filterType === "rep" && selectedFilter) {
       filteredSales = sales.filter(
-        (sale) => sale.salesRepName === selectedFilter
+        (sale) => sale && sale.salesRepName === selectedFilter
       );
     } else if (filterType === "worker" && selectedFilter) {
       filteredSales = sales.filter(
-        (sale) => sale.timeslot?.assignedWorker?.user?.name === selectedFilter
+        (sale) =>
+          sale && sale.timeslot?.assignedWorker?.user?.name === selectedFilter
       );
     }
 
@@ -78,18 +106,22 @@ const ViewSales = () => {
 
   // Get unique sales reps
   const getUniqueSalesReps = () => {
+    if (!Array.isArray(sales)) return [];
+
     const reps = [
-      ...new Set(sales.map((sale) => sale.salesRepName).filter(Boolean)),
+      ...new Set(sales.map((sale) => sale?.salesRepName).filter(Boolean)),
     ];
     return reps.sort();
   };
 
   // Get unique workers
   const getUniqueWorkers = () => {
+    if (!Array.isArray(sales)) return [];
+
     const workers = [
       ...new Set(
         sales
-          .map((sale) => sale.timeslot?.assignedWorker?.user?.name)
+          .map((sale) => sale?.timeslot?.assignedWorker?.user?.name)
           .filter(Boolean)
       ),
     ];
@@ -176,7 +208,8 @@ const ViewSales = () => {
     setWeekStartDate(new Date(today.setDate(diff)));
   };
 
-  if (loading) {
+  // Show loading if data is loading or user is not yet available
+  if (loading || (!user && token)) {
     return (
       <div className="view-sales-container">
         <motion.div
@@ -189,7 +222,7 @@ const ViewSales = () => {
         </motion.div>
         <div className="loading-spinner"></div>
         <p style={{ textAlign: "center", color: "var(--gray)" }}>
-          Loading sales data...
+          {loading ? "Loading sales data..." : "Loading user data..."}
         </p>
       </div>
     );
@@ -326,64 +359,67 @@ const ViewSales = () => {
                     </h3>
                   </div>
                   <div className="day-sales">
-                    {getDisplaySales()[date.toDateString()].map((sale) => (
-                      <motion.div
-                        key={sale._id}
-                        className="sale-card"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <div className="sale-header">
-                          <h3>
-                            Rep: {sale.salesRepName || "Unknown"}
-                            {sale.timeslot?.assignedWorker && (
-                              <>
-                                , Worker:{" "}
-                                {sale.timeslot.assignedWorker.user?.name ||
-                                  "Unknown"}
-                              </>
-                            )}
-                          </h3>
-                          <button
-                            className="delete-btn"
-                            onClick={() => {
-                              if (
-                                window.confirm(
-                                  "Are you sure you want to delete this sale?"
-                                )
-                              ) {
-                                handleDeleteSale(sale._id);
-                              }
-                            }}
-                            title="Delete sale"
-                          >
-                            ×
-                          </button>
-                        </div>
-                        <div className="sale-time">
-                          {sale.timeslot.startTime} - {sale.timeslot.endTime}
-                        </div>
-                        <div className="sale-info">
-                          <p>
-                            <strong>Client:</strong> {sale.name}
-                          </p>
-                          <p>
-                            <strong>Price:</strong> {formatCurrency(sale.price)}
-                          </p>
-                          <p>
-                            <strong>Phone:</strong> {sale.number}
-                          </p>
-                          <p>
-                            <strong>Address:</strong> {sale.address}
-                          </p>
-                          <p className="sale-details">
-                            <strong>Details:</strong>{" "}
-                            {sale.details || "No additional details"}
-                          </p>
-                        </div>
-                      </motion.div>
-                    ))}
+                    {(getDisplaySales()[date.toDateString()] || []).map(
+                      (sale) => (
+                        <motion.div
+                          key={sale._id}
+                          className="sale-card"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <div className="sale-header">
+                            <h3>
+                              Rep: {sale.salesRepName || "Unknown"}
+                              {sale.timeslot?.assignedWorker && (
+                                <>
+                                  , Worker:{" "}
+                                  {sale.timeslot.assignedWorker.user?.name ||
+                                    "Unknown"}
+                                </>
+                              )}
+                            </h3>
+                            <button
+                              className="delete-btn"
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    "Are you sure you want to delete this sale?"
+                                  )
+                                ) {
+                                  handleDeleteSale(sale._id);
+                                }
+                              }}
+                              title="Delete sale"
+                            >
+                              ×
+                            </button>
+                          </div>
+                          <div className="sale-time">
+                            {sale.timeslot.startTime} - {sale.timeslot.endTime}
+                          </div>
+                          <div className="sale-info">
+                            <p>
+                              <strong>Client:</strong> {sale.name}
+                            </p>
+                            <p>
+                              <strong>Price:</strong>{" "}
+                              {formatCurrency(sale.price)}
+                            </p>
+                            <p>
+                              <strong>Phone:</strong> {sale.number}
+                            </p>
+                            <p>
+                              <strong>Address:</strong> {sale.address}
+                            </p>
+                            <p className="sale-details">
+                              <strong>Details:</strong>{" "}
+                              {sale.details || "No additional details"}
+                            </p>
+                          </div>
+                        </motion.div>
+                      )
+                    )}
                   </div>
                 </div>
               ))

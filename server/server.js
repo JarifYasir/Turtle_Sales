@@ -45,15 +45,28 @@ if (process.env.NODE_ENV === "development") {
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: process.env.NODE_ENV === "development" ? 1000 : 100, // Much more lenient in development
   message: {
     error: "Too many requests from this IP, please try again later.",
+  },
+  skip: (req) => {
+    // Skip rate limiting for local development
+    if (process.env.NODE_ENV === "development") {
+      const ip = req.ip || req.connection.remoteAddress;
+      return (
+        ip === "127.0.0.1" ||
+        ip === "::1" ||
+        ip.includes("192.168.") ||
+        ip === "::ffff:127.0.0.1"
+      );
+    }
+    return false;
   },
 });
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === "development" ? 50 : 5, // More lenient in development
+  max: process.env.NODE_ENV === "development" ? 1000 : 5, // Much more lenient in development
   message: {
     error: "Too many login attempts, please try again later.",
   },
@@ -61,7 +74,12 @@ const authLimiter = rateLimit({
     // Skip rate limiting for localhost in development
     if (process.env.NODE_ENV === "development") {
       const ip = req.ip || req.connection.remoteAddress;
-      return ip === "127.0.0.1" || ip === "::1" || ip.includes("192.168.");
+      return (
+        ip === "127.0.0.1" ||
+        ip === "::1" ||
+        ip.includes("192.168.") ||
+        ip === "::ffff:127.0.0.1"
+      );
     }
     return false;
   },
@@ -74,12 +92,38 @@ if (process.env.NODE_ENV === "development") {
   // In development, allow all origins
   app.use(
     cors({
-      origin: true, // Allow all origins in development
+      origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        const allowedOrigins = [
+          "http://localhost:5173",
+          "http://localhost:5174",
+          "http://127.0.0.1:5173",
+          "http://127.0.0.1:5174",
+          "http://192.168.2.24:5173",
+          "http://192.168.2.24:5174",
+          process.env.CLIENT_URL,
+        ].filter(Boolean);
+
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(null, true); // Allow all origins in development
+        }
+      },
       credentials: true,
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+      allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "Accept",
+        "Origin",
+      ],
       exposedHeaders: ["Content-Length"],
       optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
+      maxAge: 86400, // Cache preflight response for 24 hours
     })
   );
 } else {
@@ -113,7 +157,20 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // Handle preflight requests explicitly
-app.options("*", cors()); // Enable preflight for all routes
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+  );
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Max-Age", "86400");
+  res.sendStatus(200);
+});
 
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));

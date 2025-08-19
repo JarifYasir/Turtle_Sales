@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/TrackSales.css";
+import "../styles/ViewTimeslots.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
@@ -46,7 +46,7 @@ const formatPhoneNumber = (value) => {
   }
 };
 
-const TrackSales = () => {
+const ViewTimeslots = () => {
   const { user, token } = useContext(UserContext);
   const navigate = useNavigate();
   const [selectedWeekStart, setSelectedWeekStart] = useState(new Date());
@@ -174,8 +174,6 @@ const TrackSales = () => {
   }, [workdays]);
 
   const myTimeslots = useMemo(() => {
-    if (!user?.id) return [];
-
     const slots = [];
     workdays.forEach((workday) => {
       if (workday.timeslots) {
@@ -196,21 +194,21 @@ const TrackSales = () => {
       }
     });
     return slots;
-  }, [workdays, user?.id]);
+  }, [workdays, user.id]);
 
   const getMyAssignmentInSlot = useCallback(
     (timeslot) => {
-      if (!timeslot.assignedUsers || !user?.id) return null;
+      if (!timeslot.assignedUsers) return null;
       return timeslot.assignedUsers.find(
         (assignment) => assignment.user._id === user.id
       );
     },
-    [user?.id]
+    [user.id]
   );
 
   const getSlotStatus = useCallback(
     (slot) => {
-      if (!slot.assignedUsers || slot.assignedUsers.length === 0 || !user?.id) {
+      if (!slot.assignedUsers || slot.assignedUsers.length === 0) {
         return "unassigned";
       }
       const isMySlot = slot.assignedUsers.some(
@@ -221,7 +219,7 @@ const TrackSales = () => {
       }
       return "other-assignment";
     },
-    [user?.id]
+    [user.id]
   );
 
   const handleTimeslotClick = useCallback((timeslot, workday) => {
@@ -276,21 +274,7 @@ const TrackSales = () => {
     setSelectedWeekStart(startOfWeek);
   }, []);
 
-  const weekDates = getWeekDates();
-
-  // Handle loading states in the render
-  if (!user && token) {
-    return (
-      <div className="timeslots-container">
-        <LoadingSpinner
-          size="large"
-          text="Loading user data..."
-          fullScreen={false}
-        />
-      </div>
-    );
-  }
-
+  // Loading state
   if (isLoading) {
     return (
       <div className="timeslots-container">
@@ -316,6 +300,8 @@ const TrackSales = () => {
       </div>
     );
   }
+
+  const weekDates = getWeekDates();
 
   return (
     <ErrorBoundary>
@@ -440,14 +426,14 @@ const TrackSales = () => {
                                 <div
                                   key={idx}
                                   className={`assignment ${
-                                    assignment.user._id === user?.id
+                                    assignment.user._id === user.id
                                       ? "my-assignment-user"
                                       : "other-assignment-user"
                                   }`}
                                 >
                                   <span className="user-name">
                                     {assignment.user.name}
-                                    {assignment.user._id === user?.id &&
+                                    {assignment.user._id === user.id &&
                                       " (You)"}
                                   </span>
                                   {assignment.notes && (
@@ -749,4 +735,4 @@ const TrackSales = () => {
   );
 };
 
-export default TrackSales;
+export default ViewTimeslots;
