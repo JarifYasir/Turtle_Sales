@@ -73,7 +73,7 @@ exports.generateTimeslots = async (req, res) => {
   }
 };
 
-// Get timeslots for organization (UPDATED - ANY EMPLOYEE CAN SEE ASSIGNED SLOTS)
+// Get timeslots for organization (UPDATED - Only show available slots for sales)
 exports.getTimeslots = async (req, res) => {
   try {
     const organization = await Organization.findOne({
@@ -112,53 +112,67 @@ exports.getTimeslots = async (req, res) => {
       };
     }
 
-    const allTimeslots = await Timeslot.find({
-      organization: organization._id,
-      isActive: true,
-      ...dateFilter,
-    })
-      .populate("assignedUsers.user", "name email")
-      .sort({ date: 1, startTime: 1 });
-
     const isOwner = organization.owner.toString() === req.user._id.toString();
-
-    // Get all timeslots with sales information
-    const timeslotsWithSales = await Promise.all(
-      allTimeslots.map(async (timeslot) => {
-        const sales = await Sale.find({ timeslot: timeslot._id });
-        const timeslotObj = {
-          ...timeslot.toObject(),
-          salesCount: sales.length,
-          sales: sales.map((sale) => ({
-            id: sale._id,
-            name: sale.name,
-            price: sale.price,
-            salesRepName: sale.salesRepName,
-            createdAt: sale.createdAt,
-          })),
-        };
-
-        // For non-management views, only include timeslots with available slots
-        if (!req.query.management) {
-          const availableSlots = timeslot.assignedUsers
-            ? timeslot.assignedUsers.length - sales.length
-            : 0;
-          if (availableSlots <= 0) {
-            return null;
-          }
-        }
-
-        return timeslotObj;
-      })
+    const userMember = organization.members.find(
+      member => member.user.toString() === req.user._id.toString()
     );
+    const isManager = userMember && (userMember.role === 'manager' || userMember.role === 'owner');
 
-    // Filter out null values (if any)
-    const validTimeslots = timeslotsWithSales.filter((slot) => slot !== null);
+    // Use aggregation pipeline for efficient data loading
+    const timeslots = await Timeslot.aggregate([
+      {
+        $match: {
+          organization: organization._id,
+          isActive: true,
+          ...dateFilter,
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "assignedUsers.user",
+          foreignField: "_id",
+          as: "assignedUserDetails"
+        }
+      },
+      {
+        $lookup: {
+          from: "sales",
+          localField: "_id",
+          foreignField: "timeslot",
+          as: "sales"
+        }
+      },
+      {
+        $addFields: {
+          assignedCount: { $size: "$assignedUsers" },
+          salesCount: { $size: "$sales" },
+          availableSlots: { $subtract: [{ $size: "$assignedUsers" }, { $size: "$sales" }] }
+        }
+      },
+      {
+        $match: {
+          $and: [
+            { assignedCount: { $gt: 0 } }, // Must have assigned users
+            { availableSlots: { $gt: 0 } } // Must have available slots
+          ]
+        }
+      },
+      {
+        $sort: { date: 1, startTime: 1 }
+      }
+    ]);
+
+    // Filter for sales view - only show slots with available spots for EVERYONE
+    const availableTimeslots = timeslots.filter(timeslot => {
+      return timeslot.availableSlots > 0 && timeslot.assignedCount > 0;
+    });
 
     res.json({
       success: true,
-      timeslots: validTimeslots,
+      timeslots: availableTimeslots,
       isOwner,
+      isManager,
     });
   } catch (error) {
     console.error("Get Timeslots Error:", error);
@@ -292,15 +306,9 @@ exports.deleteTimeslot = async (req, res) => {
       });
     }
 
-    // Clean up associated sales - remove sales that reference this deleted timeslot
-    await Sale.deleteMany({
-      timeslot: timeslotId,
-      organization: organization._id,
-    });
-
     res.json({
       success: true,
-      msg: "Timeslot and associated sales deleted successfully",
+      msg: "Timeslot deleted successfully",
     });
   } catch (error) {
     console.error("Delete Timeslot Error:", error);

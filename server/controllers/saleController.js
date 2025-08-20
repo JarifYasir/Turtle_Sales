@@ -1,8 +1,8 @@
 // controllers/saleController.js
 const Sale = require("../models/Sale");
 const Timeslot = require("../models/Timeslot");
-const Organization = require("../models/Organizations");
 const Workday = require("../models/Workday");
+const Organization = require("../models/Organizations");
 
 // Get all sales for organization
 exports.getSales = async (req, res) => {
@@ -19,297 +19,72 @@ exports.getSales = async (req, res) => {
       });
     }
 
-    // Get all sales for the organization
+    // Check user role
+    const isOwner = organization.owner.toString() === req.user._id.toString();
+    const userMember = organization.members.find(
+      member => member.user.toString() === req.user._id.toString()
+    );
+    const isManager = userMember && (userMember.role === 'manager' || userMember.role === 'owner');
+
+    // Get all sales for the organization with workday and timeslot population
     const sales = await Sale.find({ organization: organization._id })
       .sort({ createdAt: -1 })
       .populate("user", "name")
       .populate({
         path: "workday",
+        select: "date timeslots",
         populate: {
-          path: "timeslots.assignedUsers.user",
-          select: "name",
+          path: "timeslots",
+          select: "startTime endTime date",
         },
-      });
+      })
+      .lean(); // Use lean for better performance
 
-    // Process sales to include timeslot data and assign specific worker to each sale
-    const salesWithTimeslots = sales.map((sale) => {
-      const saleObj = sale.toObject();
-
-      if (sale.workday && sale.timeslotId) {
-        // Find the specific timeslot within the workday
-        const timeslot = sale.workday.timeslots.find(
-          (ts) => ts._id.toString() === sale.timeslotId.toString()
+    // Add timeslot info to each sale based on timeslotId
+    const enrichedSales = sales.map(sale => {
+      if (sale.workday && sale.workday.timeslots) {
+        const timeslot = sale.workday.timeslots.find(ts => 
+          ts._id.toString() === sale.timeslotId.toString()
         );
-        if (timeslot) {
-          // Get all sales for this specific timeslot
-          const timeslotSales = sales.filter(
-            (s) =>
-              s.workday &&
-              s.timeslotId &&
-              s.timeslotId.toString() === sale.timeslotId.toString()
-          );
-
-          // Find the index of this sale among all sales for this timeslot
-          const saleIndex = timeslotSales.findIndex(
-            (s) => s._id.toString() === sale._id.toString()
-          );
-
-          // Assign worker in round-robin fashion
-          const assignedUsers = timeslot.assignedUsers || [];
-          const assignedWorker =
-            assignedUsers.length > 0
-              ? assignedUsers[saleIndex % assignedUsers.length]
-              : null;
-
-          saleObj.timeslot = {
-            date: sale.workday.date,
-            startTime: timeslot.startTime,
-            endTime: timeslot.endTime,
-            assignedWorker: assignedWorker,
-          };
-        }
+        return {
+          ...sale,
+          timeslot: timeslot || null
+        };
       }
-
-      return saleObj;
+      return sale;
     });
 
-    res.json({ success: true, sales: salesWithTimeslots });
+    res.json({ 
+      success: true, 
+      data: {
+        sales: enrichedSales,
+        isOwner,
+        isManager
+      }
+    });
   } catch (error) {
     console.error("Get Sales Error:", error);
     res.status(500).json({ success: false, msg: "Server error" });
   }
 };
 
-// Get weekly sales report for employee paystub
-exports.getWeeklySalesReport = async (req, res) => {
-  try {
-    const { startDate, endDate } = req.query;
-
-    // Find the organization the user belongs to
-    const organization = await Organization.findOne({
-      $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
-    });
-
-    if (!organization) {
-      return res.status(404).json({
-        success: false,
-        msg: "User not associated with any organization",
-      });
-    }
-
-    // Parse dates
-    const start = startDate ? new Date(startDate) : new Date();
-    const end = endDate ? new Date(endDate) : new Date();
-
-    // Set to start of day for start date and end of day for end date
-    start.setHours(0, 0, 0, 0);
-    end.setHours(23, 59, 59, 999);
-
-    // Get sales within the date range
-    const allSales = await Sale.find({
-      organization: organization._id,
-      createdAt: {
-        $gte: start,
-        $lte: end,
-      },
-    })
-      .sort({ createdAt: -1 })
-      .populate("user", "name")
-      .populate({
-        path: "workday",
-        populate: {
-          path: "timeslots.assignedUsers.user",
-          select: "name",
-        },
-      })
-      .populate("timeslot", "date startTime endTime")
-      .select(
-        "salesRepName price createdAt user name address workday timeslot timeslotId"
-      );
-
-    // Filter out sales with deleted/invalid timeslots or workdays
-    const sales = allSales.filter((sale) => {
-      // If sale has workday and timeslotId, check if the specific timeslot still exists
-      if (sale.workday && sale.timeslotId) {
-        const timeslot = sale.workday.timeslots.find(
-          (ts) => ts._id.toString() === sale.timeslotId.toString()
-        );
-        return !!timeslot; // Only include if timeslot exists
-      }
-
-      // If sale has legacy timeslot, check if it still exists
-      if (sale.timeslot) {
-        return true; // Legacy timeslot exists (populated successfully)
-      }
-
-      // If no timeslot reference, exclude from paystub
-      return false;
-    });
-
-    // Group sales by sales rep
-    const salesByRep = {};
-    let totalRevenue = 0;
-
-    sales.forEach((sale) => {
-      const repName = sale.salesRepName;
-      if (!salesByRep[repName]) {
-        salesByRep[repName] = {
-          salesRepName: repName,
-          sales: [],
-          totalAmount: 0,
-          salesCount: 0,
-        };
-      }
-
-      // Get timeslot information
-      let timeslotInfo = null;
-      if (sale.workday && sale.timeslotId) {
-        // Find the specific timeslot within the workday
-        const timeslot = sale.workday.timeslots.find(
-          (ts) => ts._id.toString() === sale.timeslotId.toString()
-        );
-        if (timeslot) {
-          timeslotInfo = {
-            date: sale.workday.date,
-            startTime: timeslot.startTime,
-            endTime: timeslot.endTime,
-          };
-        }
-      } else if (sale.timeslot) {
-        // Legacy timeslot system
-        timeslotInfo = {
-          date: sale.timeslot.date,
-          startTime: sale.timeslot.startTime,
-          endTime: sale.timeslot.endTime,
-        };
-      }
-
-      salesByRep[repName].sales.push({
-        amount: sale.price,
-        date: sale.createdAt,
-        saleId: sale._id,
-        clientName: sale.name,
-        clientAddress: sale.address,
-        timeslot: timeslotInfo,
-      });
-      salesByRep[repName].totalAmount += sale.price;
-      salesByRep[repName].salesCount += 1;
-      totalRevenue += sale.price;
-    });
-
-    // Convert to array and sort by total amount (highest first)
-    const salesReport = Object.values(salesByRep).sort(
-      (a, b) => b.totalAmount - a.totalAmount
-    );
-
-    res.json({
-      success: true,
-      data: {
-        period: {
-          startDate: start,
-          endDate: end,
-        },
-        salesReport,
-        summary: {
-          totalRevenue,
-          totalSales: sales.length,
-          totalReps: salesReport.length,
-        },
-      },
-    });
-  } catch (error) {
-    console.error("Get Weekly Sales Report Error:", error);
-    res.status(500).json({ success: false, msg: "Server error" });
-  }
-};
-
-// Cleanup orphaned sales (sales with no valid timeslot reference)
-exports.cleanupOrphanedSales = async (req, res) => {
-  try {
-    // Find the organization the user belongs to
-    const organization = await Organization.findOne({
-      $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
-    });
-
-    if (!organization) {
-      return res.status(404).json({
-        success: false,
-        msg: "User not associated with any organization",
-      });
-    }
-
-    // Only allow organization owners to run cleanup
-    if (organization.owner.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        msg: "Only organization owners can run cleanup operations",
-      });
-    }
-
-    // Find all sales for this organization
-    const allSales = await Sale.find({ organization: organization._id })
-      .populate("workday")
-      .populate("timeslot");
-
-    const orphanedSales = [];
-
-    for (const sale of allSales) {
-      let isOrphaned = false;
-
-      if (sale.workday && sale.timeslotId) {
-        // Check if the specific timeslot still exists in the workday
-        const timeslot = sale.workday.timeslots.find(
-          (ts) => ts._id.toString() === sale.timeslotId.toString()
-        );
-        if (!timeslot) {
-          isOrphaned = true;
-        }
-      } else if (sale.timeslot) {
-        // Legacy timeslot - if populate failed, it's orphaned
-        if (!sale.timeslot) {
-          isOrphaned = true;
-        }
-      } else {
-        // No timeslot reference at all
-        isOrphaned = true;
-      }
-
-      if (isOrphaned) {
-        orphanedSales.push(sale._id);
-      }
-    }
-
-    // Delete orphaned sales
-    const deleteResult = await Sale.deleteMany({
-      _id: { $in: orphanedSales },
-      organization: organization._id,
-    });
-
-    res.json({
-      success: true,
-      msg: `Cleanup completed. ${deleteResult.deletedCount} orphaned sales removed.`,
-      deletedCount: deleteResult.deletedCount,
-    });
-  } catch (error) {
-    console.error("Cleanup Orphaned Sales Error:", error);
-    res.status(500).json({ success: false, msg: "Server error" });
-  }
-};
-
-// Delete a sale (manager only)
+// Delete a sale (owner/manager only)
 exports.deleteSale = async (req, res) => {
   try {
     const { saleId } = req.params;
 
-    // Find the organization where user is owner
+    // Find the organization where user is owner or manager
     const organization = await Organization.findOne({
-      owner: req.user._id,
+      $or: [
+        { owner: req.user._id },
+        { "members.user": req.user._id, "members.role": { $in: ["owner", "manager"] } }
+      ]
     });
 
     if (!organization) {
       return res.status(403).json({
         success: false,
-        msg: "Only organization owners can delete sales",
+        msg: "Only organization owners and managers can delete sales",
       });
     }
 
@@ -326,9 +101,6 @@ exports.deleteSale = async (req, res) => {
       });
     }
 
-    // Note: We don't need to modify timeslot.maxEmployees when deleting a sale
-    // Sales availability is calculated dynamically based on assignedUsers count vs actual sales count
-
     await sale.deleteOne();
 
     res.json({ success: true, msg: "Sale deleted successfully" });
@@ -340,26 +112,38 @@ exports.deleteSale = async (req, res) => {
 
 exports.createSale = async (req, res) => {
   try {
-    const { timeslotId, workdayId, name, number, address, price, details } =
-      req.body;
+    const { timeslotId, workdayId, name, number, address, price, details } = req.body;
 
-    // Find the workday and the specific timeslot within it
+    // Validate required fields
+    if (!name?.trim() || !number?.trim() || !address?.trim() || !price || !details?.trim() || !timeslotId || !workdayId) {
+      return res.status(400).json({
+        success: false,
+        msg: "All fields are required",
+      });
+    }
+
+    // Validate price
+    const parsedPrice = parseFloat(price);
+    if (isNaN(parsedPrice) || parsedPrice < 0) {
+      return res.status(400).json({
+        success: false,
+        msg: "Price must be a valid positive number",
+      });
+    }
+
+    // Find the workday and specific timeslot
     const workday = await Workday.findById(workdayId);
     if (!workday) {
       return res.status(404).json({ success: false, msg: "Workday not found" });
     }
 
-    const timeslot = workday.timeslots.id(timeslotId);
+    const timeslot = workday.timeslots.find(slot => slot._id.toString() === timeslotId);
     if (!timeslot) {
-      return res
-        .status(404)
-        .json({ success: false, msg: "Timeslot not found" });
+      return res.status(404).json({ success: false, msg: "Timeslot not found" });
     }
 
-    // Get number of assigned cleaners (x = max sales allowed)
-    const assignedCleanersCount = timeslot.assignedUsers
-      ? timeslot.assignedUsers.length
-      : 0;
+    // Get number of assigned cleaners (max sales allowed = number of cleaners)
+    const assignedCleanersCount = timeslot.assignedUsers?.length || 0;
 
     if (assignedCleanersCount === 0) {
       return res.status(400).json({
@@ -370,20 +154,16 @@ exports.createSale = async (req, res) => {
 
     // Check existing sales count for this timeslot
     const existingSalesCount = await Sale.countDocuments({
-      timeslot: timeslotId,
+      workday: workdayId,
+      timeslotId: timeslotId,
     });
 
-    // Calculate remaining sales slots (y = sales still allowed)
-    const remainingSalesSlots = assignedCleanersCount - existingSalesCount;
-
-    if (remainingSalesSlots <= 0) {
+    if (existingSalesCount >= assignedCleanersCount) {
       return res.status(400).json({
         success: false,
         msg: `Maximum of ${assignedCleanersCount} sale${
           assignedCleanersCount !== 1 ? "s" : ""
-        } allowed for this timeslot (${assignedCleanersCount} cleaner${
-          assignedCleanersCount !== 1 ? "s" : ""
-        } assigned). This timeslot is full.`,
+        } allowed for this timeslot. This timeslot is full.`,
       });
     }
 
@@ -404,118 +184,24 @@ exports.createSale = async (req, res) => {
       name: name.trim(),
       number: number.trim(),
       address: address.trim(),
-      price: parseFloat(price),
+      price: parsedPrice,
       details: details.trim(),
       salesRepName: req.user.name,
       user: req.user._id,
-      timeslot: timeslotId,
       workday: workdayId,
-      timeslotId: timeslotId, // Store for workday system
+      timeslotId: timeslotId,
       organization: workday.organization,
     });
 
     await sale.save();
 
-    // Note: We don't modify timeslot.maxEmployees as it represents total capacity
-    // Sales availability is calculated dynamically based on assignedUsers count vs actual sales count
-
-    res.json({ success: true, msg: "Sale recorded successfully", sale });
+    res.json({ 
+      success: true, 
+      msg: "Sale recorded successfully", 
+      data: { sale }
+    });
   } catch (error) {
     console.error("Create Sale Error:", error);
-    res.status(500).json({ success: false, msg: "Server error" });
-  }
-};
-
-// Get leaderboard data
-exports.getLeaderboard = async (req, res) => {
-  try {
-    // Find the organization the user belongs to
-    const organization = await Organization.findOne({
-      $or: [{ owner: req.user._id }, { "members.user": req.user._id }],
-    })
-      .populate("owner", "name")
-      .populate("members.user", "name");
-
-    if (!organization) {
-      return res.status(404).json({
-        success: false,
-        msg: "User not associated with any organization",
-      });
-    }
-
-    // Get all organization members including owner (avoid duplicates)
-    const allMembers = [];
-
-    // Add owner
-    allMembers.push({
-      user: { _id: organization.owner._id, name: organization.owner.name },
-    });
-
-    // Add members (excluding owner if they're also in members array)
-    organization.members.forEach((member) => {
-      const isOwnerAlreadyAdded = allMembers.some(
-        (existing) =>
-          existing.user._id.toString() === member.user._id.toString()
-      );
-      if (!isOwnerAlreadyAdded) {
-        allMembers.push(member);
-      }
-    });
-
-    // Get sales data aggregated by user
-    const salesStats = await Sale.aggregate([
-      { $match: { organization: organization._id } },
-      {
-        $group: {
-          _id: "$user",
-          totalSales: { $sum: 1 },
-          totalRevenue: { $sum: "$price" },
-          avgSaleValue: { $avg: "$price" },
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "_id",
-          foreignField: "_id",
-          as: "userInfo",
-        },
-      },
-      { $unwind: "$userInfo" },
-      {
-        $project: {
-          _id: 1,
-          name: "$userInfo.name",
-          totalSales: 1,
-          totalRevenue: { $round: ["$totalRevenue", 2] },
-          avgSaleValue: { $round: ["$avgSaleValue", 2] },
-        },
-      },
-    ]);
-
-    // Include members with zero sales and ensure uniqueness
-    const memberMap = new Map();
-
-    allMembers.forEach((member) => {
-      const userId = member.user._id.toString();
-      if (!memberMap.has(userId)) {
-        const stats = salesStats.find((stat) => stat._id.toString() === userId);
-
-        memberMap.set(userId, {
-          _id: member.user._id,
-          name: member.user.name,
-          totalSales: stats ? stats.totalSales : 0,
-          totalRevenue: stats ? stats.totalRevenue : 0,
-          avgSaleValue: stats ? stats.avgSaleValue : 0,
-        });
-      }
-    });
-
-    const leaderboardData = Array.from(memberMap.values());
-
-    res.json({ success: true, leaderboard: leaderboardData });
-  } catch (error) {
-    console.error("Get Leaderboard Error:", error);
     res.status(500).json({ success: false, msg: "Server error" });
   }
 };

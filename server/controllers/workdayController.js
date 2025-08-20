@@ -30,16 +30,18 @@ exports.getWorkdays = async (req, res) => {
         },
       };
     } else {
-      // Default to next 7 days
+      // Default to show current week (7 days back to 7 days forward)
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const nextWeek = new Date(today);
-      nextWeek.setDate(today.getDate() + 7);
+      const weekBefore = new Date(today);
+      weekBefore.setDate(today.getDate() - 7);
+      const weekAfter = new Date(today);
+      weekAfter.setDate(today.getDate() + 7);
 
       dateFilter = {
         date: {
-          $gte: today,
-          $lt: nextWeek,
+          $gte: weekBefore,
+          $lt: weekAfter,
         },
       };
     }
@@ -60,43 +62,60 @@ exports.getWorkdays = async (req, res) => {
     );
     const isManager = userMember && (userMember.role === 'manager' || userMember.role === 'owner');
 
-    // Get sales information for each timeslot
-    const workdaysWithSales = await Promise.all(
-      workdays.map(async (workday) => {
-        const workdayObj = workday.toObject();
+    // Get sales information for each workday - optimized single query
+    const workdayIds = workdays.map(w => w._id);
+    const allSales = await Sale.find({
+      workday: { $in: workdayIds }
+    }).lean();
 
-        // For each timeslot, get sales data
-        workdayObj.timeslots = await Promise.all(
-          workdayObj.timeslots.map(async (timeslot) => {
-            const sales = await Sale.find({
-              // We'll need to update Sale model to reference workday and timeslot
-              workday: workday._id,
-              timeslotId: timeslot._id,
-            });
+    // Group sales by workday and timeslot for efficient lookup
+    const salesByWorkdayAndTimeslot = {};
+    allSales.forEach(sale => {
+      const workdayKey = sale.workday.toString();
+      const timeslotKey = sale.timeslotId.toString();
+      
+      if (!salesByWorkdayAndTimeslot[workdayKey]) {
+        salesByWorkdayAndTimeslot[workdayKey] = {};
+      }
+      if (!salesByWorkdayAndTimeslot[workdayKey][timeslotKey]) {
+        salesByWorkdayAndTimeslot[workdayKey][timeslotKey] = [];
+      }
+      
+      salesByWorkdayAndTimeslot[workdayKey][timeslotKey].push({
+        id: sale._id,
+        name: sale.name,
+        price: sale.price,
+        salesRepName: sale.salesRepName,
+        createdAt: sale.createdAt,
+      });
+    });
 
-            return {
-              ...timeslot,
-              salesCount: sales.length,
-              sales: sales.map((sale) => ({
-                id: sale._id,
-                name: sale.name,
-                price: sale.price,
-                salesRepName: sale.salesRepName,
-                createdAt: sale.createdAt,
-              })),
-            };
-          })
-        );
+    const workdaysWithSales = workdays.map(workday => {
+      const workdayObj = workday.toObject();
+      const workdayKey = workday._id.toString();
 
-        return workdayObj;
-      })
-    );
+      // For each timeslot, get sales data from our lookup object
+      workdayObj.timeslots = workdayObj.timeslots.map(timeslot => {
+        const timeslotKey = timeslot._id.toString();
+        const sales = salesByWorkdayAndTimeslot[workdayKey]?.[timeslotKey] || [];
+
+        return {
+          ...timeslot,
+          salesCount: sales.length,
+          sales,
+        };
+      });
+
+      return workdayObj;
+    });
 
     res.json({
       success: true,
-      workdays: workdaysWithSales,
-      isOwner,
-      isManager,
+      data: {
+        workdays: workdaysWithSales,
+        isOwner,
+        isManager,
+      }
     });
   } catch (error) {
     console.error("Get Workdays Error:", error);

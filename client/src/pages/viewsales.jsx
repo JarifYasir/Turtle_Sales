@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/ViewSales.css";
-import api from "../utils/api";
+import axios from "axios";
 import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
-import LoadingSpinner from "../components/LoadingComponents";
+import api from "../utils/api";
 
 const ViewSales = () => {
   const navigate = useNavigate();
@@ -13,8 +13,9 @@ const ViewSales = () => {
   const [sales, setSales] = useState([]);
   const [isOwner, setIsOwner] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [filterType, setFilterType] = useState("none"); // "none", "rep", "worker"
-  const [selectedFilter, setSelectedFilter] = useState("");
+  const [showMySales, setShowMySales] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [employees, setEmployees] = useState([]);
   const [weekStartDate, setWeekStartDate] = useState(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -28,53 +29,56 @@ const ViewSales = () => {
       navigate("/login");
       return;
     }
-    if (user) {
-      fetchSales();
-    }
-  }, [token, navigate, user]);
+    fetchSales();
+    fetchOrganizationInfo();
+  }, [token, navigate]);
 
-  // Refetch sales when window regains focus (handles case where sales were deleted by other users)
-  useEffect(() => {
-    const handleFocus = () => {
-      if (user && token) {
-        fetchSales();
+  const fetchOrganizationInfo = async () => {
+    try {
+      const authToken = JSON.parse(localStorage.getItem("auth"));
+      const response = await api.get("/organization", {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+
+      if (response.data.success) {
+        setIsOwner(response.data.isOwner);
+        if (response.data.isOwner) {
+          setEmployees(response.data.organization.members || []);
+        }
       }
-    };
-
-    window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
-  }, [user, token]);
+    } catch (error) {
+      console.error("Error fetching organization info:", error);
+      toast.error("Failed to load organization information");
+    }
+  };
 
   const fetchSales = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/sales");
+      const authToken = JSON.parse(localStorage.getItem("auth"));
+      const response = await api.get("/sales", {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
 
       if (response.data.success) {
-        // Filter out any sales with missing required data to prevent render errors
-        const validSales = (response.data.sales || []).filter(
-          (sale) => sale && sale._id && sale.timeslot && sale.timeslot.date
-        );
-        setSales(validSales);
+        setSales(response.data.data.sales);
       }
     } catch (error) {
       console.error("Error fetching sales:", error);
-
-      // Handle specific error types
-      if (error.response?.status === 404) {
-        toast.error("Please join an organization first");
-        navigate("/welcome");
-      } else {
-        toast.error("Failed to load sales data");
-      }
+      toast.error("Failed to load sales data");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteSale = async (saleId) => {
+    if (!isOwner) return;
+
     try {
-      const response = await api.delete(`/sales/${saleId}`);
+      const authToken = JSON.parse(localStorage.getItem("auth"));
+      const response = await api.delete(`/sales/${saleId}`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
 
       if (response.data.success) {
         toast.success("Sale deleted successfully");
@@ -87,53 +91,27 @@ const ViewSales = () => {
   };
 
   const getDisplaySales = () => {
-    if (!Array.isArray(sales)) return {};
-
     let filteredSales = sales;
-
-    if (filterType === "rep" && selectedFilter) {
-      filteredSales = sales.filter(
-        (sale) => sale && sale.salesRepName === selectedFilter
-      );
-    } else if (filterType === "worker" && selectedFilter) {
-      filteredSales = sales.filter(
-        (sale) =>
-          sale && sale.timeslot?.assignedWorker?.user?.name === selectedFilter
-      );
+    if (isOwner && selectedEmployee) {
+      filteredSales = sales.filter((sale) => sale.userId === selectedEmployee);
+    } else if (!isOwner && showMySales) {
+      filteredSales = sales.filter((sale) => sale.userId === user.id);
     }
-
     return groupSalesByDate(filteredSales);
-  };
-
-  // Get unique sales reps
-  const getUniqueSalesReps = () => {
-    if (!Array.isArray(sales)) return [];
-
-    const reps = [
-      ...new Set(sales.map((sale) => sale?.salesRepName).filter(Boolean)),
-    ];
-    return reps.sort();
-  };
-
-  // Get unique workers
-  const getUniqueWorkers = () => {
-    if (!Array.isArray(sales)) return [];
-
-    const workers = [
-      ...new Set(
-        sales
-          .map((sale) => sale?.timeslot?.assignedWorker?.user?.name)
-          .filter(Boolean)
-      ),
-    ];
-    return workers.sort();
   };
 
   const groupSalesByDate = (sales) => {
     const grouped = {};
     sales.forEach((sale) => {
-      if (!sale.timeslot) return;
-      const dateKey = new Date(sale.timeslot.date).toDateString();
+      // Use workday date for grouping (new unified structure)
+      let dateKey;
+      if (sale.workday && sale.workday.date) {
+        dateKey = new Date(sale.workday.date).toDateString();
+      } else {
+        console.warn('Sale missing workday date information:', sale);
+        return; // Skip sales without date information
+      }
+      
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
       }
@@ -159,7 +137,7 @@ const ViewSales = () => {
       const dateKey = date.toDateString();
       return displaySales[dateKey] && displaySales[dateKey].length > 0;
     });
-  }, [weekDates, sales, filterType, selectedFilter]);
+  }, [weekDates, sales, selectedEmployee, showMySales, user]);
 
   const isCurrentDay = (date) => {
     const today = new Date();
@@ -170,15 +148,26 @@ const ViewSales = () => {
     );
   };
 
-  const formatTimeslot = (timeslot) => {
-    if (!timeslot) return "No timeslot information";
-    const date = new Date(timeslot.date);
-    const formattedDate = date.toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
-    return `${formattedDate}, ${timeslot.startTime} - ${timeslot.endTime}`;
+  const formatTimeslot = (sale) => {
+    // Handle both new workday+timeslot structure and old timeslot structure
+    if (sale.timeslot) {
+      const date = new Date(sale.timeslot.date || sale.workday?.date);
+      const formattedDate = date.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+      return `${formattedDate}, ${sale.timeslot.startTime} - ${sale.timeslot.endTime}`;
+    } else if (sale.workday) {
+      const date = new Date(sale.workday.date);
+      const formattedDate = date.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+      return `${formattedDate} (Timeslot info unavailable)`;
+    }
+    return "No timeslot information";
   };
 
   const formatCurrency = (amount) => {
@@ -209,15 +198,22 @@ const ViewSales = () => {
     setWeekStartDate(new Date(today.setDate(diff)));
   };
 
-  // Show loading if data is loading or user is not yet available
-  if (loading || (!user && token)) {
+  if (loading) {
     return (
-      <LoadingSpinner
-        size="large"
-        text={loading ? "Loading sales data..." : "Loading user data..."}
-        variant="turtle"
-        fullScreen={false}
-      />
+      <div className="view-sales-container">
+        <motion.div
+          className="sales-header"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1>Sales Overview</h1>
+        </motion.div>
+        <div className="loading-spinner"></div>
+        <p style={{ textAlign: "center", color: "var(--gray)" }}>
+          Loading sales data...
+        </p>
+      </div>
     );
   }
 
@@ -230,81 +226,29 @@ const ViewSales = () => {
         transition={{ duration: 0.5 }}
       >
         <h1>Sales Overview</h1>
-      </motion.div>
-
-      {/* Filter Controls */}
-      <motion.div
-        className="filter-section"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.1 }}
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: "15px",
-          margin: "20px 0",
-          padding: "15px",
-          backgroundColor: "#f8f9fa",
-          borderRadius: "8px",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <label style={{ fontWeight: "500", color: "#333" }}>Filter by:</label>
-          <select
-            value={filterType}
-            onChange={(e) => {
-              setFilterType(e.target.value);
-              setSelectedFilter("");
-            }}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "4px",
-              border: "1px solid #ddd",
-              fontSize: "14px",
-            }}
-          >
-            <option value="none">No Filter</option>
-            <option value="rep">Sales Rep</option>
-            <option value="worker">Worker</option>
-          </select>
-        </div>
-
-        {filterType !== "none" && (
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <label style={{ fontWeight: "500", color: "#333" }}>
-              {filterType === "rep" ? "Sales Rep:" : "Worker:"}
-            </label>
+        <div className="filter-controls">
+          {isOwner ? (
             <select
-              value={selectedFilter}
-              onChange={(e) => setSelectedFilter(e.target.value)}
-              style={{
-                padding: "8px 12px",
-                borderRadius: "4px",
-                border: "1px solid #ddd",
-                fontSize: "14px",
-                minWidth: "150px",
-              }}
+              value={selectedEmployee || ""}
+              onChange={(e) => setSelectedEmployee(e.target.value || null)}
+              className="employee-select"
             >
-              <option value="">
-                All {filterType === "rep" ? "Reps" : "Workers"}
-              </option>
-              {filterType === "rep"
-                ? getUniqueSalesReps().map((rep) => (
-                    <option key={rep} value={rep}>
-                      {rep}
-                    </option>
-                  ))
-                : getUniqueWorkers().map((worker) => (
-                    <option key={worker} value={worker}>
-                      {worker}
-                    </option>
-                  ))}
+              <option value="">All Sales</option>
+              {employees.map((emp) => (
+                <option key={emp.user} value={emp.user}>
+                  {emp.name}
+                </option>
+              ))}
             </select>
-          </div>
-        )}
+          ) : (
+            <button
+              className="toggle-btn"
+              onClick={() => setShowMySales(!showMySales)}
+            >
+              {showMySales ? "Show All Sales" : "Show My Sales"}
+            </button>
+          )}
+        </div>
       </motion.div>
 
       <motion.div
@@ -352,26 +296,17 @@ const ViewSales = () => {
                     </h3>
                   </div>
                   <div className="day-sales">
-                    {(getDisplaySales()[date.toDateString()] || []).map(
-                      (sale) => (
-                        <motion.div
-                          key={sale._id}
-                          className="sale-card"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <div className="sale-header">
-                            <h3>
-                              Rep: {sale.salesRepName || "Unknown"}
-                              {sale.timeslot?.assignedWorker && (
-                                <>
-                                  , Worker:{" "}
-                                  {sale.timeslot.assignedWorker.user?.name ||
-                                    "Unknown"}
-                                </>
-                              )}
-                            </h3>
+                    {getDisplaySales()[date.toDateString()].map((sale) => (
+                      <motion.div
+                        key={sale._id}
+                        className="sale-card"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <div className="sale-header">
+                          <h3>{sale.salesRepName || "Unknown"}</h3>
+                          {isOwner && (
                             <button
                               className="delete-btn"
                               onClick={() => {
@@ -387,32 +322,34 @@ const ViewSales = () => {
                             >
                               ×
                             </button>
-                          </div>
-                          <div className="sale-time">
-                            {sale.timeslot.startTime} - {sale.timeslot.endTime}
-                          </div>
-                          <div className="sale-info">
-                            <p>
-                              <strong>Client:</strong> {sale.name}
-                            </p>
-                            <p>
-                              <strong>Price:</strong>{" "}
-                              {formatCurrency(sale.price)}
-                            </p>
-                            <p>
-                              <strong>Phone:</strong> {sale.number}
-                            </p>
-                            <p>
-                              <strong>Address:</strong> {sale.address}
-                            </p>
-                            <p className="sale-details">
-                              <strong>Details:</strong>{" "}
-                              {sale.details || "No additional details"}
-                            </p>
-                          </div>
-                        </motion.div>
-                      )
-                    )}
+                          )}
+                        </div>
+                        <div className="sale-time">
+                          {sale.timeslot ? 
+                            `${sale.timeslot.startTime} - ${sale.timeslot.endTime}` : 
+                            'Time info unavailable'
+                          }
+                        </div>
+                        <div className="sale-info">
+                          <p>
+                            <strong>Client:</strong> {sale.name}
+                          </p>
+                          <p>
+                            <strong>Price:</strong> {formatCurrency(sale.price)}
+                          </p>
+                          <p>
+                            <strong>Phone:</strong> {sale.number}
+                          </p>
+                          <p>
+                            <strong>Address:</strong> {sale.address}
+                          </p>
+                          <p className="sale-details">
+                            <strong>Details:</strong>{" "}
+                            {sale.details || "No additional details"}
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
               ))

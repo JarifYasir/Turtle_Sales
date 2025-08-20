@@ -110,10 +110,12 @@ exports.getOrganization = async (req, res) => {
 
     res.json({
       success: true,
-      organization,
-      memberCount: organization.members.length,
-      isOwner,
-      isManager,
+      data: {
+        organization,
+        memberCount: organization.members.length,
+        isOwner,
+        isManager,
+      }
     });
   } catch (error) {
     console.error("Get Organization Error:", error);

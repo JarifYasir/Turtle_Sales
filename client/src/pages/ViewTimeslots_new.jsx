@@ -37,14 +37,8 @@ const ViewTimeslots = () => {
 
   // Form handling
   const saleForm = useSaleForm(
-    {}, // Default values object
     useCallback(
       async (data) => {
-        if (!selectedTimeslot || !selectedWorkday) {
-          toast.error("Please select a timeslot first");
-          return;
-        }
-
         try {
           await createSaleMutation.mutateAsync({
             ...data,
@@ -55,10 +49,8 @@ const ViewTimeslots = () => {
           setShowSaleForm(false);
           setSelectedTimeslot(null);
           setSelectedWorkday(null);
-          toast.success("Sale recorded successfully!");
         } catch (error) {
           console.error("Sale creation error:", error);
-          toast.error(error.response?.data?.msg || "Failed to record sale");
         }
       },
       [selectedTimeslot, selectedWorkday, createSaleMutation]
@@ -113,13 +105,10 @@ const ViewTimeslots = () => {
   // Group workdays by date
   const groupedWorkdays = useCallback(() => {
     const grouped = {};
-    // Ensure workdays is an array before using forEach
-    if (Array.isArray(workdays)) {
-      workdays.forEach((workday) => {
-        const dateKey = new Date(workday.date).toDateString();
-        grouped[dateKey] = workday;
-      });
-    }
+    workdays.forEach((workday) => {
+      const dateKey = new Date(workday.date).toDateString();
+      grouped[dateKey] = workday;
+    });
     return grouped;
   }, [workdays]);
 
@@ -169,32 +158,6 @@ const ViewTimeslots = () => {
     );
   }
 
-  // Error state
-  if (error) {
-    console.error('ViewTimeslots error:', error);
-    return (
-      <div className="timeslots-container">
-        <div className="error-state">
-          <h2>Unable to load workdays</h2>
-          <p>{error?.response?.data?.msg || error?.message || 'An error occurred'}</p>
-          <button onClick={() => window.location.reload()}>Try Again</button>
-        </div>
-      </div>
-    );
-  }
-
-  // No data state
-  if (!Array.isArray(workdays) || workdays.length === 0) {
-    return (
-      <div className="timeslots-container">
-        <div className="empty-state">
-          <h2>No workdays available</h2>
-          <p>There are no workdays scheduled for the selected time period.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="timeslots-container">
       {/* Header */}
@@ -229,16 +192,16 @@ const ViewTimeslots = () => {
         transition={{ delay: 0.2 }}
       >
         <div className="stat-card">
-          <span className="stat-number">{Array.isArray(workdays) ? workdays.length : 0}</span>
+          <span className="stat-number">{workdays.length}</span>
           <span className="stat-label">Workdays</span>
         </div>
         <div className="stat-card">
           <span className="stat-number">
-            {Array.isArray(workdays) ? workdays.reduce((total, day) => 
-              total + (day.timeslots?.filter(slot => 
+            {workdays.reduce((total, day) => 
+              total + day.timeslots.filter(slot => 
                 (slot.assignedUsers?.length || 0) > (slot.sales?.length || 0)
-              ).length || 0), 0
-            ) : 0}
+              ).length, 0
+            )}
           </span>
           <span className="stat-label">Available Slots</span>
         </div>
@@ -418,6 +381,7 @@ const ViewTimeslots = () => {
                     type="submit"
                     variant="primary"
                     loading={createSaleMutation.isPending}
+                    disabled={!saleForm.formState.isValid}
                   >
                     {createSaleMutation.isPending ? "Recording..." : "Record Sale"}
                   </Button>

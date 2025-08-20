@@ -82,59 +82,13 @@ const authLimiter = rateLimit({
 
 app.use(limiter);
 
-// CORS middleware
-if (process.env.NODE_ENV === "development") {
-  // In development, allow all origins
-  app.use(
-    cors({
-      origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-
-        const allowedOrigins = getCorsOrigins();
-
-        if (allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(null, true); // Allow all origins in development
-        }
-      },
-      credentials: true,
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-      allowedHeaders: [
-        "Content-Type",
-        "Authorization",
-        "X-Requested-With",
-        "Accept",
-        "Origin",
-      ],
-      exposedHeaders: ["Content-Length"],
-      optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
-      maxAge: 86400, // Cache preflight response for 24 hours
-    })
-  );
-} else {
-  // In production, be more restrictive
-  app.use(
-    cors({
-      origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-
-        const allowedOrigins = getCorsOrigins();
-
-        if (allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error("Not allowed by CORS"));
-        }
-      },
-      credentials: true,
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-    })
-  );
-}
+// CORS middleware - Simplified for debugging
+app.use(cors({
+  origin: true, // Allow all origins temporarily
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+}));
 
 // Handle preflight requests explicitly
 app.options("*", (req, res) => {
@@ -156,7 +110,18 @@ app.options("*", (req, res) => {
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
+// Health check endpoint
+app.get("/api/v1/health", (req, res) => {
+  res.json({ 
+    success: true, 
+    message: "Server is running",
+    timestamp: new Date().toISOString(),
+    host: req.get('host')
+  });
+});
+
 // Routes
+app.use("/api/v1/network", require("./routes/networkRoutes"));
 app.use("/api/v1/auth", authLimiter, require("./routes/authRoutes"));
 app.use("/api/v1/organization", require("./routes/organizationRoutes"));
 const timeslotRoutes = require("./routes/timeslotRoutes");

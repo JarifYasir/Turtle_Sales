@@ -1,19 +1,57 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
-// Create axios instance with default config
+// Dynamic API URL detection based on client access method
+const getApiBaseURL = () => {
+  // If we have an explicit environment variable, use it
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Otherwise, dynamically determine based on current location
+  const hostname = window.location.hostname;
+  const port = '3000'; // Server port
+  
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `http://localhost:${port}/api/v1`;
+  } else {
+    // Use the same IP as the client is accessing
+    return `http://${hostname}:${port}/api/v1`;
+  }
+};
+
+// Create axios instance with dynamic config
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api/v1", // Use relative URL as fallback
-  timeout: 15000, // Increased timeout
+  baseURL: getApiBaseURL(),
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: false, // Set to false to avoid potential CORS issues
+  withCredentials: false,
 });
+
+// Log the API base URL for debugging
+console.log('🌐 API Base URL:', api.defaults.baseURL);
+
+// Test connectivity function (can be called manually if needed)
+export const testConnectivity = async () => {
+  try {
+    const response = await api.get('/health', { timeout: 5000 });
+    console.log('🟢 Server connectivity test:', response.status, response.data);
+    return true;
+  } catch (error) {
+    console.error('🔴 Server connectivity test failed:', {
+      message: error.message,
+      code: error.code,
+      status: error.response?.status
+    });
+    return false;
+  }
+};
 
 // Request interceptor to add auth token
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
     const auth = localStorage.getItem("auth");
     if (auth) {
       try {
@@ -124,7 +162,22 @@ export const timeslotAPI = {
 };
 
 export const workdayAPI = {
-  getAll: (params) => api.get("/workdays", { params }),
+  getAll: async (params) => {
+    try {
+      console.log('🔄 Fetching workdays from:', api.defaults.baseURL + '/workdays');
+      const response = await api.get("/workdays", { params });
+      console.log('✅ Workdays response:', response.status, response.data);
+      return response;
+    } catch (error) {
+      console.error('❌ Workdays fetch error:', {
+        status: error.response?.status,
+        message: error.message,
+        url: error.config?.url,
+        baseURL: error.config?.baseURL
+      });
+      throw error;
+    }
+  },
   create: (workday) => api.post("/workdays", workday),
   update: (id, updates) => api.put(`/workdays/${id}`, updates),
   delete: (id) => api.delete(`/workdays/${id}`),

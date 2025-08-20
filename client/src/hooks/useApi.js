@@ -20,7 +20,13 @@ export const queryKeys = {
 export const useWorkdays = (params = {}) => {
   return useQuery({
     queryKey: queryKeys.workdays(params),
-    queryFn: () => workdayAPI.getAll(params).then((res) => res.data),
+    queryFn: () => workdayAPI.getAll(params).then((res) => {
+      // Handle both new structured response and legacy response
+      if (res.data.data && res.data.data.workdays) {
+        return res.data.data.workdays;
+      }
+      return res.data.workdays || res.data;
+    }),
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
     retry: 2,

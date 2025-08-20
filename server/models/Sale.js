@@ -40,10 +40,16 @@ const saleSchema = new mongoose.Schema(
     },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 
-    // Support both old timeslot system and new workday system
-    timeslot: { type: mongoose.Schema.Types.ObjectId, ref: "Timeslot" },
-    workday: { type: mongoose.Schema.Types.ObjectId, ref: "Workday" },
-    timeslotId: { type: mongoose.Schema.Types.ObjectId }, // For workday timeslots
+    // New workday-based timeslot system (unified approach)
+    workday: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "Workday", 
+      required: true 
+    },
+    timeslotId: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      required: true 
+    }, // References timeslot within workday
 
     organization: {
       type: mongoose.Schema.Types.ObjectId,
@@ -59,13 +65,16 @@ const saleSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for performance optimization
+// Indexes for performance optimization and data integrity
 saleSchema.index({ organization: 1, createdAt: -1 }); // For organization sales listing
 saleSchema.index({ timeslot: 1 }); // For timeslot sales count
 saleSchema.index({ workday: 1, timeslotId: 1 }); // For workday timeslot sales
 saleSchema.index({ user: 1, createdAt: -1 }); // For user sales history
 saleSchema.index({ organization: 1, user: 1 }); // Compound index for user sales in org
 saleSchema.index({ name: "text", details: "text" }); // Text search
+
+// Prevent duplicate sales by same user in same timeslot (optional business rule)
+saleSchema.index({ user: 1, timeslot: 1 }, { unique: false }); // Allow multiple sales per user per timeslot
 
 // Virtual for formatted price
 saleSchema.virtual("formattedPrice").get(function () {
