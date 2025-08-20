@@ -70,9 +70,9 @@ const SalesLeaderboard = () => {
   const getSortedData = () => {
     const sorted = [...leaderboardData].sort((a, b) => {
       if (sortBy === "totalSales") {
-        return b.totalSales - a.totalSales;
+        return (b.totalSales || 0) - (a.totalSales || 0);
       } else {
-        return b.totalRevenue - a.totalRevenue;
+        return (b.totalRevenue || 0) - (a.totalRevenue || 0);
       }
     });
     return sorted;
@@ -197,7 +197,7 @@ const SalesLeaderboard = () => {
               <div className="stat-content">
                 <span className="stat-value">
                   {sortedData.reduce(
-                    (sum, member) => sum + member.totalSales,
+                    (sum, member) => sum + (member.totalSales || 0),
                     0
                   )}
                 </span>
@@ -210,7 +210,7 @@ const SalesLeaderboard = () => {
                 <span className="stat-value">
                   $
                   {sortedData
-                    .reduce((sum, member) => sum + member.totalRevenue, 0)
+                    .reduce((sum, member) => sum + (member.totalRevenue || 0), 0)
                     .toLocaleString()}
                 </span>
                 <span className="stat-label">Total Revenue</span>
@@ -289,13 +289,13 @@ const SalesLeaderboard = () => {
                         </div>
                         <div className="stat-item">
                           <FiDollarSign className="stat-icon-small" />
-                          <span>${member.totalRevenue.toLocaleString()}</span>
+                          <span>${(member.totalRevenue || 0).toLocaleString()}</span>
                         </div>
                         {member.totalSales > 0 && (
                           <div className="stat-item">
                             <FiTrendingUp className="stat-icon-small" />
                             <span>
-                              ${member.avgSaleValue.toLocaleString()} avg
+                              ${(member.avgSaleValue || 0).toLocaleString()} avg
                             </span>
                           </div>
                         )}
@@ -307,8 +307,8 @@ const SalesLeaderboard = () => {
                     <div className="primary-metric">
                       <span className="metric-value">
                         {sortBy === "totalSales"
-                          ? member.totalSales
-                          : `$${member.totalRevenue.toLocaleString()}`}
+                          ? member.totalSales || 0
+                          : `$${(member.totalRevenue || 0).toLocaleString()}`}
                       </span>
                       <span className="metric-label">
                         {sortBy === "totalSales" ? "Sales" : "Revenue"}

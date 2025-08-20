@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import "../styles/EmployeePaystub.css";
 import LoadingSpinner from "../components/LoadingComponents";
 
@@ -14,7 +13,6 @@ const EmployeePaystub = () => {
   const [loading, setLoading] = useState(true);
   const [selectedWeek, setSelectedWeek] = useState(getCurrentWeek());
   const [generatingPDF, setGeneratingPDF] = useState(false);
-  const pdfContentRef = useRef();
 
   // Get current week's start and end dates
   function getCurrentWeek() {
@@ -106,7 +104,8 @@ const EmployeePaystub = () => {
   // Clean up orphaned sales before fetching data
   const cleanupOrphanedSales = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "/api/v1"; // Use relative URL as fallback
+      const apiUrl =
+        import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
 
       const response = await fetch(`${apiUrl}/sales/cleanup`, {
         method: "POST",
@@ -137,7 +136,8 @@ const EmployeePaystub = () => {
       // First, run cleanup to ensure data integrity
       await cleanupOrphanedSales();
 
-      const apiUrl = import.meta.env.VITE_API_URL || "/api/v1"; // Use relative URL as fallback
+      const apiUrl =
+        import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
 
       const response = await fetch(
         `${apiUrl}/sales/weekly-report?startDate=${selectedWeek.start.toISOString()}&endDate=${selectedWeek.end.toISOString()}`,
@@ -199,54 +199,263 @@ const EmployeePaystub = () => {
 
     try {
       setGeneratingPDF(true);
-      const element = pdfContentRef.current;
-
-      if (!element) {
-        toast.error("PDF content not found");
-        return;
-      }
-
-      // Create canvas from HTML element
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-      });
-
-      const imgData = canvas.toDataURL("image/png");
 
       // Create PDF
       const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210; // A4 width in mm
+      const pageWidth = 210; // A4 width in mm
       const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
+      const margin = 20;
+      let yPosition = margin;
 
-      let position = 0;
+      // Helper function to add text
+      const addText = (text, x, y, options = {}) => {
+        pdf.setFont(options.font || "helvetica", options.style || "normal");
+        pdf.setFontSize(options.size || 10);
+        pdf.setTextColor(options.color || "#000000");
+        if (options.align === "center") {
+          pdf.text(text, x, y, { align: "center" });
+        } else if (options.align === "right") {
+          pdf.text(text, x, y, { align: "right" });
+        } else {
+          pdf.text(text, x, y);
+        }
+      };
 
-      // Add first page
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      // Helper function to add line
+      const addLine = (x1, y1, x2, y2) => {
+        pdf.setDrawColor("#4a7c59");
+        pdf.setLineWidth(0.5);
+        pdf.line(x1, y1, x2, y2);
+      };
 
-      // Add additional pages if needed
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
+      // Helper function to add rectangle
+      const addRect = (x, y, width, height, fillColor = null) => {
+        if (fillColor) {
+          pdf.setFillColor(fillColor);
+          pdf.rect(x, y, width, height, "F");
+        } else {
+          pdf.setDrawColor("#4a7c59");
+          pdf.setLineWidth(0.5);
+          pdf.rect(x, y, width, height);
+        }
+      };
+
+      // Header with watermark
+      pdf.setGState(new pdf.GState({ opacity: 0.1 }));
+      addText("TURTLE SALES", pageWidth / 2 - 30, pageHeight / 2, {
+        size: 60,
+        style: "bold",
+        color: "#4a7c59"
+      });
+      pdf.setGState(new pdf.GState({ opacity: 1 }));
+
+      // Title Section
+      addText("TURTLE SALES", pageWidth / 2, yPosition, { 
+        size: 20, 
+        style: "bold", 
+        color: "#4a7c59",
+        align: "center"
+      });
+      yPosition += 10;
+      
+      addText("Weekly Sales Report", pageWidth / 2, yPosition, { 
+        size: 16, 
+        style: "bold",
+        align: "center"
+      });
+      yPosition += 8;
+      
+      addText(`${formatDate(selectedWeek.start)} - ${formatDate(selectedWeek.end)}`, 
+        pageWidth / 2, yPosition, { 
+        size: 12, 
+        color: "#666666",
+        align: "center"
+      });
+      yPosition += 15;
+
+      // Line separator
+      addLine(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 10;
+
+      // Employee Sales Sections
+      salesData.salesReport.forEach((rep, repIndex) => {
+        // Check if we need a new page
+        if (yPosition > pageHeight - 80) {
+          pdf.addPage();
+          yPosition = margin;
+        }
+
+        // Employee Header
+        addRect(margin, yPosition, pageWidth - 2 * margin, 12, "#f0f8f0");
+        addText(`Employee: ${rep.salesRepName}`, margin + 5, yPosition + 8, {
+          size: 14,
+          style: "bold",
+          color: "#4a7c59"
+        });
+        addText(`${rep.salesCount} Sales | ${formatCurrency(rep.totalAmount)}`, 
+          pageWidth - margin - 5, yPosition + 8, {
+          size: 12,
+          style: "bold",
+          color: "#4a7c59",
+          align: "right"
+        });
+        yPosition += 15;
+
+        // Sales Table Header
+        addRect(margin, yPosition, pageWidth - 2 * margin, 8, "#e8f5e8");
+        addText("Date", margin + 3, yPosition + 5, { size: 9, style: "bold" });
+        addText("Amount", margin + 35, yPosition + 5, { size: 9, style: "bold" });
+        addText("Client", margin + 55, yPosition + 5, { size: 9, style: "bold" });
+        addText("Phone", margin + 85, yPosition + 5, { size: 9, style: "bold" });
+        addText("Address", margin + 115, yPosition + 5, { size: 9, style: "bold" });
+        yPosition += 8;
+
+        // Sales Details
+        rep.sales.forEach((sale, saleIndex) => {
+          // Check if we need a new page
+          if (yPosition > pageHeight - 40) {
+            pdf.addPage();
+            yPosition = margin;
+          }
+
+          const rowHeight = 20;
+          const isEvenRow = saleIndex % 2 === 0;
+          
+          // Alternate row background
+          if (isEvenRow) {
+            addRect(margin, yPosition, pageWidth - 2 * margin, rowHeight, "#fafafa");
+          }
+
+          // Sale basic info
+          addText(new Date(sale.date).toLocaleDateString(), margin + 3, yPosition + 5, { size: 8 });
+          addText(formatCurrency(sale.amount), margin + 35, yPosition + 5, { 
+            size: 8, 
+            style: "bold", 
+            color: "#4a7c59" 
+          });
+          addText(sale.clientName || "N/A", margin + 55, yPosition + 5, { size: 8 });
+          addText(sale.clientPhone || "N/A", margin + 85, yPosition + 5, { size: 8 });
+          
+          // Address (truncated if too long)
+          let address = sale.clientAddress || "N/A";
+          if (address.length > 25) {
+            address = address.substring(0, 22) + "...";
+          }
+          addText(address, margin + 115, yPosition + 5, { size: 8 });
+
+          // Timeslot info
+          if (sale.timeslot) {
+            const timeslotText = `${formatTimeslotRange(sale.timeslot)}`;
+            addText(`Time: ${timeslotText}`, margin + 3, yPosition + 10, { 
+              size: 7, 
+              color: "#666666" 
+            });
+          }
+
+          // Sale details
+          if (sale.details) {
+            let details = sale.details;
+            if (details.length > 80) {
+              details = details.substring(0, 77) + "...";
+            }
+            addText(`Details: ${details}`, margin + 3, yPosition + 15, { 
+              size: 7, 
+              color: "#333333",
+              style: "italic"
+            });
+          }
+
+          yPosition += rowHeight;
+        });
+
+        yPosition += 5; // Space between employees
+      });
+
+      // Summary Section
+      yPosition += 10;
+      if (yPosition > pageHeight - 60) {
         pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        yPosition = margin;
       }
 
+      // Summary Header
+      addLine(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 10;
+      
+      addText("WEEK SUMMARY", pageWidth / 2, yPosition, { 
+        size: 16, 
+        style: "bold", 
+        color: "#4a7c59",
+        align: "center"
+      });
+      yPosition += 15;
+
+      // Summary Box
+      addRect(margin, yPosition, pageWidth - 2 * margin, 25, "#f0f8f0");
+      
+      // Summary Content
+      addText("Total Revenue:", margin + 10, yPosition + 8, { 
+        size: 12, 
+        style: "bold" 
+      });
+      addText(formatCurrency(salesData.summary.totalRevenue), margin + 60, yPosition + 8, { 
+        size: 12, 
+        style: "bold", 
+        color: "#4a7c59" 
+      });
+
+      addText("Total Sales:", margin + 10, yPosition + 16, { 
+        size: 12, 
+        style: "bold" 
+      });
+      addText(salesData.summary.totalSales.toString(), margin + 60, yPosition + 16, { 
+        size: 12, 
+        style: "bold", 
+        color: "#4a7c59" 
+      });
+
+      addText("Sales Representatives:", pageWidth - margin - 60, yPosition + 8, { 
+        size: 12, 
+        style: "bold" 
+      });
+      addText(salesData.summary.totalReps.toString(), pageWidth - margin - 10, yPosition + 8, { 
+        size: 12, 
+        style: "bold", 
+        color: "#4a7c59",
+        align: "right"
+      });
+
+      addText("Average per Rep:", pageWidth - margin - 60, yPosition + 16, { 
+        size: 12, 
+        style: "bold" 
+      });
+      addText(formatCurrency(salesData.summary.totalRevenue / salesData.summary.totalReps), 
+        pageWidth - margin - 10, yPosition + 16, { 
+        size: 12, 
+        style: "bold", 
+        color: "#4a7c59",
+        align: "right"
+      });
+
+      // Footer
+      yPosition = pageHeight - 20;
+      addText(`Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`, 
+        pageWidth / 2, yPosition, { 
+        size: 8, 
+        color: "#666666",
+        align: "center"
+      });
+
       // Generate filename with date
-      const filename = `Sales-Report-${
+      const filename = `Turtle-Sales-Report-${
         selectedWeek.start.toISOString().split("T")[0]
       }-to-${selectedWeek.end.toISOString().split("T")[0]}.pdf`;
 
       pdf.save(filename);
-      toast.success("PDF downloaded successfully!");
+      toast.success("Professional PDF report downloaded successfully!");
     } catch (error) {
       console.error("Error generating PDF:", error);
-      toast.error("Failed to generate PDF");
+      toast.error("Failed to generate PDF report");
     } finally {
       setGeneratingPDF(false);
     }
@@ -298,7 +507,7 @@ const EmployeePaystub = () => {
         </div>
 
         {/* PDF Content */}
-        <div ref={pdfContentRef} className="pdf-content">
+        <div className="pdf-content">
           {/* PDF Header with Watermark */}
           <div className="pdf-header">
             <div className="watermark">Turtle Sales</div>
@@ -357,6 +566,22 @@ const EmployeePaystub = () => {
                                   {sale.clientAddress || "N/A"}
                                 </span>
                               </div>
+                              {sale.clientPhone && (
+                                <div className="phone-info">
+                                  <span className="phone-label">Phone:</span>
+                                  <span className="client-phone">
+                                    {sale.clientPhone}
+                                  </span>
+                                </div>
+                              )}
+                              {sale.details && (
+                                <div className="details-info">
+                                  <span className="details-label">Details:</span>
+                                  <span className="sale-details-text">
+                                    {sale.details}
+                                  </span>
+                                </div>
+                              )}
                               <div className="timeslot-info">
                                 <span className="timeslot-label">
                                   Timeslot:

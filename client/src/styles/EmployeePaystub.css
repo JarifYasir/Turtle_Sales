@@ -329,6 +329,8 @@
 
 .client-info,
 .address-info,
+.phone-info,
+.details-info,
 .timeslot-info {
   display: flex;
   align-items: flex-start;
@@ -338,6 +340,8 @@
 
 .client-label,
 .address-label,
+.phone-label,
+.details-label,
 .timeslot-label {
   color: var(--gray);
   font-weight: 500;
@@ -347,6 +351,8 @@
 
 .client-name,
 .client-address,
+.client-phone,
+.sale-details-text,
 .timeslot-details {
   color: var(--dark-gray);
   font-weight: 500;
@@ -357,6 +363,22 @@
 .client-name {
   color: var(--primary-green);
   font-weight: 600;
+}
+
+.client-phone {
+  color: var(--secondary-green);
+  font-weight: 500;
+  font-family: 'Courier New', monospace;
+}
+
+.sale-details-text {
+  background: rgba(160, 196, 160, 0.1);
+  padding: 0.5rem;
+  border-radius: 4px;
+  border-left: 3px solid var(--primary-green);
+  font-style: italic;
+  color: var(--dark-gray);
+  line-height: 1.4;
 }
 
 .timeslot-details {
@@ -599,6 +621,8 @@
 
   .client-info,
   .address-info,
+  .phone-info,
+  .details-info,
   .timeslot-info {
     flex-direction: column;
     align-items: flex-start;
@@ -607,6 +631,8 @@
 
   .client-label,
   .address-label,
+  .phone-label,
+  .details-label,
   .timeslot-label {
     min-width: auto;
     font-size: 0.75rem;
