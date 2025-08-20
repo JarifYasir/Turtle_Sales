@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import axios from "axios";
+import "../styles/WorkdayStyles.css";
 
 const CreateWorkdayModal = ({
   show,
@@ -20,6 +21,47 @@ const CreateWorkdayModal = ({
   ]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && show && !loading) {
+        handleClose();
+      }
+    };
+
+    if (show) {
+      document.addEventListener("keydown", handleEscape);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
+    };
+  }, [show, loading]);
+
+  // Prevent scroll on mobile when modal is open
+  useEffect(() => {
+    if (show) {
+      const preventDefault = (e) => e.preventDefault();
+      document.addEventListener("touchmove", preventDefault, { passive: false });
+      
+      // Add viewport meta tag if not present (for better mobile experience)
+      let viewportMeta = document.querySelector('meta[name="viewport"]');
+      if (!viewportMeta) {
+        viewportMeta = document.createElement('meta');
+        viewportMeta.name = 'viewport';
+        viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+        document.head.appendChild(viewportMeta);
+      }
+      
+      return () => {
+        document.removeEventListener("touchmove", preventDefault);
+      };
+    }
+  }, [show]);
 
   const addTimeslot = () => {
     // Get the end time of the last timeslot as the start time for the new one
@@ -210,6 +252,8 @@ const CreateWorkdayModal = ({
       },
     ]);
     setNotes("");
+    // Reset body overflow when closing
+    document.body.style.overflow = "unset";
     onClose();
   };
 
@@ -241,28 +285,18 @@ const CreateWorkdayModal = ({
           onClick={handleClose}
         >
           <motion.div
-            className="create-workday-modal modern-modal"
+            className="create-workday-modal modern-modal compact-modal"
             initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 30 }}
             transition={{ type: "spring", damping: 20, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Enhanced Header */}
-            <div className="modal-header modern-header">
-              <div className="header-content">
-                <div className="header-icon">
-                  <svg
-                    width="28"
-                    height="28"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
-                  </svg>
-                </div>
+            {/* Compact Header */}
+            <div className="modal-header modern-header compact-header">
+              <div className="header-content compact-header-content">
                 <div className="header-text">
-                  <h1>Create New Workday</h1>
+                  <h1>Create Workday</h1>
                   <p className="header-subtitle">{date && formatDate(date)}</p>
                 </div>
               </div>
@@ -272,8 +306,8 @@ const CreateWorkdayModal = ({
                 onClick={handleClose}
               >
                 <svg
-                  width="20"
-                  height="20"
+                  width="18"
+                  height="18"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -282,128 +316,132 @@ const CreateWorkdayModal = ({
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="modal-body modern-body">
-              <div className="form-content">
+            <form onSubmit={handleSubmit} className="modal-body modern-body compact-body">
+              <div className="form-content compact-form-content">
                 {/* Timeslots Section */}
-                <div className="form-section timeslots-section">
-                  <div className="section-header modern-section-header">
-                    <div className="section-title">
-                      <svg
-                        width="20"
-                        height="20"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                        className="section-icon"
-                      >
-                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" />
-                        <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
-                      </svg>
-                      <div>
-                        <h3>Timeslots Configuration</h3>
-                        <p className="section-subtitle">
-                          Define work shifts for this day
-                        </p>
-                      </div>
+                <div className="form-section timeslots-section compact-timeslots">
+                  <div className="section-header compact-section-header">
+                    <div className="section-title compact-section-title">
+                      <h3>Timeslots</h3>
                     </div>
                     <button
                       type="button"
                       onClick={addTimeslot}
-                      className="add-timeslot-btn modern-add-btn"
+                      className="add-timeslot-btn compact-add-btn"
                     >
                       <svg
-                        width="16"
-                        height="16"
+                        width="14"
+                        height="14"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
                       </svg>
-                      Add Timeslot
+                      Add Slot
                     </button>
                   </div>
 
-                  <div className="timeslots-list modern-timeslots-list">
+                  <div className="timeslots-list compact-timeslots-list">
                     {timeslots.map((slot, index) => (
                       <motion.div
                         key={index}
-                        className="timeslot-item modern-timeslot-item"
+                        className="timeslot-item compact-timeslot-item"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <div className="timeslot-header">
-                          <div className="slot-indicator">
+                        <div className="timeslot-header compact-slot-header">
+                          <div className="slot-indicator compact-slot-indicator">
                             <span className="slot-number">{index + 1}</span>
                           </div>
-                          <div className="time-preview">
+                          <div className="time-preview compact-time-preview">
                             {slot.startTime &&
                               slot.endTime &&
                               `${formatTime(slot.startTime)} - ${formatTime(
                                 slot.endTime
                               )}`}
                           </div>
+                          {timeslots.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeTimeslot(index)}
+                              className="remove-timeslot-btn compact-remove-btn"
+                              title="Remove this timeslot"
+                            >
+                              <svg
+                                width="14"
+                                height="14"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                              </svg>
+                            </button>
+                          )}
                         </div>
 
-                        <div className="timeslot-inputs modern-inputs">
-                          <div className="input-group">
-                            <label>Start Time</label>
-                            <input
-                              type="time"
-                              value={slot.startTime}
-                              onChange={(e) =>
-                                updateTimeslot(
-                                  index,
-                                  "startTime",
-                                  e.target.value
-                                )
-                              }
-                              required
-                              className="modern-input"
-                            />
-                          </div>
-
-                          <div className="input-group">
-                            <label>End Time</label>
-                            <input
-                              type="time"
-                              value={slot.endTime}
-                              onChange={(e) =>
-                                updateTimeslot(index, "endTime", e.target.value)
-                              }
-                              required
-                              className="modern-input"
-                            />
-                          </div>
-
-                          <div className="input-group">
-                            <label># of Workers</label>
-                            <select
-                              value={slot.maxEmployees}
-                              onChange={(e) => {
-                                const newCount = parseInt(e.target.value);
-                                updateTimeslot(index, "maxEmployees", newCount);
-                                // Reset assigned users if the new count is less than current assignments
-                                if (slot.assignedUsers.length > newCount) {
-                                  updateTimeslot(index, "assignedUsers", []);
+                        <div className="timeslot-inputs compact-inputs">
+                          <div className="input-row compact-input-row">
+                            <div className="input-group compact-input-group">
+                              <label>Start</label>
+                              <input
+                                type="time"
+                                value={slot.startTime}
+                                onChange={(e) =>
+                                  updateTimeslot(
+                                    index,
+                                    "startTime",
+                                    e.target.value
+                                  )
                                 }
-                              }}
-                              className="modern-select"
-                            >
-                              {[...Array(10)].map((_, i) => (
-                                <option key={i + 1} value={i + 1}>
-                                  {i + 1} {i === 0 ? "worker" : "workers"}
-                                </option>
-                              ))}
-                            </select>
+                                required
+                                className="compact-input"
+                              />
+                            </div>
+
+                            <div className="input-group compact-input-group">
+                              <label>End</label>
+                              <input
+                                type="time"
+                                value={slot.endTime}
+                                onChange={(e) =>
+                                  updateTimeslot(index, "endTime", e.target.value)
+                                }
+                                required
+                                className="compact-input"
+                              />
+                            </div>
+
+                            <div className="input-group compact-input-group">
+                              <label>Workers</label>
+                              <select
+                                value={slot.maxEmployees}
+                                onChange={(e) => {
+                                  const newCount = parseInt(e.target.value);
+                                  updateTimeslot(index, "maxEmployees", newCount);
+                                  // Reset assigned users if the new count is less than current assignments
+                                  if (slot.assignedUsers.length > newCount) {
+                                    updateTimeslot(index, "assignedUsers", []);
+                                  }
+                                }}
+                                className="compact-select"
+                              >
+                                {[...Array(10)].map((_, i) => (
+                                  <option key={i + 1} value={i + 1}>
+                                    {i + 1}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
                           </div>
 
-                          <div className="input-group">
-                            <label>
+                          <div className="input-group compact-input-group employee-selection">
+                            <label className="compact-label">
                               Select Workers ({slot.assignedUsers?.length || 0}/
                               {slot.maxEmployees})
                             </label>
                             <div
-                              className={`custom-multiselect ${
+                              className={`compact-multiselect ${
                                 slot.assignedUsers?.length === slot.maxEmployees
                                   ? "complete"
                                   : ""
@@ -420,27 +458,38 @@ const CreateWorkdayModal = ({
                                 return (
                                   <div
                                     key={employee._id}
-                                    className={`employee-option ${
+                                    className={`employee-option compact-employee-option ${
                                       isSelected ? "selected" : ""
                                     } ${isDisabled ? "disabled" : ""}`}
                                     onClick={() =>
                                       !isDisabled &&
                                       handleEmployeeToggle(index, employee._id)
                                     }
+                                    onTouchStart={(e) => {
+                                      // Prevent double-tap zoom on mobile
+                                      e.preventDefault();
+                                    }}
+                                    role="button"
+                                    tabIndex={isDisabled ? -1 : 0}
+                                    onKeyDown={(e) => {
+                                      if ((e.key === "Enter" || e.key === " ") && !isDisabled) {
+                                        e.preventDefault();
+                                        handleEmployeeToggle(index, employee._id);
+                                      }
+                                    }}
+                                    aria-pressed={isSelected}
+                                    aria-disabled={isDisabled}
                                   >
-                                    <div className="employee-info">
-                                      <span className="employee-name">
+                                    <div className="employee-info compact-employee-info">
+                                      <span className="employee-name compact-employee-name">
                                         {employee.name}
                                       </span>
-                                      <span className="employee-email">
-                                        {employee.email}
-                                      </span>
                                     </div>
-                                    <div className="selection-indicator">
+                                    <div className="selection-indicator compact-selection-indicator">
                                       {isSelected && (
                                         <svg
-                                          width="16"
-                                          height="16"
+                                          width="14"
+                                          height="14"
                                           viewBox="0 0 24 24"
                                           fill="currentColor"
                                         >
@@ -452,32 +501,7 @@ const CreateWorkdayModal = ({
                                 );
                               })}
                             </div>
-                            <small className="multiselect-help-text">
-                              Click to select/unselect workers. You must select
-                              exactly {slot.maxEmployees} worker
-                              {slot.maxEmployees !== 1 ? "s" : ""}.
-                            </small>
                           </div>
-                        </div>
-
-                        <div className="timeslot-actions">
-                          {timeslots.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeTimeslot(index)}
-                              className="remove-timeslot-btn modern-remove-btn"
-                              title="Remove this timeslot"
-                            >
-                              <svg
-                                width="16"
-                                height="16"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-                              </svg>
-                            </button>
-                          )}
                         </div>
                       </motion.div>
                     ))}
@@ -485,24 +509,10 @@ const CreateWorkdayModal = ({
                 </div>
 
                 {/* Notes Section */}
-                <div className="form-section notes-section modern-notes-section">
-                  <div className="section-header modern-section-header">
-                    <div className="section-title">
-                      <svg
-                        width="20"
-                        height="20"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                        className="section-icon"
-                      >
-                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                      </svg>
-                      <div>
-                        <h3>Additional Notes</h3>
-                        <p className="section-subtitle">
-                          Optional instructions or special requirements
-                        </p>
-                      </div>
+                <div className="form-section notes-section compact-notes-section">
+                  <div className="section-header compact-section-header">
+                    <div className="section-title compact-section-title">
+                      <h3>Notes (Optional)</h3>
                     </div>
                   </div>
 
@@ -510,58 +520,50 @@ const CreateWorkdayModal = ({
                     id="workday-notes"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Add any special instructions, requirements, or important information for this workday..."
-                    maxLength={500}
-                    rows={4}
-                    className="modern-textarea"
+                    placeholder="Special instructions or requirements..."
+                    maxLength={300}
+                    rows={3}
+                    className="compact-textarea"
                   />
-                  <div className="char-count">
-                    <small>{notes.length}/500 characters</small>
+                  <div className="char-count compact-char-count">
+                    <small>{notes.length}/300</small>
                   </div>
                 </div>
               </div>
 
-              {/* Enhanced Actions */}
-              <div className="modal-actions modern-actions">
+              {/* Compact Actions */}
+              <div className="modal-actions compact-actions">
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="cancel-btn modern-cancel-btn"
+                  className="cancel-btn compact-cancel-btn"
                   disabled={loading}
                 >
-                  <svg
-                    width="16"
-                    height="16"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-                  </svg>
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="create-btn modern-create-btn"
+                  className="create-btn compact-create-btn"
                   disabled={loading || timeslots.length === 0}
                 >
                   {loading ? (
                     <>
                       <svg
-                        width="16"
-                        height="16"
+                        width="14"
+                        height="14"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                         className="spinner"
                       >
                         <path d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z" />
                       </svg>
-                      Creating Workday...
+                      Creating...
                     </>
                   ) : (
                     <>
                       <svg
-                        width="16"
-                        height="16"
+                        width="14"
+                        height="14"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >

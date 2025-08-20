@@ -244,8 +244,7 @@ const WelcomePage = () => {
         <div className="welcome-header">
           <h1 className="welcome-title">Welcome, {user?.name || "User"}!</h1>
           <p className="welcome-subtitle">
-            Let's get you started by creating a new organization or joining an
-            existing one.
+            Choose how you'd like to get started with your sales organization management
           </p>
         </div>
 
@@ -262,64 +261,75 @@ const WelcomePage = () => {
               <motion.div
                 className="option-card"
                 whileHover={{
-                  y: -5,
-                  boxShadow: "0 8px 25px rgba(53, 120, 214, 0.15)",
+                  y: -8,
+                  boxShadow: "0 12px 35px rgba(76, 175, 80, 0.2)",
                 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="option-icon create-icon">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"
-                      fill="currentColor"
-                    />
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="16"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
                   </svg>
                 </div>
-                <h3>Create Organization</h3>
-                <p>
-                  Start your own organization and invite team members to join
-                </p>
+                <div className="option-content">
+                  <h3>Create Organization</h3>
+                  <p>
+                    Start your own organization and invite team members to collaborate on sales tracking
+                  </p>
+                  <div className="option-features">
+                    <span className="feature-badge">• Full Control</span>
+                    <span className="feature-badge">• Team Management</span>
+                    <span className="feature-badge">• Analytics</span>
+                  </div>
+                </div>
                 <button
                   className="option-btn create-btn"
                   onClick={() => setMode("create")}
                   disabled={loading}
                 >
                   Create New Organization
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9,18 15,12 9,6"/>
+                  </svg>
                 </button>
               </motion.div>
 
               <motion.div
                 className="option-card"
                 whileHover={{
-                  y: -5,
-                  boxShadow: "0 8px 25px rgba(53, 120, 214, 0.15)",
+                  y: -8,
+                  boxShadow: "0 12px 35px rgba(76, 175, 80, 0.2)",
                 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="option-icon join-icon">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H16c-.8 0-1.54.37-2.01.99L12 11l2.01 2.01c.47.62 1.21.99 2.01.99h2.54l-2.54 7.63V22z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M12.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5z"
-                      fill="currentColor"
-                    />
-                    <path
-                      d="M5.5 6c1.11 0 2-.89 2-2s-.89-2-2-2-2 .89-2 2 .89 2 2 2zm1.5 2h-3C2.46 8 1 9.46 1 11.5V16h8v-4.5C9 9.46 7.54 8 6 8z"
-                      fill="currentColor"
-                    />
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                   </svg>
                 </div>
-                <h3>Join Organization</h3>
-                <p>Enter an invitation code to join an existing organization</p>
+                <div className="option-content">
+                  <h3>Join Organization</h3>
+                  <p>Enter an invitation code to join an existing organization and start tracking sales</p>
+                  <div className="option-features">
+                    <span className="feature-badge">• Quick Access</span>
+                    <span className="feature-badge">• Team Collaboration</span>
+                    <span className="feature-badge">• Instant Setup</span>
+                  </div>
+                </div>
                 <button
                   className="option-btn join-btn"
                   onClick={() => setMode("join")}
                   disabled={loading}
                 >
                   Join Organization
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9,18 15,12 9,6"/>
+                  </svg>
                 </button>
               </motion.div>
             </motion.div>

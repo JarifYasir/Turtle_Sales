@@ -6,6 +6,7 @@ import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import api from "../utils/api";
+import LoadingSpinner from "../components/LoadingComponents";
 
 const ViewSales = () => {
   const navigate = useNavigate();
@@ -200,20 +201,12 @@ const ViewSales = () => {
 
   if (loading) {
     return (
-      <div className="view-sales-container">
-        <motion.div
-          className="sales-header"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1>Sales Overview</h1>
-        </motion.div>
-        <div className="loading-spinner"></div>
-        <p style={{ textAlign: "center", color: "var(--gray)" }}>
-          Loading sales data...
-        </p>
-      </div>
+      <LoadingSpinner
+        size="large"
+        text="Loading sales data..."
+        variant="turtle"
+        fullScreen={false}
+      />
     );
   }
 
