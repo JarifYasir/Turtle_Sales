@@ -60,7 +60,7 @@ exports.getWorkdays = async (req, res) => {
     const userMember = organization.members.find(
       member => member.user.toString() === req.user._id.toString()
     );
-    const isManager = userMember && (userMember.role === 'manager' || userMember.role === 'owner');
+    const isManager = isOwner || (userMember && userMember.role === 'manager');
 
     // Get sales information for each workday - optimized single query
     const workdayIds = workdays.map(w => w._id);
@@ -111,11 +111,9 @@ exports.getWorkdays = async (req, res) => {
 
     res.json({
       success: true,
-      data: {
-        workdays: workdaysWithSales,
-        isOwner,
-        isManager,
-      }
+      workdays: workdaysWithSales,
+      isOwner,
+      isManager,
     });
   } catch (error) {
     console.error("Get Workdays Error:", error);
@@ -152,9 +150,9 @@ exports.createWorkday = async (req, res) => {
     const userMember = organization.members.find(
       member => member.user.toString() === req.user._id.toString()
     );
-    const isManager = userMember && (userMember.role === 'manager' || userMember.role === 'owner');
+    const isManager = isOwner || (userMember && userMember.role === 'manager');
 
-    if (!isManager && !isOwner) {
+    if (!isManager) {
       return res.status(403).json({
         success: false,
         msg: "Only organization owners and managers can create workdays",
@@ -302,9 +300,9 @@ exports.updateWorkday = async (req, res) => {
     const userMember = organization.members.find(
       member => member.user.toString() === req.user._id.toString()
     );
-    const isManager = userMember && (userMember.role === 'manager' || userMember.role === 'owner');
+    const isManager = isOwner || (userMember && userMember.role === 'manager');
 
-    if (!isManager && !isOwner) {
+    if (!isManager) {
       return res.status(403).json({
         success: false,
         msg: "Only organization owners and managers can update workdays",
@@ -382,9 +380,9 @@ exports.assignTimeslot = async (req, res) => {
     const userMember = organization.members.find(
       member => member.user.toString() === req.user._id.toString()
     );
-    const isManager = userMember && (userMember.role === 'manager' || userMember.role === 'owner');
+    const isManager = isOwner || (userMember && userMember.role === 'manager');
 
-    if (!isManager && !isOwner) {
+    if (!isManager) {
       return res.status(403).json({
         success: false,
         msg: "Only organization owners and managers can assign timeslots",
@@ -501,9 +499,9 @@ exports.deleteWorkday = async (req, res) => {
     const userMember = organization.members.find(
       member => member.user.toString() === req.user._id.toString()
     );
-    const isManager = userMember && (userMember.role === 'manager' || userMember.role === 'owner');
+    const isManager = isOwner || (userMember && userMember.role === 'manager');
 
-    if (!isManager && !isOwner) {
+    if (!isManager) {
       return res.status(403).json({
         success: false,
         msg: "Only organization owners and managers can delete workdays",
@@ -560,9 +558,9 @@ exports.deleteTimeslot = async (req, res) => {
     const userMember = organization.members.find(
       member => member.user.toString() === req.user._id.toString()
     );
-    const isManager = userMember && (userMember.role === 'manager' || userMember.role === 'owner');
+    const isManager = isOwner || (userMember && userMember.role === 'manager');
 
-    if (!isManager && !isOwner) {
+    if (!isManager) {
       return res.status(403).json({
         success: false,
         msg: "Only organization owners and managers can delete timeslots",

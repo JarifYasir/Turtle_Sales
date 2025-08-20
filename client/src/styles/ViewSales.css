@@ -235,20 +235,29 @@
   min-height: 200px;
   max-height: 500px;
   overflow-y: auto;
+  /* Firefox scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-green) var(--pale-green);
 }
 
 /* For WebKit browsers */
 .day-sales::-webkit-scrollbar {
-  width: 4px;
+  width: 8px;
 }
 
 .day-sales::-webkit-scrollbar-track {
   background: var(--pale-green);
+  border-radius: 10px;
 }
 
 .day-sales::-webkit-scrollbar-thumb {
-  background-color: var(--light-green);
+  background-color: var(--primary-green);
   border-radius: 10px;
+  border: 1px solid var(--light-green);
+}
+
+.day-sales::-webkit-scrollbar-thumb:hover {
+  background-color: var(--dark-green);
 }
 
 /* Sale Cards */
@@ -260,8 +269,10 @@
   border-left: 3px solid var(--primary-green);
   transition: var(--transition-fast);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   word-break: break-word;
+  min-height: fit-content;
+  height: auto;
 }
 
 .sale-card:hover {
@@ -339,6 +350,9 @@
   margin: 0;
   padding: 0.25rem 0;
   color: var(--dark-gray);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .sale-info strong {
@@ -351,6 +365,12 @@
   margin-top: 0.5rem;
   padding-top: 0.5rem;
   border-top: 1px dashed var(--light-green);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  max-width: 100%;
+  overflow: visible;
+  line-height: 1.4;
 }
 
 .no-sales {
@@ -489,6 +509,7 @@
   .day-sales {
     min-height: 150px;
     max-height: 400px;
+    overflow-y: auto;
   }
 
   .sale-card {
@@ -588,6 +609,7 @@
     -webkit-overflow-scrolling: touch;
     padding: 0.5rem;
     max-height: 60vh; /* Better mobile viewport usage */
+    overflow-y: auto;
   }
 
   .sale-card {
