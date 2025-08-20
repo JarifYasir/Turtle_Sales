@@ -129,6 +129,66 @@ The application automatically detects your network IP address for CORS configura
 3. Configure production URLs in environment variables
 4. Ensure proper security measures are in place
 
+## Environment Configuration
+
+### Development Environment
+
+Both client and server are pre-configured for local development. Default settings:
+
+- Server: `http://localhost:3000`
+- Client: `http://localhost:5173`
+- MongoDB: Connect to your local or cloud database
+
+### Staging Environment
+
+Update environment files for staging:
+
+**Server (.env):**
+
+```bash
+NODE_ENV=staging
+HOST=0.0.0.0
+PORT=8080
+CLIENT_URL=https://staging.yourapp.com
+MONGODB_URI=mongodb://staging-db-connection
+JWT_SECRET=your-staging-jwt-secret
+```
+
+**Client (.env):**
+
+```bash
+VITE_API_URL=https://staging-api.yourapp.com/api/v1
+VITE_NODE_ENV=staging
+VITE_CLIENT_URL=https://staging.yourapp.com
+```
+
+### Production Environment
+
+**Server (.env):**
+
+```bash
+NODE_ENV=production
+HOST=0.0.0.0
+PORT=8080
+CLIENT_URL=https://yourapp.com
+MONGODB_URI=mongodb://production-db-connection
+JWT_SECRET=your-production-jwt-secret
+ADDITIONAL_ORIGINS=https://www.yourapp.com,https://api.yourapp.com
+```
+
+**Client (.env):**
+
+```bash
+VITE_API_URL=https://api.yourapp.com/api/v1
+VITE_NODE_ENV=production
+VITE_DEBUG=false
+VITE_CLIENT_URL=https://yourapp.com
+```
+
+### Docker Deployment
+
+The application is containerization-ready. Environment variables can be passed through Docker compose or Kubernetes configurations.
+
 ## Project Structure
 
 ```

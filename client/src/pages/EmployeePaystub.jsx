@@ -106,8 +106,7 @@ const EmployeePaystub = () => {
   // Clean up orphaned sales before fetching data
   const cleanupOrphanedSales = async () => {
     try {
-      const apiUrl =
-        import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
+      const apiUrl = import.meta.env.VITE_API_URL || "/api/v1"; // Use relative URL as fallback
 
       const response = await fetch(`${apiUrl}/sales/cleanup`, {
         method: "POST",
@@ -138,8 +137,7 @@ const EmployeePaystub = () => {
       // First, run cleanup to ensure data integrity
       await cleanupOrphanedSales();
 
-      const apiUrl =
-        import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
+      const apiUrl = import.meta.env.VITE_API_URL || "/api/v1"; // Use relative URL as fallback
 
       const response = await fetch(
         `${apiUrl}/sales/weekly-report?startDate=${selectedWeek.start.toISOString()}&endDate=${selectedWeek.end.toISOString()}`,

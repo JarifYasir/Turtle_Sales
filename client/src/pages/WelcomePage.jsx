@@ -89,8 +89,9 @@ const WelcomePage = () => {
 
         // Complete first login if it's the user's first time
         try {
+          const apiUrl = import.meta.env.VITE_API_URL || "/api/v1";
           await axios.put(
-            "http://localhost:3000/api/v1/first-login",
+            `${apiUrl}/first-login`,
             {},
             {
               headers: {
@@ -141,8 +142,9 @@ const WelcomePage = () => {
     setLoading(true);
     try {
       const authToken = JSON.parse(localStorage.getItem("auth"));
+      const apiUrl = import.meta.env.VITE_API_URL || "/api/v1";
       const response = await axios.post(
-        "http://localhost:3000/api/v1/organization/join",
+        `${apiUrl}/organization/join`,
         { code: orgCode.trim().toUpperCase() },
         {
           headers: {
@@ -156,8 +158,9 @@ const WelcomePage = () => {
 
         // Complete first login if it's the user's first time
         try {
+          const apiUrl = import.meta.env.VITE_API_URL || "/api/v1";
           await axios.put(
-            "http://localhost:3000/api/v1/first-login",
+            `${apiUrl}/first-login`,
             {},
             {
               headers: {
@@ -195,8 +198,9 @@ const WelcomePage = () => {
   const handleSkipForNow = async () => {
     try {
       const authToken = JSON.parse(localStorage.getItem("auth"));
+      const apiUrl = import.meta.env.VITE_API_URL || "/api/v1";
       await axios.put(
-        "http://localhost:3000/api/v1/first-login",
+        `${apiUrl}/first-login`,
         {},
         {
           headers: {

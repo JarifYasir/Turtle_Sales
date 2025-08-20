@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1",
+  baseURL: import.meta.env.VITE_API_URL || "/api/v1", // Use relative URL as fallback
   timeout: 15000, // Increased timeout
   headers: {
     "Content-Type": "application/json",

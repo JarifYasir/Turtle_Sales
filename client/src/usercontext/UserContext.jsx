@@ -14,8 +14,7 @@ export const UserProvider = ({ children }) => {
     const fetchUserData = async () => {
       if (token) {
         try {
-          const apiUrl =
-            import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
+          const apiUrl = import.meta.env.VITE_API_URL || "/api/v1"; // Use relative URL as fallback
           const response = await axios.get(`${apiUrl}/auth/dashboard`, {
             headers: {
               Authorization: `Bearer ${token}`,

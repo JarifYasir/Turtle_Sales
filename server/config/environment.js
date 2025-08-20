@@ -21,23 +21,30 @@ const getNetworkIP = () => {
  * @returns {string[]} Array of allowed origins
  */
 const getCorsOrigins = () => {
-  const defaultOrigins = [
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:5174",
-    "http://localhost:3000",
-    process.env.CLIENT_URL,
-  ];
+  // Start with CLIENT_URL from environment
+  const defaultOrigins = [process.env.CLIENT_URL];
 
-  // Add network-specific URLs if available
-  const networkIP = process.env.NETWORK_HOST || getNetworkIP();
-  if (networkIP) {
-    defaultOrigins.push(
-      `http://${networkIP}:5173`,
-      `http://${networkIP}:5174`,
-      `http://${networkIP}:3000`
-    );
+  // In development, add common localhost variations
+  if (process.env.NODE_ENV === "development") {
+    const devOrigins = [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:3001",
+      "http://127.0.0.1:5173",
+      "http://127.0.0.1:5174",
+      "http://127.0.0.1:3001",
+    ];
+    defaultOrigins.push(...devOrigins);
+
+    // Add network-specific URLs for development
+    const networkIP = process.env.NETWORK_HOST || getNetworkIP();
+    if (networkIP) {
+      defaultOrigins.push(
+        `http://${networkIP}:5173`,
+        `http://${networkIP}:5174`,
+        `http://${networkIP}:3001`
+      );
+    }
   }
 
   // Add additional origins from environment variable

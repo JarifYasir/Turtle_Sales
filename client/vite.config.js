@@ -10,11 +10,13 @@ export default defineConfig({
     __DEV__: JSON.stringify(true),
   },
   server: {
-    port: 5173,
-    host: "0.0.0.0", // This allows external connections
+    port: process.env.VITE_PORT || 5173,
+    host: process.env.VITE_HOST || "0.0.0.0", // This allows external connections
     hmr: {
-      port: 5173,
-      host: "localhost", // Use localhost for HMR to avoid ERR_ADDRESS_INVALID
+      port: process.env.VITE_HMR_PORT || 5173,
+      // Use same host as page URL - fixes WebSocket connection issues
+      // When false, Vite automatically uses the current page's host for WebSocket connections
+      host: false,
     },
   },
   build: {
