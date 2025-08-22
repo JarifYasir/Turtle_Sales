@@ -27,6 +27,9 @@
 
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-fast: all 0.2s ease;
+  
+  /* iOS viewport fix */
+  --vh: 1vh;
 }
 
 /* Global Reset and Base Styles */
@@ -34,10 +37,17 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  /* iOS-specific fixes */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
+/* iOS-specific global styles */
 html {
   scroll-behavior: smooth;
+  /* iOS viewport fixes */
+  height: 100%;
+  height: -webkit-fill-available;
 }
 
 body {
@@ -48,10 +58,21 @@ body {
     var(--pale-green) 0%,
     var(--off-white) 100%
   );
+  /* iOS-specific fixes */
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent iOS zoom on orientation change */
+  -webkit-text-size-adjust: none;
+  -ms-text-size-adjust: none;
+  text-size-adjust: none;
   color: var(--dark-green);
   line-height: 1.6;
   font-size: 16px;
-  min-height: 100vh;
 }
 
 /* Typography */
@@ -202,6 +223,51 @@ p {
   outline: none;
   border-color: var(--primary-green);
   box-shadow: 0 0 0 3px rgba(45, 90, 45, 0.1);
+}
+
+/* iOS-specific fixes for forms and buttons */
+@media screen and (-webkit-min-device-pixel-ratio: 2) {
+  /* Target iOS devices with retina displays */
+  
+  button,
+  .btn-primary,
+  .btn-secondary,
+  .btn-danger,
+  input[type="button"],
+  input[type="submit"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    touch-action: manipulation !important;
+    cursor: pointer !important;
+    min-height: 44px !important; /* iOS touch target minimum */
+  }
+
+  input,
+  textarea,
+  select,
+  .form-control {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+    border-radius: var(--border-radius) !important;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus,
+  .form-control:focus {
+    -webkit-user-select: auto !important;
+    user-select: auto !important;
+  }
+
+  /* Fix iOS button styling */
+  button:focus,
+  .btn-primary:focus,
+  .btn-secondary:focus,
+  .btn-danger:focus {
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
 }
 
 /* Responsive Grid */

@@ -364,7 +364,7 @@ const Dashboard = () => {
                     </svg>
                   </div>
                   <div className="action-content">
-                    <h3>Track Sales</h3>
+                    <h3>Record Sale</h3>
                     <p>Record and monitor sales</p>
                   </div>
                 </Link>

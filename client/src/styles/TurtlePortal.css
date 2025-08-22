@@ -384,12 +384,18 @@
   margin: 0 auto;
 }
 
+.section-header h2,
 .manager-section h2 {
-  color: var(--primary-green);
+  color: var(--dark-gray);
 }
 
+.section-header h2::after,
 .manager-section h2::after {
-  background: linear-gradient(90deg, var(--primary-green), var(--turtle-shell));
+  background: linear-gradient(
+    90deg,
+    var(--primary-green),
+    var(--secondary-green)
+  );
 }
 
 /* Modern Grid Layout */

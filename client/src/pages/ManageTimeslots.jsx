@@ -25,6 +25,56 @@ const ManageTimeslots = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedWorkday, setSelectedWorkday] = useState(null);
 
+  // iOS viewport fix
+  useEffect(() => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isWebKit = /WebKit/.test(navigator.userAgent);
+    
+    if (isIOS || isWebKit) {
+      // Fix iOS viewport height issues
+      const setVh = () => {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+        
+        // Force body height recalculation
+        document.body.style.height = `${window.innerHeight}px`;
+        setTimeout(() => {
+          document.body.style.height = '100vh';
+          document.body.style.height = '-webkit-fill-available';
+        }, 100);
+      };
+      
+      setVh();
+      window.addEventListener('resize', setVh);
+      window.addEventListener('orientationchange', () => {
+        setTimeout(setVh, 100);
+      });
+      
+      // Prevent iOS zoom on double tap
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', (event) => {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+          event.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, false);
+      
+      // Prevent iOS zoom on form focus
+      const inputs = document.querySelectorAll('input, textarea, select');
+      inputs.forEach(input => {
+        input.addEventListener('focus', () => {
+          input.style.fontSize = '16px';
+        });
+      });
+      
+      return () => {
+        window.removeEventListener('resize', setVh);
+        window.removeEventListener('orientationchange', setVh);
+      };
+    }
+  }, []);
+
   useEffect(() => {
     if (!token) {
       navigate("/login");

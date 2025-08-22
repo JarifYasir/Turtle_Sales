@@ -3,8 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Enhanced iOS viewport configuration -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no" />
+    
+    <!-- iOS-specific meta tags for better compatibility -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    
+    <!-- Prevent iOS text size adjustment -->
+    <meta name="apple-mobile-web-app-title" content="TurtleSales" />
+    
     <title>TurtleSales</title>
+    
+    <style>
+      /* Critical iOS fixes loaded immediately */
+      @supports (-webkit-touch-callout: none) {
+        html {
+          height: 100%;
+          height: -webkit-fill-available;
+        }
+        body {
+          min-height: 100vh;
+          min-height: -webkit-fill-available;
+          overflow-x: hidden;
+          -webkit-overflow-scrolling: touch;
+          -webkit-text-size-adjust: none;
+          touch-action: manipulation;
+        }
+        #root {
+          min-height: 100vh;
+          min-height: -webkit-fill-available;
+          width: 100%;
+          overflow-x: hidden;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

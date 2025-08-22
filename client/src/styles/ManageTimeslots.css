@@ -1,10 +1,32 @@
 /* ========== ManageTimeslots.css ========== */
 /* Modern, responsive calendar-style timeslot management with turtle theme */
 
+/* iOS-specific fixes */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+input, textarea, select, button {
+  -webkit-user-select: auto;
+  -moz-user-select: auto;
+  -ms-user-select: auto;
+  user-select: auto;
+}
+
 .manage-timeslots-container {
   width: 100%;
   min-height: 100vh;
+  min-height: -webkit-fill-available; /* iOS fix */
   padding: 1.5rem;
+  padding-top: max(1.5rem, env(safe-area-inset-top) + 1rem); /* iOS safe area */
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom) + 1rem); /* iOS safe area */
+  padding-left: max(1.5rem, env(safe-area-inset-left) + 1rem); /* iOS safe area */
+  padding-right: max(1.5rem, env(safe-area-inset-right) + 1rem); /* iOS safe area */
   background-color: var(--pale-green);
   background-image: linear-gradient(
     135deg,
@@ -14,6 +36,7 @@
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
 }
 
 /* Time table styles */
@@ -99,7 +122,8 @@
 }
 
 /* Calendar Grid */
-.timeslots-grid {
+.timeslots-grid,
+.workdays-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr); /* 7 days of the week */
   gap: 0;
@@ -446,7 +470,841 @@
   }
 }
 
+/* Workday Components */
+.workday-content {
+  padding: 1rem;
+}
+
+.workday-card {
+  background-color: var(--white);
+  border-radius: var(--border-radius-small);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-light);
+  transition: var(--transition-fast);
+}
+
+.workday-card:hover {
+  box-shadow: var(--shadow-medium);
+}
+
+.workday-summary {
+  margin-bottom: 1.25rem;
+}
+
+.workday-time-range {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--dark-green);
+  margin-bottom: 0.5rem;
+}
+
+.workday-capacity {
+  font-size: 1rem;
+  color: var(--gray);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.workday-capacity::before {
+  content: "👥";
+}
+
+.workday-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.workday-actions button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: var(--border-radius-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  font-size: 0.9rem;
+  min-width: 120px;
+}
+
+.manage-workday-btn {
+  background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+  color: var(--white);
+}
+
+.manage-workday-btn:hover {
+  background: linear-gradient(135deg, var(--secondary-green), var(--primary-green));
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.delete-workday-btn {
+  background-color: #dc3545;
+  color: var(--white);
+}
+
+.delete-workday-btn:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.no-workday-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  background-color: var(--light-gray);
+  border-radius: var(--border-radius-small);
+  border: 2px dashed var(--accent-green);
+  padding: 2rem 1rem;
+}
+
+.no-workday-message {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.no-workday-message p {
+  color: var(--gray);
+  font-style: italic;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.create-workday-btn {
+  background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+  color: var(--white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  font-size: 0.95rem;
+}
+
+.create-workday-btn:hover {
+  background: linear-gradient(135deg, var(--secondary-green), var(--primary-green));
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.day-info {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.workday-stats {
+  color: var(--dark-green);
+  font-weight: 600;
+  background-color: rgba(76, 175, 80, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-small);
+  display: inline-block;
+}
+
+.no-workday {
+  color: var(--gray);
+  font-style: italic;
+  background-color: rgba(168, 168, 168, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-small);
+  display: inline-block;
+}
+
 /* Responsive Styles */
+/* Mobile-First Responsive Design with iOS optimizations */
+
+/* iOS-specific device targeting with enhanced fixes */
+@supports (-webkit-appearance: none) {
+  /* Target all iOS devices */
+  
+  .manage-timeslots-container {
+    padding: env(safe-area-inset-top, 1rem) env(safe-area-inset-right, 1rem) env(safe-area-inset-bottom, 1rem) env(safe-area-inset-left, 1rem) !important;
+    min-height: 100vh !important;
+    min-height: -webkit-fill-available !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    position: relative !important;
+  }
+}
+
+/* iPhone X, XS, 11 Pro - 375x812 */
+@media only screen 
+  and (device-width: 375px) 
+  and (device-height: 812px) 
+  and (-webkit-device-pixel-ratio: 3) {
+  
+  html, body, #root {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    -webkit-text-size-adjust: none !important;
+  }
+  
+  .manage-timeslots-container {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-height: 100vh !important;
+    min-height: -webkit-fill-available !important;
+    padding: max(env(safe-area-inset-top), 1rem) 1rem max(env(safe-area-inset-bottom), 1rem) 1rem !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  .manage-timeslots-header {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 1rem !important;
+    margin: 0 0 1rem 0 !important;
+  }
+  
+  .manage-timeslots-header h1 {
+    font-size: 1.5rem !important;
+    line-height: 1.3 !important;
+    margin: 0 0 0.5rem 0 !important;
+  }
+  
+  .week-navigation {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    padding: 1rem !important;
+    position: sticky !important;
+    top: env(safe-area-inset-top, 0) !important;
+    z-index: 1000 !important;
+    background: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+  }
+  
+  .nav-btn, .current-btn {
+    width: 100% !important;
+    min-height: 50px !important;
+    padding: 1rem !important;
+    font-size: 16px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    -webkit-appearance: none !important;
+    touch-action: manipulation !important;
+    cursor: pointer !important;
+  }
+  
+  .timeslots-grid, .workdays-grid {
+    width: 100% !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .day-column {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border: 1px solid var(--timetable-border-color) !important;
+    border-radius: 12px !important;
+    background: white !important;
+    overflow: hidden !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .day-header {
+    width: 100% !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+  }
+  
+  .workday-content {
+    width: 100% !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+  }
+  
+  .workday-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+  }
+  
+  .workday-actions button {
+    width: 100% !important;
+    min-height: 50px !important;
+    padding: 1rem !important;
+    font-size: 16px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    -webkit-appearance: none !important;
+    touch-action: manipulation !important;
+  }
+  
+  .create-workday-btn {
+    width: 100% !important;
+    min-height: 50px !important;
+    padding: 1rem !important;
+    font-size: 16px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    -webkit-appearance: none !important;
+    touch-action: manipulation !important;
+  }
+}
+
+/* iPhone 12, 12 Pro, 13, 13 Pro, 14 - 390x844 */
+@media only screen 
+  and (device-width: 390px) 
+  and (device-height: 844px) 
+  and (-webkit-device-pixel-ratio: 3) {
+  
+  html, body, #root {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    -webkit-text-size-adjust: none !important;
+  }
+  
+  .manage-timeslots-container {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-height: 100vh !important;
+    min-height: -webkit-fill-available !important;
+    padding: max(env(safe-area-inset-top), 1rem) 1rem max(env(safe-area-inset-bottom), 1rem) 1rem !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+  
+  .manage-timeslots-header {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 1rem !important;
+    margin: 0 0 1rem 0 !important;
+  }
+  
+  .manage-timeslots-header h1 {
+    font-size: 1.5rem !important;
+    line-height: 1.3 !important;
+    margin: 0 0 0.5rem 0 !important;
+  }
+  
+  .week-navigation {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    padding: 1rem !important;
+    position: sticky !important;
+    top: env(safe-area-inset-top, 0) !important;
+    z-index: 1000 !important;
+    background: white !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+  }
+  
+  .nav-btn, .current-btn {
+    width: 100% !important;
+    min-height: 50px !important;
+    padding: 1rem !important;
+    font-size: 16px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    -webkit-appearance: none !important;
+    touch-action: manipulation !important;
+    cursor: pointer !important;
+  }
+  
+  .timeslots-grid, .workdays-grid {
+    width: 100% !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .day-column {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border: 1px solid var(--timetable-border-color) !important;
+    border-radius: 12px !important;
+    background: white !important;
+    overflow: hidden !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .day-header {
+    width: 100% !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+  }
+  
+  .workday-content {
+    width: 100% !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+  }
+  
+  .workday-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+  }
+  
+  .workday-actions button {
+    width: 100% !important;
+    min-height: 50px !important;
+    padding: 1rem !important;
+    font-size: 16px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    -webkit-appearance: none !important;
+    touch-action: manipulation !important;
+  }
+  
+  .create-workday-btn {
+    width: 100% !important;
+    min-height: 50px !important;
+    padding: 1rem !important;
+    font-size: 16px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    -webkit-appearance: none !important;
+    touch-action: manipulation !important;
+  }
+}
+
+/* Small mobile devices (up to 480px) - Enhanced for iOS */
+@media (max-width: 480px) {
+  .manage-timeslots-container {
+    padding: 0.75rem;
+  }
+
+  .manage-timeslots-header {
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .manage-timeslots-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .manage-timeslots-header p {
+    font-size: 0.9rem;
+  }
+
+  /* Week navigation */
+  .week-navigation {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .nav-btn,
+  .current-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    width: 100%;
+  }
+
+  .current-week {
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  /* Calendar grid - single column on mobile */
+  .timeslots-grid,
+  .workdays-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    overflow: visible;
+  }
+
+  .day-column {
+    border: 1px solid var(--timetable-border-color);
+    border-radius: var(--border-radius-small);
+    margin-bottom: 0.5rem;
+    box-shadow: var(--shadow-light);
+  }
+
+  .day-column:last-child {
+    border: 1px solid var(--timetable-border-color);
+  }
+
+  .day-header {
+    border-radius: var(--border-radius-small) var(--border-radius-small) 0 0;
+    padding: 1rem 0.75rem;
+  }
+
+  .day-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .day-info {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .workday-stats {
+    display: block;
+    text-align: center;
+  }
+
+  .no-workday {
+    font-size: 0.85rem;
+  }
+
+  /* Workday content */
+  .workday-content {
+    padding: 0.75rem;
+  }
+
+  .workday-card {
+    padding: 1rem;
+  }
+
+  .workday-summary {
+    margin-bottom: 1rem;
+  }
+
+  .workday-time-range {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .workday-capacity {
+    font-size: 0.9rem;
+  }
+
+  .workday-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .workday-actions button {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  /* No workday card */
+  .no-workday-card {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .no-workday-message {
+    text-align: center;
+  }
+
+  .no-workday-message p {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .create-workday-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  /* Timeslot cards */
+  .timeslot-card {
+    padding: 0.75rem;
+    min-height: auto;
+  }
+
+  .slot-time {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .slot-capacity {
+    font-size: 0.85rem;
+  }
+
+  /* Assignment related */
+  .assigned-users {
+    gap: 0.4rem;
+  }
+
+  .assigned-user {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .add-more-btn,
+  .assign-btn {
+    padding: 0.6rem;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Form actions */
+  .form-actions {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .save-btn,
+  .cancel-btn,
+  .delete-btn {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  /* iOS-specific fixes within mobile breakpoint */
+  
+  /* Force iPhone compatibility */
+  html, body, #root {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    -webkit-text-size-adjust: none !important;
+    height: 100% !important;
+    height: -webkit-fill-available !important;
+    height: calc(var(--vh, 1vh) * 100) !important;
+  }
+  
+  /* iOS safe area and viewport fixes */
+  .manage-timeslots-container {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    padding: max(0.75rem, env(safe-area-inset-top) + 0.5rem) 0.75rem max(0.75rem, env(safe-area-inset-bottom) + 0.5rem) 0.75rem !important;
+    min-height: 100vh !important;
+    min-height: -webkit-fill-available !important;
+    min-height: calc(var(--vh, 1vh) * 100) !important;
+    -webkit-overflow-scrolling: touch !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    position: relative !important;
+  }
+
+  /* iOS button and input fixes */
+  .nav-btn,
+  .current-btn,
+  .create-workday-btn,
+  .workday-actions button,
+  .save-btn,
+  .cancel-btn,
+  .delete-btn {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    touch-action: manipulation !important;
+    cursor: pointer !important;
+    border: none !important;
+    font-size: 16px !important; /* Prevents iOS zoom */
+    line-height: 1.3 !important;
+    min-height: 50px !important; /* iOS touch target minimum */
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* iOS input fixes */
+  input, textarea, select {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+    border-radius: var(--border-radius-small) !important;
+    padding: 0.75rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* iOS specific layout improvements */
+  .week-navigation {
+    width: 100% !important;
+    position: sticky !important;
+    top: env(safe-area-inset-top, 0) !important;
+    background-color: var(--white) !important;
+    z-index: 1000 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    touch-action: manipulation !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    padding: 1rem !important;
+    border-radius: var(--border-radius) !important;
+    margin-bottom: 1rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .timeslots-grid,
+  .workdays-grid {
+    width: 100% !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .day-column {
+    width: 100% !important;
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    border-radius: var(--border-radius) !important;
+    border: 1px solid var(--timetable-border-color) !important;
+    background: white !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+  }
+
+  .day-header {
+    width: 100% !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+    background: var(--accent-green) !important;
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+  }
+
+  .workday-content {
+    width: 100% !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .workday-card {
+    width: 100% !important;
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+    box-sizing: border-box !important;
+    padding: 1rem !important;
+  }
+
+  .workday-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+    margin-top: 1rem !important;
+  }
+
+  .no-workday-card {
+    width: 100% !important;
+    padding: 2rem 1rem !important;
+    box-sizing: border-box !important;
+    min-height: 150px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Enhanced touch targets for iOS */
+  .nav-btn,
+  .current-btn {
+    padding: 1rem !important;
+    min-height: 50px !important;
+  }
+
+  .workday-actions button {
+    padding: 1rem !important;
+    min-height: 50px !important;
+  }
+
+  .create-workday-btn {
+    padding: 1rem !important;
+    min-height: 50px !important;
+  }
+}
+
+/* Medium mobile devices (481px to 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .manage-timeslots-container {
+    padding: 1rem;
+  }
+
+  .manage-timeslots-header h1 {
+    font-size: 1.75rem;
+  }
+
+  /* Week navigation */
+  .week-navigation {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .nav-btn,
+  .current-btn {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.85rem;
+  }
+
+  /* Calendar grid - 2 columns on tablets */
+  .timeslots-grid,
+  .workdays-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .day-column {
+    border: 1px solid var(--timetable-border-color);
+    border-radius: var(--border-radius-small);
+    box-shadow: var(--shadow-light);
+  }
+
+  .day-header h3 {
+    font-size: 0.95rem;
+  }
+
+  .workday-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .workday-actions button {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
+/* Large tablets and small desktops (769px to 992px) */
+@media (min-width: 769px) and (max-width: 992px) {
+  .timeslots-grid,
+  .workdays-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+
+  .day-column {
+    border: 1px solid var(--timetable-border-color);
+    border-radius: var(--border-radius-small);
+    box-shadow: var(--shadow-light);
+  }
+}
+
+/* Desktop and larger (993px and up) */
+@media (min-width: 993px) {
+  .timeslots-grid,
+  .workdays-grid {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0;
+  }
+
+  .day-column {
+    border-right: 1px solid var(--timetable-border-color);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .day-column:last-child {
+    border-right: none;
+  }
+}
+
+/* Legacy responsive styles - keeping for compatibility */
 @media (min-width: 768px) {
   .manage-timeslots-container {
     padding: 2rem;
@@ -460,12 +1318,6 @@
     grid-column: auto;
   }
 
-  .timeslots-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
-  }
-
   .week-navigation {
     flex-wrap: nowrap;
   }
@@ -475,25 +1327,9 @@
   .manage-timeslots-header h1 {
     font-size: 2.5rem;
   }
-
-  .timeslots-grid {
-    grid-template-columns: repeat(7, 1fr);
-  }
 }
 
 @media (max-width: 576px) {
-  .manage-timeslots-container {
-    padding: 1rem;
-  }
-
-  .manage-timeslots-header {
-    padding: 1.25rem;
-  }
-
-  .manage-timeslots-header h1 {
-    font-size: 1.75rem;
-  }
-
   .nav-btn,
   .current-btn {
     padding: 0.5rem 0.75rem;
@@ -858,42 +1694,108 @@
   gap: 0.5rem;
 }
 
-/* Responsive styles for timetable */
+/* Enhanced responsive styles for timetable components */
 @media (max-width: 1200px) {
-  .timeslots-grid {
-    grid-template-columns: repeat(4, 1fr); /* Show 4 days at a time */
-    overflow-x: auto;
+  .assign-modal {
+    max-width: 90vw;
+    margin: 1rem;
   }
 }
 
 @media (max-width: 768px) {
-  .timeslots-grid {
-    grid-template-columns: repeat(3, 1fr); /* Show 3 days at a time */
+  .assign-modal {
+    max-width: 95vw;
+    margin: 0.5rem;
+    max-height: 95vh;
   }
 
-  .day-header h3 {
-    font-size: 0.8rem;
+  .assign-modal-header {
+    padding: 1rem;
   }
 
-  .slot-time,
-  .slot-capacity {
-    font-size: 0.7rem;
+  .assign-modal-title {
+    font-size: 1.1rem;
+  }
+
+  .assign-modal-body {
+    padding: 1rem;
+  }
+
+  .modal-info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .modal-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .modal-value {
+    font-size: 0.9rem;
+  }
+
+  .assign-form {
+    padding: 0.75rem;
+  }
+
+  .user-select {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .compact-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .compact-actions .main-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .compact-actions .assign-btn,
+  .compact-actions .cancel-btn,
+  .compact-actions .delete-slot-btn {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.9rem;
   }
 }
 
-@media (max-width: 576px) {
-  .timeslots-grid {
-    grid-template-columns: repeat(2, 1fr); /* Show 2 days at a time */
+@media (max-width: 480px) {
+  .assign-modal {
+    max-width: 100vw;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
   }
 
-  .slot-time::before,
-  .slot-capacity::before {
-    display: none; /* Hide icons on small screens */
+  .assign-modal-header {
+    padding: 0.75rem;
   }
 
-  .week-navigation {
-    flex-direction: column;
-    align-items: stretch;
+  .assign-modal-title {
+    font-size: 1rem;
+  }
+
+  .assign-modal-body {
+    padding: 0.75rem;
+  }
+
+  .modal-info-grid {
+    gap: 0.5rem;
+  }
+
+  .assign-form {
+    padding: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .user-select {
+    padding: 0.6rem;
+    font-size: 0.85rem;
   }
 }
 

@@ -371,16 +371,20 @@
 
 /* Compact Feature Styles */
 .features-section.compact {
-  padding: 4rem 0;
+  padding: 4rem 0 6rem 0;
 }
 
 .features-section.compact .section-header {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+  text-align: left;
 }
 
 .features-section.compact .section-title {
   font-size: clamp(1.75rem, 3vw, 2.25rem);
   margin-bottom: 0.75rem;
+  color: var(--dark-green);
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .features-section.compact .section-subtitle {
@@ -388,8 +392,9 @@
 }
 
 .features-section.compact .features-grid {
-  gap: 1.5rem;
-  margin-top: 2rem;
+  gap: 2rem;
+  margin-top: 3rem;
+  justify-content: center;
 }
 
 .feature-card.compact {
@@ -496,8 +501,8 @@
   background: linear-gradient(135deg, var(--dark-green), #1e5722);
   color: white;
   text-align: center;
-  padding: 2rem 0;
-  margin-top: 3rem;
+  padding: 3rem 0;
+  margin-top: 4rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 

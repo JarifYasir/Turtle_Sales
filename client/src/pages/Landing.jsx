@@ -85,9 +85,7 @@ const Landing = () => {
           </motion.h1>
 
           <motion.p className="hero-subtitle" variants={itemVariants}>
-            A simple platform to manage schedules, track sales activities, and
-            generate paystubs for your door-to-door sales team. Keep everything
-            organized in one place.
+            One platform to manage all aspects of door-to-door sales. Record and track sales, manage reps and workers, streamline payroll operations.
           </motion.p>
 
           <motion.div className="hero-actions" variants={itemVariants}>
@@ -222,27 +220,6 @@ const Landing = () => {
             </motion.div>
           </motion.div>
         </motion.div>
-
-        {/* CTA Section */}
-        <motion.div className="cta-section" variants={itemVariants}>
-          <motion.div className="cta-content" variants={itemVariants}>
-            <h2 className="cta-title">Ready to Organize Your Sales Team?</h2>
-            <p className="cta-description">
-              Start managing your door-to-door sales operations more
-              effectively. Create schedules, track sales, and generate paystubs
-              all in one place.
-            </p>
-            <motion.button
-              className="cta-final"
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleGetStarted}
-            >
-              Get Started Today
-              <span className="cta-arrow">→</span>
-            </motion.button>
-          </motion.div>
-        </motion.div>
       </motion.div>
 
       {/* Footer */}
@@ -258,7 +235,7 @@ const Landing = () => {
             <span className="footer-logo-text">Turtle Sales</span>
           </div>
           <p className="footer-text">
-            © 2025 Turtle Sales. Streamlining door-to-door sales operations.
+            © 2025 Turtle Sales by Yasir Corp. Making door-to-door sales easy.
           </p>
         </div>
       </motion.footer>

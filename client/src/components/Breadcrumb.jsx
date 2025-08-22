@@ -16,7 +16,7 @@ const Breadcrumb = () => {
     "/turtle-portal": { name: "Turtle Portal", parent: "/" },
     "/manage-org": { name: "Manage Organization", parent: "/turtle-portal" },
     "/manage-timeslots": { name: "Manage Timeslots", parent: "/turtle-portal" },
-    "/track-sales": { name: "Track Sales", parent: "/turtle-portal" },
+    "/track-sales": { name: "Record Sale", parent: "/turtle-portal" },
     "/view-sales": { name: "View Sales", parent: "/turtle-portal" },
     "/employee-paystub": { name: "Employee Paystub", parent: "/turtle-portal" },
     "/sales-leaderboard": {

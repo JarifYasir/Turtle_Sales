@@ -120,15 +120,15 @@ const TurtlePortal = () => {
     },
     {
       icon: FiCalendar,
-      title: "Track Sales",
-      description: "Record and track your daily sales activities",
+      title: "Record Sale",
+      description: "Record a sale!",
       route: "/track-sales",
       color: "green",
     },
     {
       icon: FiBarChart2,
       title: "View Sales",
-      description: "Analyze your sales performance and metrics",
+      description: "View all sales and filter by rep or worker",
       route: "/view-sales",
       color: "purple",
     },
