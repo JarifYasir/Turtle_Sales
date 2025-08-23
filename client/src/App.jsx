@@ -85,10 +85,6 @@ const router = createBrowserRouter([
         element: <ViewTimeslots />,
       },
       {
-        path: "view-timeslots", 
-        element: <ViewTimeslots />,
-      },
-      {
         path: "view-sales",
         element: <ViewSales />,
       },
