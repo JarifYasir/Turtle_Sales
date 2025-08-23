@@ -1,6 +1,13 @@
 /* ========== ManageTimeslots.css ========== */
 /* Modern, responsive calendar-style timeslot management with turtle theme */
 
+/* iPhone and iOS-specific CSS variables */
+:root {
+  --vh: 1vh;
+  --actual-vh: 1vh;
+  --visual-vh: 1vh;
+}
+
 /* iOS-specific fixes */
 * {
   -webkit-tap-highlight-color: transparent;
@@ -22,6 +29,7 @@ input, textarea, select, button {
   width: 100%;
   min-height: 100vh;
   min-height: -webkit-fill-available; /* iOS fix */
+  min-height: calc(var(--vh, 1vh) * 100); /* Fallback for iOS */
   padding: 1.5rem;
   padding-top: max(1.5rem, env(safe-area-inset-top) + 1rem); /* iOS safe area */
   padding-bottom: max(1.5rem, env(safe-area-inset-bottom) + 1rem); /* iOS safe area */
@@ -37,6 +45,10 @@ input, textarea, select, button {
   display: flex;
   flex-direction: column;
   -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+  
+  /* iPhone-specific optimizations */
+  position: relative;
+  contain: layout style paint;
 }
 
 /* Time table styles */
@@ -92,25 +104,36 @@ input, textarea, select, button {
 
 .nav-btn {
   padding: 0.75rem 1rem;
-  border: none;
+  border: 2px solid var(--primary-green);
   border-radius: var(--border-radius-small);
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
   transition: var(--transition-fast);
-  background-color: var(--accent-green);
-  color: var(--dark-green);
+  background-color: var(--white);
+  color: var(--primary-green);
+  box-shadow: var(--shadow-light);
 }
 
 .nav-btn:hover {
-  background-color: var(--light-green);
+  background-color: var(--primary-green);
+  color: var(--white);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-light);
+  box-shadow: var(--shadow-medium);
+  border-color: var(--dark-green);
 }
 
 .nav-btn.current-btn {
   background-color: var(--primary-green);
   color: var(--white);
+  border-color: var(--primary-green);
+}
+
+.nav-btn.current-btn:hover {
+  background-color: var(--dark-green);
+  border-color: var(--dark-green);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
 }
 
 .current-week {
@@ -1819,4 +1842,269 @@ input, textarea, select, button {
 
 .modal-value.compact-value {
   font-size: 0.95rem;
+}
+
+/* ========== iPhone-Specific Responsive Fixes ========== */
+
+/* iPhone SE and smaller iPhones (max-width: 375px) */
+@media (max-width: 375px) {
+  .manage-timeslots-container {
+    padding: 0.5rem;
+    padding-top: max(0.5rem, env(safe-area-inset-top) + 0.5rem);
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom) + 0.5rem);
+  }
+
+  .manage-timeslots-header {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .manage-timeslots-header h1 {
+    font-size: 1.25rem;
+    line-height: 1.3;
+  }
+
+  .manage-timeslots-header p {
+    font-size: 0.8rem;
+  }
+
+  .week-navigation {
+    padding: 0.5rem;
+    gap: 0.4rem;
+    flex-direction: column;
+  }
+
+  .nav-btn, .current-btn {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.8rem;
+    min-height: 44px; /* iOS touch target minimum */
+    width: 100%;
+  }
+
+  .current-week {
+    font-size: 0.85rem;
+    padding: 0.4rem;
+  }
+
+  .workdays-grid {
+    gap: 0.5rem;
+  }
+
+  .day-column {
+    margin-bottom: 0.4rem;
+  }
+
+  .day-header {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .day-header h3 {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .day-info {
+    font-size: 0.75rem;
+  }
+
+  .workday-content {
+    padding: 0.5rem;
+  }
+
+  .workday-card {
+    padding: 0.75rem;
+  }
+
+  .workday-time-range {
+    font-size: 0.9rem;
+  }
+
+  .workday-capacity {
+    font-size: 0.8rem;
+  }
+
+  .workday-actions {
+    margin-top: 0.75rem;
+    gap: 0.4rem;
+  }
+
+  .workday-actions button {
+    padding: 0.6rem 0.5rem;
+    font-size: 0.8rem;
+    min-height: 44px; /* iOS touch target minimum */
+  }
+
+  .timeslot-preview {
+    gap: 0.4rem;
+  }
+
+  .timeslot-preview-item {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .create-workday-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    min-height: 44px; /* iOS touch target minimum */
+  }
+
+  .no-workday-card {
+    padding: 1rem 0.5rem;
+  }
+
+  .no-workday-message p {
+    font-size: 0.85rem;
+  }
+}
+
+/* iPhone 12/13 mini specific (max-width: 390px) */
+@media (max-width: 390px) and (min-width: 376px) {
+  .manage-timeslots-container {
+    padding: 0.75rem;
+  }
+
+  .manage-timeslots-header h1 {
+    font-size: 1.4rem;
+  }
+
+  .nav-btn, .current-btn {
+    font-size: 0.85rem;
+    padding: 0.65rem 0.85rem;
+  }
+
+  .day-header h3 {
+    font-size: 0.95rem;
+  }
+
+  .workday-actions button {
+    font-size: 0.85rem;
+  }
+}
+
+/* iPhone landscape mode fixes */
+@media (max-height: 430px) and (orientation: landscape) {
+  .manage-timeslots-container {
+    padding: 0.5rem;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+
+  .manage-timeslots-header {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .manage-timeslots-header h1 {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .manage-timeslots-header p {
+    font-size: 0.8rem;
+  }
+
+  .week-navigation {
+    padding: 0.5rem;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-btn, .current-btn {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+    width: auto;
+    flex: 1;
+    margin: 0 0.25rem;
+  }
+
+  .current-week {
+    font-size: 0.8rem;
+    order: 2;
+    flex: 2;
+    text-align: center;
+  }
+
+  .workdays-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .day-header {
+    padding: 0.5rem;
+  }
+
+  .day-header h3 {
+    font-size: 0.85rem;
+  }
+
+  .workday-content {
+    padding: 0.5rem;
+  }
+
+  .workday-card {
+    padding: 0.6rem;
+  }
+
+  .workday-actions {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .workday-actions button {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .manage-timeslots-container {
+    /* Fix for iOS Safari bottom bar */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom) + 1rem);
+  }
+
+  /* Prevent zoom on double tap */
+  .nav-btn, .current-btn, .workday-actions button, .create-workday-btn {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Better scrolling on iOS */
+  .workdays-grid {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent text selection on buttons and interactive elements */
+  .day-header, .workday-actions, .week-navigation {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
+
+/* iPhone Pro Max and larger iPhones optimization */
+@media (min-width: 414px) and (max-width: 480px) {
+  .workdays-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .day-column {
+    min-height: auto;
+  }
+}
+
+/* High DPI iPhone displays */
+@media (-webkit-min-device-pixel-ratio: 2) and (max-width: 480px) {
+  .manage-timeslots-header h1 {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .nav-btn, .current-btn, .workday-actions button {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }

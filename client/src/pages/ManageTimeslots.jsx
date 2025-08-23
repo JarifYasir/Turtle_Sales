@@ -29,14 +29,35 @@ const ManageTimeslots = () => {
   useEffect(() => {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isWebKit = /WebKit/.test(navigator.userAgent);
+    const isIPhone = /iPhone/.test(navigator.userAgent);
     
-    if (isIOS || isWebKit) {
-      // Fix iOS viewport height issues
+    if (isIOS || isWebKit || isIPhone) {
+      // Enhanced iPhone viewport handling
       const setVh = () => {
         const vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
         
-        // Force body height recalculation
+        // Specific iPhone viewport fixes
+        if (isIPhone) {
+          // Handle iPhone Safari bottom bar
+          const actualHeight = window.innerHeight;
+          const visualViewport = window.visualViewport;
+          
+          if (visualViewport) {
+            const viewportHeight = visualViewport.height;
+            document.documentElement.style.setProperty('--actual-vh', `${actualHeight * 0.01}px`);
+            document.documentElement.style.setProperty('--visual-vh', `${viewportHeight * 0.01}px`);
+          }
+          
+          // Force layout recalculation for iPhone
+          document.body.style.minHeight = `${actualHeight}px`;
+          setTimeout(() => {
+            document.body.style.minHeight = '100vh';
+            document.body.style.minHeight = '-webkit-fill-available';
+          }, 150);
+        }
+        
+        // Force body height recalculation for all iOS devices
         document.body.style.height = `${window.innerHeight}px`;
         setTimeout(() => {
           document.body.style.height = '100vh';
@@ -45,32 +66,80 @@ const ManageTimeslots = () => {
       };
       
       setVh();
+      
+      // Enhanced event listeners for iPhone
       window.addEventListener('resize', setVh);
       window.addEventListener('orientationchange', () => {
         setTimeout(setVh, 100);
+        // Additional iPhone-specific orientation handling
+        if (isIPhone) {
+          setTimeout(setVh, 300);
+          setTimeout(setVh, 500);
+        }
       });
       
-      // Prevent iOS zoom on double tap
+      // iPhone-specific visual viewport handling
+      if (window.visualViewport && isIPhone) {
+        window.visualViewport.addEventListener('resize', setVh);
+      }
+      
+      // Prevent iOS zoom on double tap - enhanced for iPhone
       let lastTouchEnd = 0;
-      document.addEventListener('touchend', (event) => {
+      const preventZoom = (event) => {
         const now = (new Date()).getTime();
         if (now - lastTouchEnd <= 300) {
           event.preventDefault();
         }
         lastTouchEnd = now;
-      }, false);
+      };
+      document.addEventListener('touchend', preventZoom, false);
       
-      // Prevent iOS zoom on form focus
-      const inputs = document.querySelectorAll('input, textarea, select');
-      inputs.forEach(input => {
-        input.addEventListener('focus', () => {
-          input.style.fontSize = '16px';
+      // iPhone-specific touch handling
+      if (isIPhone) {
+        // Prevent pinch zoom
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
+        document.addEventListener('gesturechange', (e) => e.preventDefault());
+        document.addEventListener('gestureend', (e) => e.preventDefault());
+        
+        // Enhance scroll performance on iPhone
+        document.addEventListener('touchstart', () => {}, { passive: true });
+        document.addEventListener('touchmove', () => {}, { passive: true });
+      }
+      
+      // Prevent iOS zoom on form focus - enhanced
+      const preventFormZoom = () => {
+        const inputs = document.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+          input.addEventListener('focus', () => {
+            input.style.fontSize = '16px';
+            input.style.fontSize = Math.max(16, parseFloat(window.getComputedStyle(input).fontSize)) + 'px';
+          });
+          
+          // iPhone-specific input handling
+          if (isIPhone) {
+            input.addEventListener('blur', () => {
+              // Reset viewport after input blur on iPhone
+              setTimeout(setVh, 100);
+            });
+          }
         });
-      });
+      };
       
+      preventFormZoom();
+      
+      // Cleanup function
       return () => {
         window.removeEventListener('resize', setVh);
         window.removeEventListener('orientationchange', setVh);
+        if (window.visualViewport && isIPhone) {
+          window.visualViewport.removeEventListener('resize', setVh);
+        }
+        document.removeEventListener('touchend', preventZoom);
+        if (isIPhone) {
+          document.removeEventListener('gesturestart', (e) => e.preventDefault());
+          document.removeEventListener('gesturechange', (e) => e.preventDefault());
+          document.removeEventListener('gestureend', (e) => e.preventDefault());
+        }
       };
     }
   }, []);
