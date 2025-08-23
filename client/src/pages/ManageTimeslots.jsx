@@ -25,107 +25,147 @@ const ManageTimeslots = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedWorkday, setSelectedWorkday] = useState(null);
 
-  // iOS viewport fix
+  // Enhanced iOS and iPhone viewport fix
   useEffect(() => {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isWebKit = /WebKit/.test(navigator.userAgent);
     const isIPhone = /iPhone/.test(navigator.userAgent);
+    const userAgent = navigator.userAgent;
+    
+    // Detect specific iPhone models for targeted fixes
+    const isIPhoneXR = userAgent.includes('iPhone') && (screen.width === 414 || screen.height === 896);
+    const isIPhone14 = userAgent.includes('iPhone') && (screen.width === 390 || screen.height === 844);
+    const isIPhoneMini = userAgent.includes('iPhone') && (screen.width === 375 || screen.height === 812);
     
     if (isIOS || isWebKit || isIPhone) {
-      // Enhanced iPhone viewport handling
+      // More aggressive iPhone viewport handling
       const setVh = () => {
-        const vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
+        // Get multiple viewport measurements for accuracy
+        const windowHeight = window.innerHeight;
+        const screenHeight = screen.height;
+        const documentHeight = document.documentElement.clientHeight;
         
-        // Specific iPhone viewport fixes
+        // Use the most reliable height measurement
+        const actualHeight = Math.min(windowHeight, documentHeight);
+        const vh = actualHeight * 0.01;
+        
+        // Set multiple CSS custom properties for different scenarios
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+        document.documentElement.style.setProperty('--real-vh', `${windowHeight * 0.01}px`);
+        document.documentElement.style.setProperty('--safe-vh', `${(actualHeight - 60) * 0.01}px`);
+        
+        // iPhone-specific viewport handling
         if (isIPhone) {
-          // Handle iPhone Safari bottom bar
-          const actualHeight = window.innerHeight;
-          const visualViewport = window.visualViewport;
-          
-          if (visualViewport) {
-            const viewportHeight = visualViewport.height;
-            document.documentElement.style.setProperty('--actual-vh', `${actualHeight * 0.01}px`);
-            document.documentElement.style.setProperty('--visual-vh', `${viewportHeight * 0.01}px`);
+          // Handle visual viewport API for modern iPhones
+          if (window.visualViewport) {
+            const visualHeight = window.visualViewport.height;
+            const visualVh = visualHeight * 0.01;
+            document.documentElement.style.setProperty('--visual-vh', `${visualVh}px`);
+            
+            // iPhone XR and 14 specific adjustments
+            if (isIPhoneXR || isIPhone14) {
+              const adjustedHeight = visualHeight - 20; // Account for dynamic island/notch
+              document.documentElement.style.setProperty('--adjusted-vh', `${adjustedHeight * 0.01}px`);
+            }
           }
           
-          // Force layout recalculation for iPhone
-          document.body.style.minHeight = `${actualHeight}px`;
-          setTimeout(() => {
-            document.body.style.minHeight = '100vh';
-            document.body.style.minHeight = '-webkit-fill-available';
-          }, 150);
+          // Force layout updates for iPhone Safari
+          const container = document.querySelector('.manage-timeslots-container');
+          if (container) {
+            container.style.minHeight = `${actualHeight}px`;
+            setTimeout(() => {
+              container.style.minHeight = '100vh';
+              container.style.minHeight = '-webkit-fill-available';
+              container.style.minHeight = `calc(var(--vh, 1vh) * 100)`;
+            }, 100);
+          }
         }
         
-        // Force body height recalculation for all iOS devices
-        document.body.style.height = `${window.innerHeight}px`;
-        setTimeout(() => {
-          document.body.style.height = '100vh';
-          document.body.style.height = '-webkit-fill-available';
-        }, 100);
+        // Additional fixes for specific iPhone models
+        if (isIPhoneXR) {
+          document.documentElement.style.setProperty('--iphone-xr-height', `${actualHeight}px`);
+          document.body.style.minHeight = `${actualHeight}px`;
+        }
+        
+        if (isIPhone14) {
+          document.documentElement.style.setProperty('--iphone-14-height', `${actualHeight}px`);
+          document.body.style.minHeight = `${actualHeight}px`;
+        }
       };
       
+      // Initial call
       setVh();
       
-      // Enhanced event listeners for iPhone
+      // Enhanced event listeners with longer delays for iPhone
       window.addEventListener('resize', setVh);
       window.addEventListener('orientationchange', () => {
         setTimeout(setVh, 100);
-        // Additional iPhone-specific orientation handling
-        if (isIPhone) {
-          setTimeout(setVh, 300);
-          setTimeout(setVh, 500);
-        }
+        setTimeout(setVh, 300);
+        setTimeout(setVh, 500);
+        setTimeout(setVh, 1000); // Extra delay for slow iPhones
       });
       
-      // iPhone-specific visual viewport handling
+      // Visual viewport listener for modern iPhones
       if (window.visualViewport && isIPhone) {
         window.visualViewport.addEventListener('resize', setVh);
+        window.visualViewport.addEventListener('scroll', setVh);
       }
       
-      // Prevent iOS zoom on double tap - enhanced for iPhone
+      // Prevent zoom and improve touch handling
       let lastTouchEnd = 0;
       const preventZoom = (event) => {
-        const now = (new Date()).getTime();
+        const now = Date.now();
         if (now - lastTouchEnd <= 300) {
           event.preventDefault();
         }
         lastTouchEnd = now;
       };
-      document.addEventListener('touchend', preventZoom, false);
       
-      // iPhone-specific touch handling
+      document.addEventListener('touchend', preventZoom, { passive: false });
+      
+      // iPhone-specific gesture handling
       if (isIPhone) {
-        // Prevent pinch zoom
-        document.addEventListener('gesturestart', (e) => e.preventDefault());
-        document.addEventListener('gesturechange', (e) => e.preventDefault());
-        document.addEventListener('gestureend', (e) => e.preventDefault());
+        // Prevent pinch-to-zoom
+        document.addEventListener('gesturestart', (e) => e.preventDefault(), { passive: false });
+        document.addEventListener('gesturechange', (e) => e.preventDefault(), { passive: false });
+        document.addEventListener('gestureend', (e) => e.preventDefault(), { passive: false });
         
-        // Enhance scroll performance on iPhone
-        document.addEventListener('touchstart', () => {}, { passive: true });
-        document.addEventListener('touchmove', () => {}, { passive: true });
-      }
-      
-      // Prevent iOS zoom on form focus - enhanced
-      const preventFormZoom = () => {
-        const inputs = document.querySelectorAll('input, textarea, select');
-        inputs.forEach(input => {
-          input.addEventListener('focus', () => {
-            input.style.fontSize = '16px';
-            input.style.fontSize = Math.max(16, parseFloat(window.getComputedStyle(input).fontSize)) + 'px';
-          });
-          
-          // iPhone-specific input handling
-          if (isIPhone) {
-            input.addEventListener('blur', () => {
-              // Reset viewport after input blur on iPhone
-              setTimeout(setVh, 100);
+        // Prevent form zoom on iPhone
+        const preventInputZoom = () => {
+          const inputs = document.querySelectorAll('input, textarea, select');
+          inputs.forEach(input => {
+            const originalFontSize = window.getComputedStyle(input).fontSize;
+            const fontSize = Math.max(16, parseFloat(originalFontSize));
+            
+            input.addEventListener('focus', () => {
+              input.style.fontSize = `${fontSize}px`;
+              input.style.transform = 'translateZ(0)'; // Force hardware acceleration
             });
-          }
-        });
-      };
-      
-      preventFormZoom();
+            
+            input.addEventListener('blur', () => {
+              setTimeout(setVh, 300); // Recalculate after keyboard closes
+            });
+          });
+        };
+        
+        preventInputZoom();
+        
+        // iPhone XR/14 specific fixes
+        if (isIPhoneXR || isIPhone14) {
+          // Force GPU acceleration for smoother scrolling
+          document.body.style.transform = 'translateZ(0)';
+          document.body.style.backfaceVisibility = 'hidden';
+          document.body.style.perspective = '1000px';
+          
+          // Fix for iPhone dynamic island and notch areas
+          const addSafeAreaClass = () => {
+            document.body.classList.add(isIPhoneXR ? 'iphone-xr' : 'iphone-14');
+            document.body.classList.add('iphone-modern');
+          };
+          
+          addSafeAreaClass();
+        }
+      }
       
       // Cleanup function
       return () => {
@@ -133,6 +173,7 @@ const ManageTimeslots = () => {
         window.removeEventListener('orientationchange', setVh);
         if (window.visualViewport && isIPhone) {
           window.visualViewport.removeEventListener('resize', setVh);
+          window.visualViewport.removeEventListener('scroll', setVh);
         }
         document.removeEventListener('touchend', preventZoom);
         if (isIPhone) {
