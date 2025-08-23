@@ -7,7 +7,6 @@ import axios from "axios";
 import { UserContext } from "../usercontext/UserContext";
 import { toast } from "react-toastify";
 import CreateWorkdayModal from "../components/CreateWorkdayModal";
-import ManageWorkdayModal from "../components/ManageWorkdayModal";
 import LoadingSpinner from "../components/LoadingComponents";
 
 const ManageTimeslots = () => {
@@ -24,6 +23,7 @@ const ManageTimeslots = () => {
   const [showManageModal, setShowManageModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedWorkday, setSelectedWorkday] = useState(null);
+  const [isEditingMode, setIsEditingMode] = useState(false);
 
   // Enhanced iOS and iPhone viewport fix
   useEffect(() => {
@@ -262,12 +262,16 @@ const ManageTimeslots = () => {
 
   const handleCreateWorkday = (date) => {
     setSelectedDate(date);
+    setSelectedWorkday(null);
+    setIsEditingMode(false);
     setShowCreateModal(true);
   };
 
   const handleManageWorkday = (workday) => {
     setSelectedWorkday(workday);
-    setShowManageModal(true);
+    setSelectedDate(new Date(workday.date));
+    setIsEditingMode(true);
+    setShowCreateModal(true);
   };
 
   const handleDeleteWorkday = async (workdayId) => {
@@ -477,23 +481,21 @@ const ManageTimeslots = () => {
         })}
       </motion.div>
 
-      {/* Create Workday Modal */}
+      {/* Create/Edit Workday Modal */}
       <CreateWorkdayModal
         show={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        onClose={() => {
+          setShowCreateModal(false);
+          setIsEditingMode(false);
+          setSelectedWorkday(null);
+        }}
         date={selectedDate}
         onWorkdayCreated={fetchWorkdays}
         employees={orgMembers.map((member) => member.user)}
+        workday={selectedWorkday}
+        isEditing={isEditingMode}
       />
 
-      {/* Manage Workday Modal */}
-      <ManageWorkdayModal
-        show={showManageModal}
-        onClose={() => setShowManageModal(false)}
-        workday={selectedWorkday}
-        onWorkdayUpdated={fetchWorkdays}
-        employees={orgMembers.map((member) => member.user)}
-      />
     </div>
   );
 };
