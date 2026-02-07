@@ -38,6 +38,7 @@ import ViewTimeslots from "./pages/ViewTimeslots";
 import ViewSales from "./pages/viewsales";
 import EmployeePaystub from "./pages/EmployeePaystub";
 import SalesLeaderboard from "./pages/SalesLeaderboard";
+import AISalesTraining from "./pages/AISalesTraining";
 
 const router = createBrowserRouter([
   {
@@ -85,7 +86,7 @@ const router = createBrowserRouter([
         element: <ViewTimeslots />,
       },
       {
-        path: "view-timeslots", 
+        path: "view-timeslots",
         element: <ViewTimeslots />,
       },
       {
@@ -99,6 +100,10 @@ const router = createBrowserRouter([
       {
         path: "sales-leaderboard",
         element: <SalesLeaderboard />,
+      },
+      {
+        path: "ai-sales-training",
+        element: <AISalesTraining />,
       },
     ],
   },

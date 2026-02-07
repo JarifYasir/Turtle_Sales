@@ -19,7 +19,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 20% 50%,
       rgba(76, 175, 80, 0.03) 0%,
       transparent 50%
@@ -54,7 +55,8 @@
   );
   backdrop-filter: blur(20px);
   border-radius: 24px;
-  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.1),
+  box-shadow:
+    0 8px 32px rgba(76, 175, 80, 0.1),
     0 1px 0 rgba(255, 255, 255, 0.8) inset;
   border: 1px solid rgba(255, 255, 255, 0.2);
   margin-bottom: 3rem;
@@ -398,6 +400,112 @@
   );
 }
 
+/* AI Training Featured Card */
+.ai-training-featured {
+  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);
+  border-radius: 24px;
+  padding: 2.5rem;
+  margin-bottom: 3rem;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(76, 175, 80, 0.25);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ai-training-featured::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="80" cy="80" r="2" fill="white" opacity="0.1"/><circle cx="40" cy="60" r="1.5" fill="white" opacity="0.1"/><circle cx="70" cy="30" r="1.5" fill="white" opacity="0.1"/></svg>')
+    repeat;
+  pointer-events: none;
+}
+
+.ai-training-featured:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(76, 175, 80, 0.35);
+}
+
+.featured-badge {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.4rem 1rem;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.featured-content {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.featured-icon {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.featured-icon svg {
+  font-size: 2.5rem;
+  color: white;
+}
+
+.featured-text {
+  flex: 1;
+  color: white;
+}
+
+.featured-text h3 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+  color: white;
+}
+
+.featured-text p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  opacity: 0.95;
+  margin: 0;
+  color: white;
+}
+
+.featured-arrow {
+  font-size: 2rem;
+  color: white;
+  opacity: 0.8;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.ai-training-featured:hover .featured-arrow {
+  transform: translateX(8px);
+  opacity: 1;
+}
+
 /* Modern Grid Layout */
 .portal-grid {
   display: grid;
@@ -420,7 +528,8 @@
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08),
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.08),
     0 1px 0 rgba(255, 255, 255, 0.5) inset;
 }
 
@@ -445,7 +554,9 @@
 }
 
 .action-card:hover {
-  box-shadow: 0 20px 40px rgba(76, 175, 80, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1),
+  box-shadow:
+    0 20px 40px rgba(76, 175, 80, 0.15),
+    0 8px 16px rgba(0, 0, 0, 0.1),
     0 1px 0 rgba(255, 255, 255, 0.8) inset;
   border-color: rgba(76, 175, 80, 0.2);
 }
@@ -854,4 +965,69 @@
 .quick-action-btn:focus {
   outline: 2px solid var(--white);
   outline-offset: 2px;
+}
+
+/* Responsive styles for AI Training Featured Card */
+@media (max-width: 768px) {
+  .ai-training-featured {
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .featured-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .featured-badge {
+    top: 1rem;
+    right: 1rem;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.85rem;
+  }
+
+  .featured-icon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .featured-icon svg {
+    font-size: 2rem;
+  }
+
+  .featured-text h3 {
+    font-size: 1.5rem;
+  }
+
+  .featured-text p {
+    font-size: 1rem;
+  }
+
+  .featured-arrow {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .ai-training-featured {
+    padding: 1.75rem 1.5rem;
+  }
+
+  .featured-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .featured-icon svg {
+    font-size: 1.75rem;
+  }
+
+  .featured-text h3 {
+    font-size: 1.375rem;
+  }
+
+  .featured-text p {
+    font-size: 0.95rem;
+  }
 }

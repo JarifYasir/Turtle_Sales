@@ -15,6 +15,7 @@ import {
   FiUsers,
   FiArrowRight,
   FiLogOut,
+  FiCpu,
 } from "react-icons/fi";
 import "../styles/TurtlePortal.css";
 import LoadingSpinner from "../components/LoadingComponents";
@@ -42,7 +43,7 @@ const TurtlePortal = () => {
         `${import.meta.env.VITE_API_URL}/organization`,
         {
           headers: { Authorization: `Bearer ${authToken}` },
-        }
+        },
       );
 
       if (response.data.success) {
@@ -139,6 +140,13 @@ const TurtlePortal = () => {
       route: "/sales-leaderboard",
       color: "orange",
     },
+    {
+      icon: FiCpu,
+      title: "AI Sales Training",
+      description: "Learn sales with our intelligent AI coach",
+      route: "/ai-sales-training",
+      color: "teal",
+    },
   ];
 
   const managerActions = [
@@ -192,8 +200,8 @@ const TurtlePortal = () => {
                   {new Date().getHours() < 12
                     ? "Morning"
                     : new Date().getHours() < 18
-                    ? "Afternoon"
-                    : "Evening"}
+                      ? "Afternoon"
+                      : "Evening"}
                   , {user?.name?.split(" ")[0] || "User"}!
                 </h2>
                 <p>Ready to boost your sales performance 🚀</p>
